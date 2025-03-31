@@ -3,7 +3,6 @@
 This document tracks the progress of implementing the specifications from the `specs/` directory.
 
 ## In Progress
-- Offline Support (OFFLINE-004)
 - Error Handling (ERROR-005)
 - Performance Optimization (PERF-006)
 - Security Implementation (SEC-007)
@@ -41,3 +40,11 @@ This document tracks the progress of implementing the specifications from the `s
   - RTL language support is added
   - Async translation loading is implemented
   - Support for English, Spanish, and Arabic languages
+
+- Offline Support (OFFLINE-004)
+  - Service worker implementation for offline capabilities
+  - IndexedDB integration for local data storage
+  - Background synchronization with S3 bucket
+  - Conflict resolution strategy (Last Write Wins)
+  - Offline-first architecture with online sync
+  - Sync status indicator in the UI

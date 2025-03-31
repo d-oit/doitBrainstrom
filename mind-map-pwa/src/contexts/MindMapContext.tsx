@@ -1,5 +1,6 @@
 // src/contexts/MindMapContext.tsx
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
+import { initializeMindMapData, saveMindMapLocally } from '../services/s3SyncService';
 import { MindMapData, MindMapNode, MindMapLink, generateId } from '../utils/MindMapDataModel';
 
 interface MindMapContextProps {
@@ -11,12 +12,79 @@ interface MindMapContextProps {
   deleteLink: (linkId: string) => void;
   updateNodePosition: (nodeId: string, x: number, y: number) => void;
   updateNodeSize: (nodeId: string, width: number, height: number) => void;
+  isLoading: boolean;
+  syncStatus: 'idle' | 'syncing' | 'success' | 'error';
+  syncMindMap: () => Promise<boolean>;
 }
 
 const MindMapContext = createContext<MindMapContextProps | undefined>(undefined);
 
 export const MindMapContextProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [mindMapData, setMindMapData] = useState<MindMapData>({ nodes: [], links: [] });
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'success' | 'error'>('idle');
+
+  // Load mind map data from IndexedDB or S3 on component mount
+  useEffect(() => {
+    const loadData = async () => {
+      setIsLoading(true);
+      try {
+        const data = await initializeMindMapData();
+        setMindMapData(data);
+        setSyncStatus('success');
+      } catch (error) {
+        console.error('Error loading mind map data:', error);
+        setSyncStatus('error');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  // Save mind map data to IndexedDB whenever it changes
+  useEffect(() => {
+    if (!isLoading) {
+      saveMindMapLocally(mindMapData).catch(error => {
+        console.error('Error saving mind map data:', error);
+      });
+    }
+  }, [mindMapData, isLoading]);
+
+  // Listen for online/offline events
+  useEffect(() => {
+    const handleOnline = () => {
+      console.log('App is online, attempting to sync...');
+      syncMindMap();
+    };
+
+    window.addEventListener('online', handleOnline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+    };
+  }, []);
+
+  // Function to manually trigger synchronization
+  const syncMindMap = async (): Promise<boolean> => {
+    if (navigator.onLine) {
+      setSyncStatus('syncing');
+      try {
+        const success = await saveMindMapLocally(mindMapData);
+        setSyncStatus(success ? 'success' : 'error');
+        return success;
+      } catch (error) {
+        console.error('Error syncing mind map:', error);
+        setSyncStatus('error');
+        return false;
+      }
+    } else {
+      console.log('App is offline, sync queued for when online');
+      setSyncStatus('idle');
+      return false;
+    }
+  };
 
   const createNode = (text: string, x: number, y: number): MindMapNode => {
     const newNode: MindMapNode = {
@@ -72,7 +140,7 @@ export const MindMapContextProvider: React.FC<{ children: React.ReactNode }> = (
 
   const editNodeText = (nodeId: string, newText: string): MindMapNode | null => {
     const nodeIndex = mindMapData.nodes.findIndex(node => node.id === nodeId);
-    
+
     if (nodeIndex === -1) {
       console.error('Node not found for editing');
       return null;
@@ -95,7 +163,7 @@ export const MindMapContextProvider: React.FC<{ children: React.ReactNode }> = (
   const deleteNode = (nodeId: string): void => {
     // Remove the node
     const updatedNodes = mindMapData.nodes.filter(node => node.id !== nodeId);
-    
+
     // Remove any links connected to this node
     const updatedLinks = mindMapData.links.filter(
       link => link.sourceId !== nodeId && link.targetId !== nodeId
@@ -109,7 +177,7 @@ export const MindMapContextProvider: React.FC<{ children: React.ReactNode }> = (
 
   const deleteLink = (linkId: string): void => {
     const updatedLinks = mindMapData.links.filter(link => link.id !== linkId);
-    
+
     setMindMapData(prevData => ({
       ...prevData,
       links: updatedLinks
@@ -118,7 +186,7 @@ export const MindMapContextProvider: React.FC<{ children: React.ReactNode }> = (
 
   const updateNodePosition = (nodeId: string, x: number, y: number): void => {
     const nodeIndex = mindMapData.nodes.findIndex(node => node.id === nodeId);
-    
+
     if (nodeIndex === -1) {
       console.error('Node not found for position update');
       return;
@@ -139,7 +207,7 @@ export const MindMapContextProvider: React.FC<{ children: React.ReactNode }> = (
 
   const updateNodeSize = (nodeId: string, width: number, height: number): void => {
     const nodeIndex = mindMapData.nodes.findIndex(node => node.id === nodeId);
-    
+
     if (nodeIndex === -1) {
       console.error('Node not found for size update');
       return;
@@ -166,7 +234,10 @@ export const MindMapContextProvider: React.FC<{ children: React.ReactNode }> = (
     deleteNode,
     deleteLink,
     updateNodePosition,
-    updateNodeSize
+    updateNodeSize,
+    isLoading,
+    syncStatus,
+    syncMindMap
   };
 
   return (

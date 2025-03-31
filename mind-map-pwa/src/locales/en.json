@@ -28,5 +28,13 @@
     "system": "System",
     "light": "Light",
     "dark": "Dark"
+  },
+  "sync": {
+    "loading": "Loading data...",
+    "success": "Data synced successfully",
+    "error": "Sync failed",
+    "syncing": "Syncing data...",
+    "idle": "Changes not synced",
+    "refresh": "Sync now"
   }
 }

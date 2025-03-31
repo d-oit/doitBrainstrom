@@ -5,6 +5,10 @@ import './styles/index.css'
 import { ThemeContextProvider } from './contexts/ThemeContext'
 import { MindMapContextProvider } from './contexts/MindMapContext'
 import { I18nContextProvider } from './contexts/I18nContext'
+import { register as registerServiceWorker } from './serviceWorker'
+
+// Register service worker for offline capabilities
+registerServiceWorker();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

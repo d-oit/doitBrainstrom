@@ -28,5 +28,13 @@
     "system": "Sistema",
     "light": "Claro",
     "dark": "Oscuro"
+  },
+  "sync": {
+    "loading": "Cargando datos...",
+    "success": "Datos sincronizados correctamente",
+    "error": "Error de sincronización",
+    "syncing": "Sincronizando datos...",
+    "idle": "Cambios no sincronizados",
+    "refresh": "Sincronizar ahora"
   }
 }
