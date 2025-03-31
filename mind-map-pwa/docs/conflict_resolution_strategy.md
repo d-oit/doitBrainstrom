@@ -2,11 +2,11 @@
 
 ## Overview
 
-This document outlines the conflict resolution strategy used in the Mind Map PWA application when synchronizing data between local storage (IndexedDB) and remote storage (S3 bucket).
+This document outlines the conflict resolution strategy used in the Mind Map PWA application when synchronizing data between local storage (IndexedDB) and remote storage (S3 bucket). The strategy ensures data consistency across devices and handles scenarios where changes are made both online and offline.
 
 ## Current Implementation: Last Write Wins
 
-For the initial phase of the application, a simple "Last Write Wins" strategy is implemented for conflict resolution:
+For the initial phase of the application, a simple "Last Write Wins" strategy is implemented for conflict resolution. This approach was chosen for its simplicity and effectiveness in single-user scenarios:
 
 ### Synchronization Process
 
@@ -31,6 +31,8 @@ The "Last Write Wins" strategy has some limitations:
 - It does not preserve changes made by multiple users simultaneously.
 - It may lead to data loss if two users edit the same mind map offline and then sync.
 - It does not provide a way for users to manually resolve conflicts.
+- It doesn't handle partial updates or selective merging of changes.
+- It assumes that newer changes are always more important than older ones.
 
 ## Future Considerations
 
@@ -63,5 +65,38 @@ The current implementation uses the following components:
 - `s3SyncService.ts`: Handles synchronization between IndexedDB and S3.
 - `dbService.ts`: Provides functions for interacting with IndexedDB.
 - `MindMapContext.tsx`: Manages the mind map state and triggers synchronization.
+- `offlineStorage.ts`: Manages local data persistence and retrieval.
+- `serviceWorker.ts`: Handles background synchronization when online.
 
 The conflict resolution logic is primarily implemented in the `syncMindMapData` function in `s3SyncService.ts`.
+
+### Synchronization Process Details
+
+1. **Data Structure**:
+   - Each mind map has a unique ID, content (nodes and links), and metadata (lastModified, synced status).
+   - The `lastModified` timestamp is updated whenever changes are made.
+   - The `synced` flag indicates whether the local data has been synchronized with S3.
+
+2. **Conflict Detection**:
+   - Conflicts are detected by comparing timestamps between local and remote data.
+   - If both local and remote data have been modified since the last sync, a conflict exists.
+
+3. **Resolution Algorithm**:
+   ```typescript
+   // Pseudocode for conflict resolution
+   function resolveConflict(localData, remoteData) {
+     const localTimestamp = new Date(localData.lastModified).getTime();
+     const remoteTimestamp = new Date(remoteData.lastModified).getTime();
+
+     if (localTimestamp >= remoteTimestamp) {
+       return localData; // Local changes win
+     } else {
+       return remoteData; // Remote changes win
+     }
+   }
+   ```
+
+4. **Error Handling**:
+   - If synchronization fails due to network issues, the operation is queued for retry.
+   - The service worker attempts to sync when the connection is restored.
+   - Users are notified of sync status through the UI.
