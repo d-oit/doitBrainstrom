@@ -1,5 +1,5 @@
 // src/components/MindMapCard.tsx
-import React from 'react';
+import React, { memo } from 'react';
 import { Card, CardContent, Typography, useTheme, useMediaQuery } from '@mui/material';
 import '../styles/responsive.css';
 
@@ -70,4 +70,14 @@ const MindMapCard: React.FC<MindMapCardProps> = ({
   );
 };
 
-export default MindMapCard;
+// Memoize the component to prevent unnecessary re-renders
+export default memo(MindMapCard, (prevProps, nextProps) => {
+  // Custom comparison function for memoization
+  // Only re-render if these props change
+  return (
+    prevProps.title === nextProps.title &&
+    prevProps.description === nextProps.description &&
+    prevProps.onClick === nextProps.onClick &&
+    prevProps.draggable === nextProps.draggable
+  );
+});

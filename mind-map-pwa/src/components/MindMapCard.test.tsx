@@ -1,0 +1,75 @@
+import { describe, it, expect } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import MindMapCard from './MindMapCard';
+import { ThemeProvider, createTheme } from '@mui/material';
+
+// Create a theme for testing
+const theme = createTheme();
+
+// Wrap component in ThemeProvider for testing
+const renderWithTheme = (component: React.ReactElement) => {
+  return render(
+    <ThemeProvider theme={theme}>
+      {component}
+    </ThemeProvider>
+  );
+};
+
+describe('MindMapCard Component', () => {
+  it('renders MindMapCard with title', () => {
+    renderWithTheme(<MindMapCard title="Test Card Title" />);
+    const titleElement = screen.getByText(/Test Card Title/i);
+    expect(titleElement).toBeInTheDocument();
+  });
+
+  it('renders MindMapCard with title and description', () => {
+    renderWithTheme(<MindMapCard title="Card Title" description="Test description for card" />);
+    const titleElement = screen.getByText(/Card Title/i);
+    const descriptionElement = screen.getByText(/Test description for card/i);
+    expect(titleElement).toBeInTheDocument();
+    expect(descriptionElement).toBeInTheDocument();
+  });
+
+  it('does not render description if not provided', () => {
+    renderWithTheme(<MindMapCard title="Title only card" />);
+    const titleElement = screen.getByText(/Title only card/i);
+    expect(titleElement).toBeInTheDocument();
+    expect(screen.queryByText(/description/i)).not.toBeInTheDocument();
+  });
+
+  it('calls onClick handler when clicked', async () => {
+    const handleClick = vi.fn();
+    renderWithTheme(<MindMapCard title="Clickable Card" onClick={handleClick} />);
+    
+    const card = screen.getByText(/Clickable Card/i).closest('.MuiCard-root');
+    expect(card).toBeInTheDocument();
+    
+    if (card) {
+      await userEvent.click(card);
+      expect(handleClick).toHaveBeenCalledTimes(1);
+    }
+  });
+
+  it('applies draggable attribute when draggable prop is true', () => {
+    renderWithTheme(<MindMapCard title="Draggable Card" draggable={true} />);
+    
+    const card = screen.getByText(/Draggable Card/i).closest('.MuiCard-root');
+    expect(card).toBeInTheDocument();
+    
+    if (card) {
+      expect(card).toHaveAttribute('draggable', 'true');
+    }
+  });
+
+  it('is not draggable by default', () => {
+    renderWithTheme(<MindMapCard title="Non-Draggable Card" />);
+    
+    const card = screen.getByText(/Non-Draggable Card/i).closest('.MuiCard-root');
+    expect(card).toBeInTheDocument();
+    
+    if (card) {
+      expect(card).toHaveAttribute('draggable', 'false');
+    }
+  });
+});

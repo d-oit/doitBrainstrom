@@ -1,11 +1,13 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import './styles/App.css'
 import { listBuckets } from './services/s3Service'
 import Layout from './components/Layout'
-import MindMapCard from './components/MindMapCard'
-import MindMap from './components/MindMap'
-import { Box, Grid, Typography, Alert, Paper, Tabs, Tab } from '@mui/material'
+import { Box, Grid, Typography, Alert, Paper, Tabs, Tab, CircularProgress } from '@mui/material'
 import { useI18n } from './contexts/I18nContext'
+
+// Lazy load components
+const MindMapCard = lazy(() => import('./components/MindMapCard'))
+const MindMap = lazy(() => import('./components/MindMap'))
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -77,7 +79,9 @@ function App() {
       </Box>
 
       <TabPanel value={tabValue} index={0}>
-        <MindMap />
+        <Suspense fallback={<Box display="flex" justifyContent="center" p={4}><CircularProgress /></Box>}>
+          <MindMap />
+        </Suspense>
       </TabPanel>
 
       <TabPanel value={tabValue} index={1}>
@@ -108,22 +112,28 @@ function App() {
         </Typography>
         <Grid container spacing={3}>
           <Grid item xs={12} sm={6} md={4}>
-            <MindMapCard
-              title={t('mindMap.mainIdea')}
-              description={t('mindMap.mainIdeaDesc')}
-            />
+            <Suspense fallback={<Box p={2}><CircularProgress size={20} /></Box>}>
+              <MindMapCard
+                title={t('mindMap.mainIdea')}
+                description={t('mindMap.mainIdeaDesc')}
+              />
+            </Suspense>
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
-            <MindMapCard
-              title={t('mindMap.supportingConcept')}
-              description={t('mindMap.supportingConceptDesc')}
-            />
+            <Suspense fallback={<Box p={2}><CircularProgress size={20} /></Box>}>
+              <MindMapCard
+                title={t('mindMap.supportingConcept')}
+                description={t('mindMap.supportingConceptDesc')}
+              />
+            </Suspense>
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
-            <MindMapCard
-              title={t('mindMap.anotherConcept')}
-              description={t('mindMap.anotherConceptDesc')}
-            />
+            <Suspense fallback={<Box p={2}><CircularProgress size={20} /></Box>}>
+              <MindMapCard
+                title={t('mindMap.anotherConcept')}
+                description={t('mindMap.anotherConceptDesc')}
+              />
+            </Suspense>
           </Grid>
         </Grid>
       </TabPanel>
