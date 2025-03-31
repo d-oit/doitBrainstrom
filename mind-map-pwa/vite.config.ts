@@ -1,9 +1,20 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+  // Load env file based on `mode` in the current working directory.
+  // Set the third parameter to '' to load all env regardless of the `VITE_` prefix.
+  const env = loadEnv(mode, process.cwd(), '');
+
+  return {
   plugins: [react()],
+  define: {
+    'import.meta.env.VITE_S3_ENDPOINT': JSON.stringify(env.VITE_S3_ENDPOINT),
+    'import.meta.env.VITE_S3_ACCESS_KEY_ID': JSON.stringify(env.VITE_S3_ACCESS_KEY_ID),
+    'import.meta.env.VITE_S3_SECRET_ACCESS_KEY': JSON.stringify(env.VITE_S3_SECRET_ACCESS_KEY),
+    'import.meta.env.VITE_S3_BUCKET_NAME': JSON.stringify(env.VITE_S3_BUCKET_NAME),
+  },
   build: {
     // Enhanced code splitting configuration
     rollupOptions: {
@@ -41,4 +52,5 @@ export default defineConfig({
     // Optimize chunk size warnings threshold
     chunkSizeWarningLimit: 1000,
   },
+  }
 })

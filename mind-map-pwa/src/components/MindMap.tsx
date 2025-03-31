@@ -12,7 +12,6 @@ const MindMap: React.FC = () => {
     mindMapData,
     createNode,
     linkNodes,
-    editNodeText,
     updateNodePosition
   } = useMindMap();
   const { t, dir } = useI18n();
@@ -20,12 +19,8 @@ const MindMap: React.FC = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
   const {
-    viewport: { breakpoint, isLandscape, isPortrait, pixelRatio },
-    shouldReduceAnimations,
-    shouldVirtualizeList,
-    network,
-    power,
-    memory
+    viewport: { breakpoint, isLandscape },
+    shouldReduceAnimations
   } = useResponsive();
 
   // Responsive configuration based on viewport
@@ -40,7 +35,7 @@ const MindMap: React.FC = () => {
   const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [scale, setScale] = useState(1);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [, setPosition] = useState({ x: 0, y: 0 });
   const [isPinching, setIsPinching] = useState(false);
   const [lastDistance, setLastDistance] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);

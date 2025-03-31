@@ -45,7 +45,9 @@ function App() {
     const fetchBuckets = async () => {
       try {
         const bucketsData = await listBuckets()
-        setBuckets(bucketsData)
+        if (bucketsData) {
+          setBuckets(bucketsData)
+        }
       } catch (err) {
         setError(t('s3.connectionError'))
         console.error(err)
@@ -53,7 +55,7 @@ function App() {
     }
 
     fetchBuckets()
-  }, [])
+  }, [t])
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);

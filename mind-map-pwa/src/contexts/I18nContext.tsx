@@ -16,7 +16,7 @@ interface I18nContextProps {
   dir: 'ltr' | 'rtl';
 }
 
-const I18nContext = createContext<I18nContextProps | undefined>(undefined);
+export const I18nContext = createContext<I18nContextProps | undefined>(undefined);
 
 export const I18nContextProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [locale, setLocale] = useState('en');
@@ -30,11 +30,11 @@ export const I18nContextProvider: React.FC<{ children: React.ReactNode }> = ({ c
         // Dynamic import of translation file
         const module = await import(`../locales/${locale}.json`);
         setTranslations(module.default || {});
-        
+
         // Set text direction
         const localeInfo = SUPPORTED_LOCALES.find(l => l.code === locale);
         setDir(localeInfo?.dir as 'ltr' | 'rtl' || 'ltr');
-        
+
         // Update HTML attributes
         document.documentElement.lang = locale;
         document.documentElement.dir = localeInfo?.dir || 'ltr';
@@ -54,11 +54,11 @@ export const I18nContextProvider: React.FC<{ children: React.ReactNode }> = ({ c
   useEffect(() => {
     const browserLang = navigator.language.split('-')[0];
     const isSupported = SUPPORTED_LOCALES.some(l => l.code === browserLang);
-    
+
     if (isSupported) {
       setLocale(browserLang);
     }
-    
+
     // Check for stored preference
     const storedLocale = localStorage.getItem('locale');
     if (storedLocale) {
@@ -76,7 +76,7 @@ export const I18nContextProvider: React.FC<{ children: React.ReactNode }> = ({ c
     // Split the key by dots to access nested properties
     const keys = key.split('.');
     let value = translations;
-    
+
     // Navigate through the nested structure
     for (const k of keys) {
       if (value && typeof value === 'object' && k in value) {
@@ -86,12 +86,12 @@ export const I18nContextProvider: React.FC<{ children: React.ReactNode }> = ({ c
         return key; // Return the key itself as fallback
       }
     }
-    
+
     // If the value is not a string, return the key
     if (typeof value !== 'string') {
       return key;
     }
-    
+
     // Replace parameters if provided
     if (params) {
       return Object.entries(params).reduce<string>(
@@ -99,7 +99,7 @@ export const I18nContextProvider: React.FC<{ children: React.ReactNode }> = ({ c
         value
       );
     }
-    
+
     return value;
   };
 

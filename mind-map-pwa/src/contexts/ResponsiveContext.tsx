@@ -29,25 +29,25 @@ export const ResponsiveContextProvider: React.FC<{ children: ReactNode }> = ({ c
   const power = usePowerMode();
 
   // Derived properties based on device capabilities
-  const shouldReduceAnimations = 
-    power.isLowPowerMode || 
-    power.reducedMotion || 
-    memory.lowMemoryMode;
+  const shouldReduceAnimations =
+    (power.isLowPowerMode || false) ||
+    (power.reducedMotion || false) ||
+    (memory.lowMemoryMode || false);
 
-  const shouldVirtualizeList = 
-    viewport.isMobile || 
-    memory.lowMemoryMode || 
+  const shouldVirtualizeList =
+    viewport.isMobile ||
+    (memory.lowMemoryMode || false) ||
     (network.effectiveType && network.effectiveType !== '4g');
 
-  const shouldReduceImageQuality = 
-    network.saveData || 
-    power.isLowPowerMode || 
+  const shouldReduceImageQuality =
+    (network.saveData || false) ||
+    (power.isLowPowerMode || false) ||
     (network.effectiveType && network.effectiveType !== '4g');
 
-  const shouldUseOfflineFirst = 
-    !network.online || 
+  const shouldUseOfflineFirst =
+    !(network.online || true) ||
     (network.effectiveType && network.effectiveType !== '4g') ||
-    network.saveData;
+    (network.saveData || false);
 
   const value: ResponsiveContextProps = {
     viewport,

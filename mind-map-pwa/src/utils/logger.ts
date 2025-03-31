@@ -9,8 +9,8 @@ export enum LogLevel {
 }
 
 // Default log level - can be configured via environment variable
-const DEFAULT_LOG_LEVEL = process.env.NODE_ENV === 'production' 
-  ? LogLevel.ERROR 
+const DEFAULT_LOG_LEVEL = import.meta.env.PROD
+  ? LogLevel.ERROR
   : LogLevel.DEBUG;
 
 // Current log level
@@ -30,7 +30,7 @@ export const getLogLevel = (): LogLevel => {
 const formatLogMessage = (level: string, ...args: any[]): any[] => {
   const timestamp = new Date().toISOString();
   const userLocale = navigator.language || 'en-US';
-  
+
   // Add user context to logs
   return [`[${level}] [${timestamp}] [${userLocale}]`, ...args];
 };
@@ -88,17 +88,17 @@ export const logGroup = (groupName: string, logFn: () => void): void => {
 // Sanitize sensitive data before logging
 export const sanitizeForLogging = (data: any): any => {
   if (!data) return data;
-  
+
   // Clone the data to avoid modifying the original
   const sanitized = JSON.parse(JSON.stringify(data));
-  
+
   // List of sensitive fields to redact
   const sensitiveFields = ['password', 'token', 'secret', 'key', 'accessKey', 'secretKey'];
-  
+
   // Recursively sanitize objects
   const sanitizeObject = (obj: any) => {
     if (typeof obj !== 'object' || obj === null) return;
-    
+
     Object.keys(obj).forEach(key => {
       if (sensitiveFields.some(field => key.toLowerCase().includes(field))) {
         obj[key] = '[REDACTED]';
@@ -107,15 +107,15 @@ export const sanitizeForLogging = (data: any): any => {
       }
     });
   };
-  
+
   sanitizeObject(sanitized);
   return sanitized;
 };
 
 // Initialize logger
 export const initLogger = (): void => {
-  logInfo('Logger initialized', { 
+  logInfo('Logger initialized', {
     level: LogLevel[currentLogLevel],
-    environment: process.env.NODE_ENV
+    environment: import.meta.env.MODE
   });
 };

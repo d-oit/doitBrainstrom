@@ -73,7 +73,7 @@ export class RenderingError extends AppError {
 // Global error handler setup
 export const setupGlobalErrorHandler = (): void => {
   // Handle uncaught exceptions
-  window.onerror = (message, source, lineno, colno, error) => {
+  window.onerror = (message, _source, _lineno, _colno, error) => {
     logErrorWithStack('Global Error Handler:', error || new Error(String(message)));
     handleError(error || new Error(String(message)));
     return true; // Prevent default browser error handling

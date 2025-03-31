@@ -86,7 +86,7 @@ describe('ResponsiveImage', () => {
   it('uses low-res image when shouldReduceImageQuality is true', async () => {
     // Override the mock to enable image quality reduction
     const useResponsive = require('../contexts/ResponsiveContext').useResponsive;
-    useResponsive.mockReturnValue({
+    useResponsive.mockImplementation(() => ({
       shouldReduceImageQuality: true,
       network: {
         online: true,
@@ -102,7 +102,7 @@ describe('ResponsiveImage', () => {
         batteryCharging: true,
         reducedMotion: false
       }
-    });
+    }));
 
     render(
       <ResponsiveContextProvider>

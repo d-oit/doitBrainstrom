@@ -1,6 +1,9 @@
 // src/utils/indexedDB/dbService.ts
-import { DB_CONFIG, MindMapRecord } from './config';
-import { logInfo, logError, logWarn } from '../logger';
+import { DB_CONFIG } from './config';
+import { logInfo, logError } from '../logger';
+
+// Re-export MindMapRecord for other modules to use
+export type { MindMapRecord } from './config';
 import { StorageError } from '../errorHandler';
 
 // Initialize the database
@@ -9,7 +12,7 @@ export const initDB = (): Promise<IDBDatabase> => {
     const request = indexedDB.open(DB_CONFIG.name, DB_CONFIG.version);
 
     request.onerror = (event) => {
-      const error = (event.target as IDBRequest).error;
+      const error = (event.target as IDBRequest).error || new Error('Unknown IndexedDB error');
       logError('Error opening IndexedDB:', error);
       reject(new StorageError('Failed to open IndexedDB', error));
     };
@@ -57,7 +60,7 @@ export const saveMindMap = async (mindMap: MindMapRecord): Promise<boolean> => {
       };
 
       request.onerror = (event) => {
-        const error = (event.target as IDBRequest).error;
+        const error = (event.target as IDBRequest).error || new Error('Unknown request error');
         logError('Error saving mind map to IndexedDB:', error);
         reject(new StorageError(`Failed to save mind map with ID ${mindMap.id}`, error));
       };
@@ -94,7 +97,7 @@ export const getMindMap = async (id: string): Promise<MindMapRecord | null> => {
       };
 
       request.onerror = (event) => {
-        const error = (event.target as IDBRequest).error;
+        const error = (event.target as IDBRequest).error || new Error('Unknown request error');
         logError('Error getting mind map from IndexedDB:', error);
         reject(new StorageError(`Failed to get mind map with ID ${id}`, error));
       };
@@ -127,7 +130,7 @@ export const getAllMindMaps = async (): Promise<MindMapRecord[]> => {
       };
 
       request.onerror = (event) => {
-        const error = (event.target as IDBRequest).error;
+        const error = (event.target as IDBRequest).error || new Error('Unknown request error');
         logError('Error getting all mind maps from IndexedDB:', error);
         reject(new StorageError('Failed to get all mind maps', error));
       };
@@ -161,7 +164,7 @@ export const getUnsyncedMindMaps = async (): Promise<MindMapRecord[]> => {
       };
 
       request.onerror = (event) => {
-        const error = (event.target as IDBRequest).error;
+        const error = (event.target as IDBRequest).error || new Error('Unknown request error');
         logError('Error getting unsynced mind maps from IndexedDB:', error);
         reject(new StorageError('Failed to get unsynced mind maps', error));
       };
@@ -193,7 +196,7 @@ export const deleteMindMap = async (id: string): Promise<boolean> => {
       };
 
       request.onerror = (event) => {
-        const error = (event.target as IDBRequest).error;
+        const error = (event.target as IDBRequest).error || new Error('Unknown request error');
         logError('Error deleting mind map from IndexedDB:', error);
         reject(new StorageError(`Failed to delete mind map with ID ${id}`, error));
       };

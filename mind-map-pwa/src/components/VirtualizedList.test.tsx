@@ -53,7 +53,7 @@ describe('VirtualizedList', () => {
   it('renders all items when virtualization is disabled', () => {
     // Override the mock to disable virtualization
     const useResponsive = require('../contexts/ResponsiveContext').useResponsive;
-    useResponsive.mockReturnValue({
+    useResponsive.mockImplementation(() => ({
       shouldVirtualizeList: false,
       viewport: {
         breakpoint: 'desktop',
@@ -64,7 +64,7 @@ describe('VirtualizedList', () => {
         isPortrait: false,
         pixelRatio: 1
       }
-    });
+    }));
 
     render(
       <ResponsiveContextProvider>

@@ -16,7 +16,7 @@ const ErrorNotificationContext = createContext<ErrorNotificationContextProps | u
 export const ErrorNotificationContextProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
-  const { t, dir } = useI18n();
+  const { dir } = useI18n();
 
   // Make the context available globally for error handler
   useEffect(() => {
@@ -45,7 +45,7 @@ export const ErrorNotificationContextProvider: React.FC<{ children: React.ReactN
     }, 300);
   };
 
-  const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+  const handleClose = (_event?: React.SyntheticEvent | Event, reason?: string) => {
     if (reason === 'clickaway') {
       return;
     }
@@ -68,9 +68,9 @@ export const ErrorNotificationContextProvider: React.FC<{ children: React.ReactN
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
         dir={dir}
       >
-        <Alert 
-          onClose={handleClose} 
-          severity="error" 
+        <Alert
+          onClose={handleClose}
+          severity="error"
           sx={{ width: '100%' }}
           action={
             <IconButton
