@@ -7,6 +7,7 @@ import { ThemeContextProvider } from './contexts/ThemeContext'
 import { MindMapContextProvider } from './contexts/MindMapContext'
 import { I18nContextProvider } from './contexts/I18nContext'
 import { ErrorNotificationContextProvider } from './contexts/ErrorNotificationContext'
+import { ResponsiveContextProvider } from './contexts/ResponsiveContext'
 import { register as registerServiceWorker } from './serviceWorker'
 import { setupGlobalErrorHandler } from './utils/errorHandler'
 import { initLogger } from './utils/logger'
@@ -25,9 +26,11 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <ErrorNotificationContextProvider>
       <I18nContextProvider>
         <ThemeContextProvider>
-          <MindMapContextProvider>
-            <App />
-          </MindMapContextProvider>
+          <ResponsiveContextProvider>
+            <MindMapContextProvider>
+              <App />
+            </MindMapContextProvider>
+          </ResponsiveContextProvider>
         </ThemeContextProvider>
       </I18nContextProvider>
     </ErrorNotificationContextProvider>

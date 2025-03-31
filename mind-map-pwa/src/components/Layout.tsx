@@ -1,9 +1,10 @@
 // src/components/Layout.tsx
 import React from 'react';
-import { AppBar, Toolbar, Typography, Container, Box, Stack } from '@mui/material';
+import { AppBar, Toolbar, Typography, Container, Box, Stack, Divider } from '@mui/material';
 import ThemeSwitcher from './ThemeSwitcher';
 import LocaleSwitcher from './LocaleSwitcher';
 import SyncStatus from './SyncStatus';
+import NetworkStatusIndicator from './NetworkStatusIndicator';
 import { useI18n } from '../contexts/I18nContext';
 // Import sanitization utility
 import { sanitizeTextInput } from '../utils/inputSanitization';
@@ -28,7 +29,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               {appTitle}
             </Typography>
             <Stack direction="row" spacing={1} alignItems="center" role="toolbar" aria-label="Application tools">
+              <NetworkStatusIndicator />
+              <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
               <SyncStatus />
+              <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
               <LocaleSwitcher />
               <ThemeSwitcher />
             </Stack>

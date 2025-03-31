@@ -4,7 +4,7 @@ import { Box, Paper, TextField, Button, useTheme, useMediaQuery } from '@mui/mat
 import MindMapCard from './MindMapCard';
 import { useMindMap } from '../contexts/MindMapContext';
 import { useI18n } from '../contexts/I18nContext';
-import useViewportAdaptation from '../hooks/useViewportAdaptation';
+import { useResponsive } from '../contexts/ResponsiveContext';
 import '../styles/responsive.css';
 
 const MindMap: React.FC = () => {
@@ -19,7 +19,14 @@ const MindMap: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
-  const { breakpoint, isLandscape, isPortrait, pixelRatio } = useViewportAdaptation();
+  const {
+    viewport: { breakpoint, isLandscape, isPortrait, pixelRatio },
+    shouldReduceAnimations,
+    shouldVirtualizeList,
+    network,
+    power,
+    memory
+  } = useResponsive();
 
   // Responsive configuration based on viewport
   const canvasConfig = {
@@ -259,7 +266,7 @@ const MindMap: React.FC = () => {
           direction: dir, // Support RTL layout
           transform: `scale(${scale})`,
           transformOrigin: '0 0',
-          transition: isPinching ? 'none' : 'transform 0.1s ease-out',
+          transition: isPinching || shouldReduceAnimations ? 'none' : 'transform 0.1s ease-out',
           touchAction: 'none' // Disable browser handling of touch gestures
         }}
         onMouseMove={handleMouseMove}

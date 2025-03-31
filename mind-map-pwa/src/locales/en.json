@@ -36,5 +36,20 @@
     "syncing": "Syncing data...",
     "idle": "Changes not synced",
     "refresh": "Sync now"
+  },
+  "network": {
+    "offline": "Offline",
+    "online": "Online",
+    "fast": "Fast",
+    "medium": "Medium",
+    "slow": "Slow",
+    "unknown": "Unknown",
+    "dataSaver": "Data Saver",
+    "offlineDetails": "You are currently offline. Changes will be saved locally.",
+    "type": "Connection type",
+    "speed": "Speed",
+    "latency": "Latency",
+    "dataSaverEnabled": "Data Saver mode enabled",
+    "unknownDetails": "Connection details unavailable"
   }
 }

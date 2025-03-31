@@ -36,5 +36,20 @@
     "syncing": "Sincronizando datos...",
     "idle": "Cambios no sincronizados",
     "refresh": "Sincronizar ahora"
+  },
+  "network": {
+    "offline": "Sin conexión",
+    "online": "En línea",
+    "fast": "Rápida",
+    "medium": "Media",
+    "slow": "Lenta",
+    "unknown": "Desconocida",
+    "dataSaver": "Ahorro de datos",
+    "offlineDetails": "Actualmente estás sin conexión. Los cambios se guardarán localmente.",
+    "type": "Tipo de conexión",
+    "speed": "Velocidad",
+    "latency": "Latencia",
+    "dataSaverEnabled": "Modo de ahorro de datos activado",
+    "unknownDetails": "Detalles de conexión no disponibles"
   }
 }
