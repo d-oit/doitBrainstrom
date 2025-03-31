@@ -1,5 +1,7 @@
 // src/services/s3Service.ts
 import AWS from 'aws-sdk';
+import { logInfo, logError } from '../utils/logger';
+import { NetworkError } from '../utils/errorHandler';
 
 const s3 = new AWS.S3({
   endpoint: import.meta.env.VITE_S3_ENDPOINT,
@@ -11,11 +13,12 @@ const s3 = new AWS.S3({
 export const listBuckets = async () => { // Example function to test connection
   try {
     const response = await s3.listBuckets().promise();
-    console.log("S3 Buckets:", response.Buckets);
+    logInfo("S3 Buckets:", response.Buckets);
     return response.Buckets;
   } catch (error) {
-    console.error("Error connecting to S3:", error);
-    throw error;
+    const errorMessage = "Error connecting to S3";
+    logError(errorMessage, error);
+    throw new NetworkError(errorMessage, error as Error);
   }
 };
 
@@ -24,10 +27,11 @@ export const getBucketContents = async (bucketName: string) => {
     const response = await s3.listObjects({
       Bucket: bucketName || import.meta.env.VITE_S3_BUCKET_NAME
     }).promise();
-    console.log("Bucket contents:", response.Contents);
+    logInfo("Bucket contents:", response.Contents);
     return response.Contents;
   } catch (error) {
-    console.error("Error getting bucket contents:", error);
-    throw error;
+    const errorMessage = "Error getting bucket contents";
+    logError(errorMessage, error);
+    throw new NetworkError(errorMessage, error as Error, { bucketName });
   }
 };
