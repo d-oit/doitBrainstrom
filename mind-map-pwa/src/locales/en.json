@@ -1,0 +1,32 @@
+{
+  "app": {
+    "title": "Mind Map PWA",
+    "subtitle": "A Progressive Web App for creating mind maps"
+  },
+  "tabs": {
+    "mindMap": "Mind Map",
+    "s3Connection": "S3 Connection",
+    "sampleCards": "Sample Cards"
+  },
+  "mindMap": {
+    "newNode": "New Node Text",
+    "addNode": "Add Node",
+    "mainIdea": "Main Idea",
+    "mainIdeaDesc": "This is the central concept of your mind map",
+    "supportingConcept": "Supporting Concept",
+    "supportingConceptDesc": "This connects to the main idea",
+    "anotherConcept": "Another Concept",
+    "anotherConceptDesc": "This is another related idea"
+  },
+  "s3": {
+    "connectionTest": "S3 Connection Test",
+    "connectionError": "Failed to connect to S3. Please check your credentials.",
+    "connectionSuccess": "Successfully connected to S3!",
+    "availableBuckets": "Available Buckets:"
+  },
+  "theme": {
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark"
+  }
+}

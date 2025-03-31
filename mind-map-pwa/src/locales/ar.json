@@ -1,0 +1,32 @@
+{
+  "app": {
+    "title": "تطبيق خريطة العقل",
+    "subtitle": "تطبيق ويب تقدمي لإنشاء خرائط ذهنية"
+  },
+  "tabs": {
+    "mindMap": "خريطة ذهنية",
+    "s3Connection": "اتصال S3",
+    "sampleCards": "بطاقات نموذجية"
+  },
+  "mindMap": {
+    "newNode": "نص العقدة الجديدة",
+    "addNode": "إضافة عقدة",
+    "mainIdea": "الفكرة الرئيسية",
+    "mainIdeaDesc": "هذا هو المفهوم المركزي لخريطتك الذهنية",
+    "supportingConcept": "مفهوم داعم",
+    "supportingConceptDesc": "هذا يتصل بالفكرة الرئيسية",
+    "anotherConcept": "مفهوم آخر",
+    "anotherConceptDesc": "هذه فكرة أخرى ذات صلة"
+  },
+  "s3": {
+    "connectionTest": "اختبار اتصال S3",
+    "connectionError": "فشل الاتصال بـ S3. يرجى التحقق من بيانات الاعتماد الخاصة بك.",
+    "connectionSuccess": "تم الاتصال بنجاح بـ S3!",
+    "availableBuckets": "الحاويات المتاحة:"
+  },
+  "theme": {
+    "system": "النظام",
+    "light": "فاتح",
+    "dark": "داكن"
+  }
+}

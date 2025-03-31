@@ -1,0 +1,32 @@
+{
+  "app": {
+    "title": "Mapa Mental PWA",
+    "subtitle": "Una aplicación web progresiva para crear mapas mentales"
+  },
+  "tabs": {
+    "mindMap": "Mapa Mental",
+    "s3Connection": "Conexión S3",
+    "sampleCards": "Tarjetas de Ejemplo"
+  },
+  "mindMap": {
+    "newNode": "Texto del Nuevo Nodo",
+    "addNode": "Añadir Nodo",
+    "mainIdea": "Idea Principal",
+    "mainIdeaDesc": "Este es el concepto central de tu mapa mental",
+    "supportingConcept": "Concepto de Apoyo",
+    "supportingConceptDesc": "Esto se conecta a la idea principal",
+    "anotherConcept": "Otro Concepto",
+    "anotherConceptDesc": "Esta es otra idea relacionada"
+  },
+  "s3": {
+    "connectionTest": "Prueba de Conexión S3",
+    "connectionError": "Error al conectar con S3. Por favor, verifica tus credenciales.",
+    "connectionSuccess": "¡Conectado exitosamente a S3!",
+    "availableBuckets": "Buckets Disponibles:"
+  },
+  "theme": {
+    "system": "Sistema",
+    "light": "Claro",
+    "dark": "Oscuro"
+  }
+}
