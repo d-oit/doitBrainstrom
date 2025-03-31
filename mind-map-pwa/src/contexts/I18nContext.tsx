@@ -5,7 +5,8 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 export const SUPPORTED_LOCALES = [
   { code: 'en', name: 'English', dir: 'ltr' },
   { code: 'es', name: 'Español', dir: 'ltr' },
-  { code: 'ar', name: 'العربية', dir: 'rtl' }
+  { code: 'ar', name: 'العربية', dir: 'rtl' },
+  { code: 'de', name: 'Deutsch', dir: 'ltr' }
 ];
 
 interface I18nContextProps {
@@ -32,7 +33,7 @@ export const I18nContextProvider: React.FC<{ children: React.ReactNode }> = ({ c
         
         // Set text direction
         const localeInfo = SUPPORTED_LOCALES.find(l => l.code === locale);
-        setDir(localeInfo?.dir || 'ltr');
+        setDir(localeInfo?.dir as 'ltr' | 'rtl' || 'ltr');
         
         // Update HTML attributes
         document.documentElement.lang = locale;
@@ -93,8 +94,8 @@ export const I18nContextProvider: React.FC<{ children: React.ReactNode }> = ({ c
     
     // Replace parameters if provided
     if (params) {
-      return Object.entries(params).reduce(
-        (str, [param, val]) => str.replace(new RegExp(`{{${param}}}`, 'g'), val),
+      return Object.entries(params).reduce<string>(
+        (str, [param, val]: [string, string]) => str.replace(new RegExp(`{{${param}}}`, 'g'), val),
         value
       );
     }

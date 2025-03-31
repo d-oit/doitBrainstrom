@@ -1,6 +1,7 @@
 // src/hooks/useFoldableDisplay.test.ts
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useFoldableDisplay } from './useFoldableDisplay';
+import { vi, describe, it, expect, afterEach } from 'vitest';
 
 // Mock window properties for foldable displays
 const mockFoldableDisplay = (
@@ -12,7 +13,7 @@ const mockFoldableDisplay = (
   // Mock Window Segments API
   if (isFoldable && isSpanned) {
     // Create mock segments based on span direction
-    const segments = spanDirection === 'horizontal' 
+    const segments = spanDirection === 'horizontal'
       ? [
           { top: 0, left: 0, width: 400, height: 800 },
           { top: 0, left: 420, width: 400, height: 800 }
@@ -21,9 +22,9 @@ const mockFoldableDisplay = (
           { top: 0, left: 0, width: 800, height: 400 },
           { top: 420, left: 0, width: 800, height: 400 }
         ];
-    
+
     // Add getWindowSegments method
-    (window as any).getWindowSegments = jest.fn().mockReturnValue(segments);
+    (window as any).getWindowSegments = vi.fn().mockReturnValue(segments);
   } else {
     delete (window as any).getWindowSegments;
   }
@@ -50,7 +51,7 @@ describe('useFoldableDisplay', () => {
   it('should detect non-foldable display', () => {
     mockFoldableDisplay(false);
     const { result } = renderHook(() => useFoldableDisplay());
-    
+
     expect(result.current.isFoldable).toBe(false);
     expect(result.current.isSpanned).toBe(false);
   });
@@ -58,7 +59,7 @@ describe('useFoldableDisplay', () => {
   it('should detect foldable display in single screen mode', () => {
     mockFoldableDisplay(true, false);
     const { result } = renderHook(() => useFoldableDisplay());
-    
+
     expect(result.current.isFoldable).toBe(true);
     expect(result.current.isSpanned).toBe(false);
   });
@@ -66,7 +67,7 @@ describe('useFoldableDisplay', () => {
   it('should detect horizontally spanned display', () => {
     mockFoldableDisplay(true, true, 'horizontal');
     const { result } = renderHook(() => useFoldableDisplay());
-    
+
     expect(result.current.isFoldable).toBe(true);
     expect(result.current.isSpanned).toBe(true);
     expect(result.current.spanDirection).toBe('horizontal');
@@ -75,7 +76,7 @@ describe('useFoldableDisplay', () => {
   it('should detect vertically spanned display', () => {
     mockFoldableDisplay(true, true, 'vertical');
     const { result } = renderHook(() => useFoldableDisplay());
-    
+
     expect(result.current.isFoldable).toBe(true);
     expect(result.current.isSpanned).toBe(true);
     expect(result.current.spanDirection).toBe('vertical');
@@ -84,22 +85,22 @@ describe('useFoldableDisplay', () => {
   it('should detect fold angle', () => {
     mockFoldableDisplay(true, true, 'horizontal', 130);
     const { result } = renderHook(() => useFoldableDisplay());
-    
+
     expect(result.current.foldAngle).toBe(130);
   });
 
   it('should update when display configuration changes', () => {
     mockFoldableDisplay(true, false);
     const { result } = renderHook(() => useFoldableDisplay());
-    
+
     expect(result.current.isSpanned).toBe(false);
-    
+
     // Simulate changing to spanned mode
     act(() => {
       mockFoldableDisplay(true, true, 'horizontal');
       window.dispatchEvent(new Event('resize'));
     });
-    
+
     expect(result.current.isSpanned).toBe(true);
     expect(result.current.spanDirection).toBe('horizontal');
   });

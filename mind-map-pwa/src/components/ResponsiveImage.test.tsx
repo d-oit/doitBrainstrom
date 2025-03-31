@@ -3,14 +3,15 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import ResponsiveImage from './ResponsiveImage';
 import { ResponsiveContextProvider } from '../contexts/ResponsiveContext';
+import { vi, describe, it, expect } from 'vitest';
 
 // Mock the useResponsive hook
-jest.mock('../contexts/ResponsiveContext', () => {
-  const originalModule = jest.requireActual('../contexts/ResponsiveContext');
-  
+vi.mock('../contexts/ResponsiveContext', () => {
+  const originalModule = vi.importActual('../contexts/ResponsiveContext');
+
   return {
     ...originalModule,
-    useResponsive: jest.fn().mockReturnValue({
+    useResponsive: vi.fn().mockReturnValue({
       shouldReduceImageQuality: false,
       network: {
         online: true,
@@ -53,11 +54,11 @@ describe('ResponsiveImage', () => {
         />
       </ResponsiveContextProvider>
     );
-    
+
     // Should show a skeleton while loading
     expect(screen.getByRole('img', { hidden: true })).toBeInTheDocument();
   });
-  
+
   it('renders the image after loading', async () => {
     render(
       <ResponsiveContextProvider>
@@ -69,19 +70,19 @@ describe('ResponsiveImage', () => {
         />
       </ResponsiveContextProvider>
     );
-    
+
     // Simulate image load
     setTimeout(() => {
       const mockImage = new MockImage();
       if (mockImage.onload) mockImage.onload();
     }, 0);
-    
+
     // Wait for the image to appear
     await waitFor(() => {
       expect(screen.getByAltText('Test image')).toBeInTheDocument();
     });
   });
-  
+
   it('uses low-res image when shouldReduceImageQuality is true', async () => {
     // Override the mock to enable image quality reduction
     const useResponsive = require('../contexts/ResponsiveContext').useResponsive;
@@ -102,7 +103,7 @@ describe('ResponsiveImage', () => {
         reducedMotion: false
       }
     });
-    
+
     render(
       <ResponsiveContextProvider>
         <ResponsiveImage
@@ -114,19 +115,19 @@ describe('ResponsiveImage', () => {
         />
       </ResponsiveContextProvider>
     );
-    
+
     // Simulate image load
     setTimeout(() => {
       const mockImage = new MockImage();
       if (mockImage.onload) mockImage.onload();
     }, 0);
-    
+
     // Wait for the image to appear
     await waitFor(() => {
       expect(screen.getByAltText('Test image')).toBeInTheDocument();
     });
   });
-  
+
   it('shows error state when image fails to load', async () => {
     render(
       <ResponsiveContextProvider>
@@ -138,13 +139,13 @@ describe('ResponsiveImage', () => {
         />
       </ResponsiveContextProvider>
     );
-    
+
     // Simulate image error
     setTimeout(() => {
       const mockImage = new MockImage();
       if (mockImage.onerror) mockImage.onerror();
     }, 0);
-    
+
     // Wait for the error state
     await waitFor(() => {
       expect(screen.getByText('Test image')).toBeInTheDocument();

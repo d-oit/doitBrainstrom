@@ -1,4 +1,5 @@
 // src/utils/errorHandler.ts
+import React from 'react';
 import { logError, logErrorWithStack, logWarn } from './logger';
 
 // Error types
@@ -21,7 +22,7 @@ export class AppError extends Error {
   ) {
     super(message);
     this.name = 'AppError';
-    
+
     // Maintain proper stack trace for where our error was thrown
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, AppError);
@@ -152,14 +153,14 @@ export const handleError = (error: Error | unknown): void => {
 // Storage error handler
 const handleStorageError = (error: AppError): void => {
   let userMessage = 'Unable to save your changes offline. Please try again.';
-  
+
   // Specific storage error messages
   if (error.original?.name === 'QuotaExceededError') {
     userMessage = 'Storage space is full. Please clear some data.';
   } else if (error.original?.name === 'InvalidStateError') {
     userMessage = 'Storage is not available. Please check your browser settings.';
   }
-  
+
   displayUserFriendlyError(userMessage);
   logError('Storage Error:', error);
 };
@@ -202,7 +203,7 @@ export const displayUserFriendlyError = (message: string): void => {
   } else {
     // Fallback if context is not available
     console.error('User-friendly error:', message);
-    
+
     // Optional: Show a simple alert if no UI component is available
     // alert(message);
   }

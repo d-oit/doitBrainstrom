@@ -1,6 +1,7 @@
 // src/hooks/usePowerMode.test.ts
 import { renderHook, act } from '@testing-library/react-hooks';
 import { usePowerMode } from './usePowerMode';
+import { vi, describe, it, expect, afterEach } from 'vitest';
 
 // Mock navigator and window properties
 const mockPowerMode = (
@@ -13,11 +14,11 @@ const mockPowerMode = (
     const mockBattery = {
       level: batteryLevel,
       charging: batteryCharging,
-      addEventListener: jest.fn(),
-      removeEventListener: jest.fn()
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn()
     };
-    
-    (navigator as any).getBattery = jest.fn().mockResolvedValue(mockBattery);
+
+    (navigator as any).getBattery = vi.fn().mockResolvedValue(mockBattery);
   } else {
     delete (navigator as any).getBattery;
   }
@@ -25,13 +26,13 @@ const mockPowerMode = (
   // Mock prefers-reduced-motion media query
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
-    value: jest.fn().mockImplementation(query => ({
+    value: vi.fn().mockImplementation(query => ({
       matches: reducedMotion,
       media: query,
       onchange: null,
-      addEventListener: jest.fn(),
-      removeEventListener: jest.fn(),
-      dispatchEvent: jest.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
     })),
   });
 };
@@ -40,15 +41,15 @@ describe('usePowerMode', () => {
   // Reset mocks after each test
   afterEach(() => {
     delete (navigator as any).getBattery;
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should detect normal power mode', async () => {
     mockPowerMode(0.8, true, false);
     const { result, waitForNextUpdate } = renderHook(() => usePowerMode());
-    
+
     await waitForNextUpdate();
-    
+
     expect(result.current.isLowPowerMode).toBe(false);
     expect(result.current.batteryLevel).toBe(0.8);
     expect(result.current.batteryCharging).toBe(true);
@@ -58,9 +59,9 @@ describe('usePowerMode', () => {
   it('should detect low power mode with low battery', async () => {
     mockPowerMode(0.15, false, false);
     const { result, waitForNextUpdate } = renderHook(() => usePowerMode());
-    
+
     await waitForNextUpdate();
-    
+
     expect(result.current.isLowPowerMode).toBe(true);
     expect(result.current.batteryLevel).toBe(0.15);
     expect(result.current.batteryCharging).toBe(false);
@@ -69,9 +70,9 @@ describe('usePowerMode', () => {
   it('should detect reduced motion preference', async () => {
     mockPowerMode(0.5, true, true);
     const { result, waitForNextUpdate } = renderHook(() => usePowerMode());
-    
+
     await waitForNextUpdate();
-    
+
     expect(result.current.isLowPowerMode).toBe(true);
     expect(result.current.reducedMotion).toBe(true);
   });
@@ -79,7 +80,7 @@ describe('usePowerMode', () => {
   it('should handle missing Battery API', () => {
     mockPowerMode(null, null, false);
     const { result } = renderHook(() => usePowerMode());
-    
+
     expect(result.current.batteryLevel).toBeNull();
     expect(result.current.batteryCharging).toBeNull();
   });

@@ -2,11 +2,12 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ResponsiveContextProvider, useResponsive } from './ResponsiveContext';
+import { vi, describe, it, expect } from 'vitest';
 
 // Mock the hooks
-jest.mock('../hooks/useViewportAdaptation', () => ({
+vi.mock('../hooks/useViewportAdaptation', () => ({
   __esModule: true,
-  default: jest.fn().mockReturnValue({
+  default: vi.fn().mockReturnValue({
     breakpoint: 'mobile',
     isMobile: true,
     isTablet: false,
@@ -17,9 +18,9 @@ jest.mock('../hooks/useViewportAdaptation', () => ({
   })
 }));
 
-jest.mock('../hooks/useNetworkStatus', () => ({
+vi.mock('../hooks/useNetworkStatus', () => ({
   __esModule: true,
-  default: jest.fn().mockReturnValue({
+  default: vi.fn().mockReturnValue({
     online: true,
     connectionType: 'wifi',
     effectiveType: '4g',
@@ -29,9 +30,9 @@ jest.mock('../hooks/useNetworkStatus', () => ({
   })
 }));
 
-jest.mock('../hooks/useDeviceMemory', () => ({
+vi.mock('../hooks/useDeviceMemory', () => ({
   __esModule: true,
-  default: jest.fn().mockReturnValue({
+  default: vi.fn().mockReturnValue({
     deviceMemory: 4,
     jsHeapSizeLimit: 2000000000,
     totalJSHeapSize: 1000000000,
@@ -40,9 +41,9 @@ jest.mock('../hooks/useDeviceMemory', () => ({
   })
 }));
 
-jest.mock('../hooks/useFoldableDisplay', () => ({
+vi.mock('../hooks/useFoldableDisplay', () => ({
   __esModule: true,
-  default: jest.fn().mockReturnValue({
+  default: vi.fn().mockReturnValue({
     isFoldable: false,
     isSpanned: false,
     foldSize: null,
@@ -52,9 +53,9 @@ jest.mock('../hooks/useFoldableDisplay', () => ({
   })
 }));
 
-jest.mock('../hooks/usePowerMode', () => ({
+vi.mock('../hooks/usePowerMode', () => ({
   __esModule: true,
-  default: jest.fn().mockReturnValue({
+  default: vi.fn().mockReturnValue({
     isLowPowerMode: false,
     batteryLevel: 0.8,
     batteryCharging: true,
@@ -84,7 +85,7 @@ describe('ResponsiveContext', () => {
         <TestComponent />
       </ResponsiveContextProvider>
     );
-    
+
     expect(screen.getByTestId('breakpoint')).toHaveTextContent('mobile');
     expect(screen.getByTestId('online')).toHaveTextContent('online');
     expect(screen.getByTestId('reduce-animations')).toHaveTextContent('no');
@@ -92,16 +93,16 @@ describe('ResponsiveContext', () => {
     expect(screen.getByTestId('reduce-image-quality')).toHaveTextContent('no');
     expect(screen.getByTestId('offline-first')).toHaveTextContent('no');
   });
-  
+
   it('should throw error when used outside provider', () => {
     // Suppress console.error for this test
     const originalError = console.error;
     console.error = jest.fn();
-    
+
     expect(() => {
       render(<TestComponent />);
     }).toThrow('useResponsive must be used within a ResponsiveContextProvider');
-    
+
     // Restore console.error
     console.error = originalError;
   });
