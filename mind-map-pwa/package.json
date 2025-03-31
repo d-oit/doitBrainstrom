@@ -13,7 +13,12 @@
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "test:sanitization": "vitest run src/utils/inputSanitization.test.ts",
+    "test:performance": "vitest run src/utils/performanceMonitoring.test.ts",
+    "test:mindmapcard": "vitest run src/components/MindMapCard.test.tsx",
+    "test:app": "vitest run src/App.test.tsx",
+    "test:layout": "vitest run src/components/Layout.accessibility.test.tsx"
   },
   "dependencies": {
     "@emotion/react": "^11.11.4",

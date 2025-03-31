@@ -1,1 +1,17 @@
-Read all `.md` files in the `@specs/` directory and implement the specifications outlined within them. Before making any changes, thoroughly review the existing codebase to ensure a comprehensive understanding of the current implementation. Document each successfully completed task in a `status.md` file, providing a clear and concise summary of the work done. 
+ANALYZE:
+- Parse all `.md` files in `@specs/`
+- Map dependencies between specifications
+- If exists: validate against `/docs` 
+- Audit current codebase state
+
+IMPLEMENT:
+- For each specification:
+  1. Develop solution based on dependency graph
+  2. Verify with `vitetest`
+  3. Fix any failing tests
+  4. Log completion in `status.md` with {date, feature, changes}
+
+VALIDATE:
+- Run development server locally
+- Execute Playwright e2e tests
+- Resolve any runtime errors
