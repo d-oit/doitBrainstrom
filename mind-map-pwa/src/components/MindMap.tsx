@@ -1,9 +1,11 @@
 // src/components/MindMap.tsx
-import React, { useState, useRef, useEffect } from 'react';
-import { Box, Paper, TextField, Button } from '@mui/material';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { Box, Paper, TextField, Button, useTheme, useMediaQuery } from '@mui/material';
 import MindMapCard from './MindMapCard';
 import { useMindMap } from '../contexts/MindMapContext';
 import { useI18n } from '../contexts/I18nContext';
+import useViewportAdaptation from '../hooks/useViewportAdaptation';
+import '../styles/responsive.css';
 
 const MindMap: React.FC = () => {
   const {
@@ -14,11 +16,26 @@ const MindMap: React.FC = () => {
     updateNodePosition
   } = useMindMap();
   const { t, dir } = useI18n();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
+  const { breakpoint, isLandscape, isPortrait, pixelRatio } = useViewportAdaptation();
+
+  // Responsive configuration based on viewport
+  const canvasConfig = {
+    mobile: { nodeSize: 32, fontScale: 0.8, linkWidth: 1 },
+    tablet: { nodeSize: 40, fontScale: 1.0, linkWidth: 1.5 },
+    desktop: { nodeSize: 48, fontScale: 1.2, linkWidth: 2 }
+  }[breakpoint];
 
   const [newNodeText, setNewNodeText] = useState('');
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [scale, setScale] = useState(1);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isPinching, setIsPinching] = useState(false);
+  const [lastDistance, setLastDistance] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleCreateNode = () => {
@@ -76,16 +93,94 @@ const MindMap: React.FC = () => {
     setDraggingNodeId(null);
   };
 
+  // Touch event handlers for mobile devices
+  const handleTouchStart = useCallback((e: React.TouchEvent, nodeId: string) => {
+    e.stopPropagation();
+
+    const node = mindMapData.nodes.find(n => n.id === nodeId);
+    if (!node) return;
+
+    // Single touch for dragging
+    if (e.touches.length === 1) {
+      const touch = e.touches[0];
+      const rect = (e.target as HTMLElement).getBoundingClientRect();
+      const offsetX = touch.clientX - rect.left;
+      const offsetY = touch.clientY - rect.top;
+
+      setDraggingNodeId(nodeId);
+      setDragOffset({ x: offsetX, y: offsetY });
+    }
+  }, [mindMapData.nodes]);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 1 && draggingNodeId && containerRef.current) {
+      e.preventDefault(); // Prevent scrolling while dragging
+
+      const touch = e.touches[0];
+      const containerRect = containerRef.current.getBoundingClientRect();
+      const x = touch.clientX - containerRect.left - dragOffset.x;
+      const y = touch.clientY - containerRect.top - dragOffset.y;
+
+      updateNodePosition(draggingNodeId, x, y);
+    } else if (e.touches.length === 2) {
+      // Handle pinch zoom
+      e.preventDefault();
+
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+      const distance = Math.hypot(
+        touch2.clientX - touch1.clientX,
+        touch2.clientY - touch1.clientY
+      );
+
+      if (!isPinching) {
+        setIsPinching(true);
+        setLastDistance(distance);
+      } else {
+        // Calculate new scale
+        const delta = distance / lastDistance;
+        const newScale = Math.max(0.5, Math.min(2, scale * delta));
+        setScale(newScale);
+        setLastDistance(distance);
+      }
+    }
+  }, [draggingNodeId, dragOffset, updateNodePosition, isPinching, lastDistance, scale]);
+
+  const handleTouchEnd = useCallback(() => {
+    setDraggingNodeId(null);
+    setIsPinching(false);
+  }, []);
+
+  // Handle canvas panning with touch
+  const handleCanvasTouchMove = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 1 && !draggingNodeId) {
+      // Pan the canvas
+      e.preventDefault();
+      const touch = e.touches[0];
+      setPosition(prev => ({
+        x: prev.x + touch.clientX - (e.target as HTMLElement).getBoundingClientRect().left,
+        y: prev.y + touch.clientY - (e.target as HTMLElement).getBoundingClientRect().top
+      }));
+    }
+  }, [draggingNodeId]);
+
   useEffect(() => {
-    // Add event listeners to handle mouse events outside the component
+    // Add event listeners to handle mouse/touch events outside the component
     const handleGlobalMouseUp = () => {
       setDraggingNodeId(null);
     };
 
+    const handleGlobalTouchEnd = () => {
+      setDraggingNodeId(null);
+      setIsPinching(false);
+    };
+
     window.addEventListener('mouseup', handleGlobalMouseUp);
+    window.addEventListener('touchend', handleGlobalTouchEnd);
 
     return () => {
       window.removeEventListener('mouseup', handleGlobalMouseUp);
+      window.removeEventListener('touchend', handleGlobalTouchEnd);
     };
   }, []);
 
@@ -122,7 +217,7 @@ const MindMap: React.FC = () => {
             x2={targetX}
             y2={targetY}
             stroke={selectedNodeId ? '#1976d2' : '#666'}
-            strokeWidth={2}
+            strokeWidth={canvasConfig.linkWidth}
           />
         </svg>
       );
@@ -152,17 +247,25 @@ const MindMap: React.FC = () => {
 
       <Paper
         ref={containerRef}
+        className="mind-map-container"
         sx={{
           flexGrow: 1,
           position: 'relative',
           overflow: 'hidden',
-          height: '500px',
+          height: isMobile ? (isLandscape ? 'calc(100vh - 150px)' : 'calc(100vh - 250px)') :
+                  isTablet ? '600px' : '700px',
           backgroundColor: theme => theme.palette.mode === 'dark' ? '#1e1e1e' : '#f5f5f5',
           cursor: draggingNodeId ? 'grabbing' : 'default',
-          direction: dir // Support RTL layout
+          direction: dir, // Support RTL layout
+          transform: `scale(${scale})`,
+          transformOrigin: '0 0',
+          transition: isPinching ? 'none' : 'transform 0.1s ease-out',
+          touchAction: 'none' // Disable browser handling of touch gestures
         }}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
+        onTouchMove={handleCanvasTouchMove}
+        onTouchEnd={handleTouchEnd}
       >
         {renderLinks()}
 
@@ -176,9 +279,13 @@ const MindMap: React.FC = () => {
               zIndex: 1,
               border: selectedNodeId === node.id ? '2px solid #1976d2' : 'none',
               borderRadius: '4px',
-              cursor: draggingNodeId === node.id ? 'grabbing' : 'grab'
+              cursor: draggingNodeId === node.id ? 'grabbing' : 'grab',
+              touchAction: 'none' // Disable browser handling of touch gestures
             }}
             onMouseDown={(e) => handleMouseDown(e, node.id)}
+            onTouchStart={(e) => handleTouchStart(e, node.id)}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
           >
             <MindMapCard
               title={node.text}
