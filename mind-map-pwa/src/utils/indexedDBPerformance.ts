@@ -1,6 +1,6 @@
 /**
  * IndexedDB Performance Utilities
- * 
+ *
  * This module provides utilities for optimizing IndexedDB operations,
  * including transaction management, bulk operations, and performance monitoring.
  */
@@ -50,7 +50,7 @@ export const bulkOperation = async (
     chunks.push(data.slice(i, i + CHUNK_SIZE));
   }
 
-  const results = [];
+  const results: any[] = [];
   // Process each chunk in a separate transaction
   for (const chunk of chunks) {
     await withTransaction(db, [storeName], 'readwrite', async (transaction) => {
@@ -112,9 +112,9 @@ export const measureIndexedDBOperation = async (
  * Memory usage monitoring
  * Tracks JavaScript heap usage (Chrome only)
  */
-export const monitorMemoryUsage = (): { 
-  usedJSHeapSize?: number; 
-  totalJSHeapSize?: number; 
+export const monitorMemoryUsage = (): {
+  usedJSHeapSize?: number;
+  totalJSHeapSize?: number;
   jsHeapSizeLimit?: number;
 } | null => {
   if ('memory' in performance) {
@@ -130,7 +130,7 @@ export const monitorMemoryUsage = (): {
 
 /**
  * Example usage:
- * 
+ *
  * // Optimized bulk save operation
  * export const saveMindMapNodes = async (nodes: Node[]) => {
  *   return await measureIndexedDBOperation('saveMindMapNodes', async () => {
@@ -138,7 +138,7 @@ export const monitorMemoryUsage = (): {
  *     return await bulkOperation(db, 'nodes', nodes, 'put');
  *   });
  * };
- * 
+ *
  * // Optimized query using indexes
  * export const queryNodesByType = async (type: string) => {
  *   return await measureIndexedDBOperation('queryNodesByType', async () => {

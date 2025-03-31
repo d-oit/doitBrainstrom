@@ -3,6 +3,7 @@ import { DB_CONFIG } from './config';
 import { logInfo, logError } from '../logger';
 
 // Re-export MindMapRecord for other modules to use
+import { MindMapRecord } from './config';
 export type { MindMapRecord } from './config';
 import { StorageError } from '../errorHandler';
 

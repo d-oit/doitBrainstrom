@@ -9,7 +9,7 @@ export enum LogLevel {
 }
 
 // Default log level - can be configured via environment variable
-const DEFAULT_LOG_LEVEL = import.meta.env.PROD
+const DEFAULT_LOG_LEVEL = (import.meta as any).env.PROD
   ? LogLevel.ERROR
   : LogLevel.DEBUG;
 
@@ -116,6 +116,6 @@ export const sanitizeForLogging = (data: any): any => {
 export const initLogger = (): void => {
   logInfo('Logger initialized', {
     level: LogLevel[currentLogLevel],
-    environment: import.meta.env.MODE
+    environment: (import.meta as any).env.MODE
   });
 };

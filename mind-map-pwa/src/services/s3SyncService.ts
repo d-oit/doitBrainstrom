@@ -10,10 +10,10 @@ import { logInfo, logError, logWarn } from '../utils/logger';
 import { StorageError, SyncError } from '../utils/errorHandler';
 
 // Get environment variables
-const S3_ENDPOINT = import.meta.env.VITE_S3_ENDPOINT as string;
-const S3_ACCESS_KEY_ID = import.meta.env.VITE_S3_ACCESS_KEY_ID as string;
-const S3_SECRET_ACCESS_KEY = import.meta.env.VITE_S3_SECRET_ACCESS_KEY as string;
-const BUCKET_NAME = import.meta.env.VITE_S3_BUCKET_NAME as string;
+const S3_ENDPOINT = (import.meta as any).env.VITE_S3_ENDPOINT as string;
+const S3_ACCESS_KEY_ID = (import.meta as any).env.VITE_S3_ACCESS_KEY_ID as string;
+const S3_SECRET_ACCESS_KEY = (import.meta as any).env.VITE_S3_SECRET_ACCESS_KEY as string;
+const BUCKET_NAME = (import.meta as any).env.VITE_S3_BUCKET_NAME as string;
 
 // Initialize S3 client
 const s3 = new AWS.S3({
@@ -296,11 +296,14 @@ export const saveMindMapLocally = async (
         syncMindMapData().catch(error => {
           logError('Background sync failed:', error);
         });
-      } else if ('serviceWorker' in navigator && 'sync' in navigator.serviceWorker) {
+      } else if ('serviceWorker' in navigator) {
         try {
           // Register for background sync when online
           const registration = await navigator.serviceWorker.ready;
-          await registration.sync.register('sync-mindmap');
+          // Sync registration is not available in all browsers
+          if ('sync' in registration) {
+            await (registration as any).sync.register('sync-mindmap');
+          }
           logInfo('Background sync registered');
         } catch (swError) {
           logError('Failed to register background sync', swError);

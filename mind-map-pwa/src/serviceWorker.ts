@@ -26,7 +26,7 @@ type Config = {
 export function register(config?: Config) {
   if ('serviceWorker' in navigator) {
     // The URL constructor is available in all browsers that support SW.
-    const BASE_URL = import.meta.env.BASE_URL as string || '/';
+    const BASE_URL = (import.meta as any).env.BASE_URL as string || '/';
     const publicUrl = new URL(BASE_URL, window.location.href);
     if (publicUrl.origin !== window.location.origin) {
       // Our service worker won't work if BASE_URL is on a different origin

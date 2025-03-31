@@ -49,16 +49,17 @@ export const ResponsiveContextProvider: React.FC<{ children: ReactNode }> = ({ c
     (network.effectiveType && network.effectiveType !== '4g') ||
     (network.saveData || false);
 
+  // Cast to boolean to avoid null values
   const value: ResponsiveContextProps = {
     viewport,
     network,
     memory,
     foldable,
     power,
-    shouldReduceAnimations,
-    shouldVirtualizeList,
-    shouldReduceImageQuality,
-    shouldUseOfflineFirst
+    shouldReduceAnimations: !!shouldReduceAnimations,
+    shouldVirtualizeList: !!shouldVirtualizeList,
+    shouldReduceImageQuality: !!shouldReduceImageQuality,
+    shouldUseOfflineFirst: !!shouldUseOfflineFirst
   };
 
   return (
