@@ -1,116 +1,87 @@
 # S3 403 Resolution Plan
 
-## Immediate Actions
-1. **Verify AWS Credentials**
-   - Check `.env` for valid AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY
-   - Confirm IAM user has `s3:GetObject` permission
-
-2. **Environment Configuration**
+## Environment Configuration
 ```env
 # Required .env variables
-S3_ENDPOINT=https://your-s3-endpoint.com
+S3_ENDPOINT=your-s3-endpoint
 S3_BUCKET_NAME=your-bucket-name
-AWS_ACCESS_KEY_ID=your_access_key
-AWS_SECRET_ACCESS_KEY=your_secret_key
+AWS_ACCESS_KEY_ID=your-access-key
+AWS_SECRET_ACCESS_KEY=your-secret-key
 ```
 
-3. **S3 Service Configuration**
+## TypeScript Implementation
+
 ```ts
-// mind-map-pwa/src/services/s3SyncService.ts
-const s3 = new AWS.S3({
-  endpoint: process.env.S3_ENDPOINT,
-  signatureVersion: 'v4' // Required for presigned URLs
-});
-```
-
-4. **Bucket Policy Check**
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [{
-    "Effect": "Allow",
-    "Principal": "*",
-    "Action": "s3:GetObject",
-    "Resource": "arn:aws:s3:::${S3_BUCKET_NAME}/*"
-  }]
-}
-```
-
-## Architectural Improvements
-1. **Credential Security**
-```mermaid
-sequenceDiagram
-    Frontend->>API Gateway: Request S3 Token
-    API Gateway->>Cognito: GetTempCredentials
-    Cognito-->>API Gateway: Temporary Token
-    API Gateway-->>Frontend: Return Token
-    Frontend->>S3: Request with Temp Token
-```
-
-2. **Error Handling Pattern**
-```ts
-class S3Error extends Error {
-  constructor(public code: string, message: string) {
-    super(message);
+// src/types/env.d.ts
+declare namespace NodeJS {
+  interface ProcessEnv {
+    S3_ENDPOINT: string;
+    S3_BUCKET_NAME: string;
+    AWS_ACCESS_KEY_ID: string;
+    AWS_SECRET_ACCESS_KEY: string;
   }
 }
 
-// Usage
-try {
-  await s3.getObject({
-    Bucket: process.env.S3_BUCKET_NAME,
-    Key: 'example.json'
-  }).promise();
-} catch (error) {
-  throw new S3Error(error.code, `S3 operation failed: ${error.message}`);
-}
-```
+// src/utils/s3Config.ts
+import { S3 } from 'aws-sdk';
 
-## PWA Verification Steps
-1. **Environment Check Function**:
-```ts
-function verifyS3Config() {
-  const requiredVars = ['S3_ENDPOINT', 'S3_BUCKET_NAME', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY'];
-  const missing = requiredVars.filter(varName => !process.env[varName]);
-  
-  if (missing.length > 0) {
-    throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
+export class S3Config {
+  private static instance: S3;
+
+  public static getInstance(): S3 {
+    if (!this.instance) {
+      this.validateEnv();
+      this.instance = new S3({
+        endpoint: process.env.S3_ENDPOINT,
+        signatureVersion: 'v4',
+        credentials: {
+          accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+          secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+        }
+      });
+    }
+    return this.instance;
   }
 
-  return true;
-}
-```
+  private static validateEnv(): void {
+    const required = [
+      'S3_ENDPOINT',
+      'S3_BUCKET_NAME',
+      'AWS_ACCESS_KEY_ID',
+      'AWS_SECRET_ACCESS_KEY'
+    ];
 
-2. **Connection Test Function**:
-```ts
-async function testS3Connection() {
-  try {
-    // List a single object to verify connectivity
-    await s3.listObjectsV2({
-      Bucket: process.env.S3_BUCKET_NAME,
-      MaxKeys: 1
-    }).promise();
-    return { success: true, message: 'S3 connection successful' };
-  } catch (error) {
-    return { 
-      success: false, 
-      message: `S3 connection failed: ${error.message}`,
-      code: error.code
-    };
+    const missing = required.filter(key => !process.env[key]);
+    if (missing.length > 0) {
+      throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
+    }
   }
 }
-```
 
-3. **CORS Configuration**:
-```xml
-<!-- CORS configuration for offline PWA
-     - Uses wildcard origin since PWA runs locally
-     - Security maintained through presigned URLs
-     - Access restricted by bucket policy and IAM roles -->
-<CORSConfiguration>
-  <CORSRule>
-    <AllowedOrigin>*</AllowedOrigin>
-    <AllowedMethod>GET</AllowedMethod>
-    <AllowedHeader>*</AllowedHeader>
-  </CORSRule>
-</CORSConfiguration>
+// src/services/s3Service.ts
+export class S3Service {
+  private s3 = S3Config.getInstance();
+
+  async getObject(key: string): Promise<AWS.S3.GetObjectOutput> {
+    try {
+      return await this.s3.getObject({
+        Bucket: process.env.S3_BUCKET_NAME,
+        Key: key
+      }).promise();
+    } catch (error) {
+      throw new Error(`Failed to get object ${key}: ${error.message}`);
+    }
+  }
+
+  async uploadObject(key: string, body: AWS.S3.Body): Promise<AWS.S3.PutObjectOutput> {
+    try {
+      return await this.s3.putObject({
+        Bucket: process.env.S3_BUCKET_NAME,
+        Key: key,
+        Body: body
+      }).promise();
+    } catch (error) {
+      throw new Error(`Failed to upload object ${key}: ${error.message}`);
+    }
+  }
+}

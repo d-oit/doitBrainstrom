@@ -1,5 +1,5 @@
 // src/hooks/useFoldableDisplay.test.ts
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useFoldableDisplay } from './useFoldableDisplay';
 import { vi, describe, it, expect, afterEach } from 'vitest';
 

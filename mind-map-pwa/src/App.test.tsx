@@ -11,6 +11,26 @@ vi.mock('./services/s3Service', () => ({
   listBuckets: vi.fn(() => Promise.resolve({ buckets: [{ Name: 'test-bucket' }], error: null }))
 }));
 
+vi.mock('@mui/material', async () => {
+  const actual = await vi.importActual('@mui/material');
+  return {
+    ...actual,
+    useTheme: () => ({
+      palette: {
+        primary: { main: '#1976d2' },
+        background: { paper: '#fff' },
+        text: { primary: '#000' },
+        divider: '#e0e0e0'
+      },
+      shadows: Array(25).fill('none'),
+      spacing: (factor: number) => `${factor * 8}px`,
+      breakpoints: {
+        down: () => false
+      }
+    })
+  };
+});
+
 vi.mock('./contexts/I18nContext', () => ({
   I18nContext: {
     Provider: ({ children, value }: { children: React.ReactNode, value: any }) => <div>{children}</div>

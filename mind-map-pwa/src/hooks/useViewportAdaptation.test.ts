@@ -1,6 +1,7 @@
 // src/hooks/useViewportAdaptation.test.ts
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useViewportAdaptation } from './useViewportAdaptation';
+import { describe, it, expect, afterEach } from 'vitest';
 
 // Mock window properties
 const mockWindowProperties = (width: number, height: number, pixelRatio: number = 1) => {
@@ -19,7 +20,7 @@ describe('useViewportAdaptation', () => {
   it('should return mobile breakpoint for small screens', () => {
     mockWindowProperties(320, 568);
     const { result } = renderHook(() => useViewportAdaptation());
-    
+
     expect(result.current.breakpoint).toBe('mobile');
     expect(result.current.isMobile).toBe(true);
     expect(result.current.isTablet).toBe(false);
@@ -29,7 +30,7 @@ describe('useViewportAdaptation', () => {
   it('should return tablet breakpoint for medium screens', () => {
     mockWindowProperties(768, 1024);
     const { result } = renderHook(() => useViewportAdaptation());
-    
+
     expect(result.current.breakpoint).toBe('tablet');
     expect(result.current.isMobile).toBe(false);
     expect(result.current.isTablet).toBe(true);
@@ -39,7 +40,7 @@ describe('useViewportAdaptation', () => {
   it('should return desktop breakpoint for large screens', () => {
     mockWindowProperties(1440, 900);
     const { result } = renderHook(() => useViewportAdaptation());
-    
+
     expect(result.current.breakpoint).toBe('desktop');
     expect(result.current.isMobile).toBe(false);
     expect(result.current.isTablet).toBe(false);
@@ -49,7 +50,7 @@ describe('useViewportAdaptation', () => {
   it('should detect landscape orientation', () => {
     mockWindowProperties(800, 600);
     const { result } = renderHook(() => useViewportAdaptation());
-    
+
     expect(result.current.isLandscape).toBe(true);
     expect(result.current.isPortrait).toBe(false);
   });
@@ -57,7 +58,7 @@ describe('useViewportAdaptation', () => {
   it('should detect portrait orientation', () => {
     mockWindowProperties(600, 800);
     const { result } = renderHook(() => useViewportAdaptation());
-    
+
     expect(result.current.isLandscape).toBe(false);
     expect(result.current.isPortrait).toBe(true);
   });
@@ -65,21 +66,21 @@ describe('useViewportAdaptation', () => {
   it('should detect high pixel ratio screens', () => {
     mockWindowProperties(1024, 768, 2);
     const { result } = renderHook(() => useViewportAdaptation());
-    
+
     expect(result.current.pixelRatio).toBe(2);
   });
 
   it('should update when window is resized', () => {
     mockWindowProperties(320, 568);
     const { result } = renderHook(() => useViewportAdaptation());
-    
+
     expect(result.current.breakpoint).toBe('mobile');
-    
+
     // Simulate window resize
     act(() => {
       mockWindowProperties(1440, 900);
     });
-    
+
     expect(result.current.breakpoint).toBe('desktop');
   });
 });

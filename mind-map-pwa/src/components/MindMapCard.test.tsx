@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import MindMapCard from './MindMapCard';
+import { ResponsiveContextProvider } from '../contexts/ResponsiveContext';
 // Mock Material UI components
 vi.mock('@mui/material', () => ({
   Card: ({ children, ...props }: any) => <div data-testid="mui-card" className="MuiCard-root" {...props}>{children}</div>,
@@ -21,14 +22,35 @@ vi.mock('@mui/material', () => ({
 
 import { ThemeProvider, createTheme } from '@mui/material';
 
+// Mock the useResponsive hook
+vi.mock('../contexts/ResponsiveContext', () => ({
+  ...vi.importActual('../contexts/ResponsiveContext'),
+  useResponsive: () => ({
+    viewport: {
+      isMobile: false,
+      isTablet: false,
+      isDesktop: true
+    },
+    shouldReduceAnimations: false,
+    shouldReduceImageQuality: false,
+    shouldReduceMotion: false,
+    network: {
+      online: true,
+      effectiveType: '4g'
+    }
+  })
+}));
+
 // Create a theme for testing
 const theme = createTheme();
 
-// Wrap component in ThemeProvider for testing
+// Wrap component in ThemeProvider and ResponsiveContextProvider for testing
 const renderWithTheme = (component: React.ReactElement) => {
   return render(
     <ThemeProvider theme={theme}>
-      {component}
+      <ResponsiveContextProvider>
+        {component}
+      </ResponsiveContextProvider>
     </ThemeProvider>
   );
 };

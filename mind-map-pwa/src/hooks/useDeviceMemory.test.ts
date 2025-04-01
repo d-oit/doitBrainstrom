@@ -1,5 +1,5 @@
 // src/hooks/useDeviceMemory.test.ts
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useDeviceMemory } from './useDeviceMemory';
 import { describe, it, expect, afterEach } from 'vitest';
 

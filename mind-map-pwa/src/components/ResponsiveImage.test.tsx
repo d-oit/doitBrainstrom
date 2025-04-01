@@ -2,8 +2,14 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import ResponsiveImage from './ResponsiveImage';
-import { ResponsiveContextProvider } from '../contexts/ResponsiveContext';
+import { ResponsiveContextProvider, useResponsive } from '../contexts/ResponsiveContext';
 import { vi, describe, it, expect } from 'vitest';
+
+// Mock the useResponsive hook
+vi.mock('../contexts/ResponsiveContext', () => ({
+  ...vi.importActual('../contexts/ResponsiveContext'),
+  useResponsive: vi.fn()
+}));
 
 // Mock Material UI components
 vi.mock('@mui/material', () => ({

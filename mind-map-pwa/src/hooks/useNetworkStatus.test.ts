@@ -1,5 +1,5 @@
 // src/hooks/useNetworkStatus.test.ts
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useNetworkStatus } from './useNetworkStatus';
 import { vi, describe, it, expect, afterEach } from 'vitest';
 

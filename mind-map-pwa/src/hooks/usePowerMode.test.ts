@@ -1,5 +1,5 @@
 // src/hooks/usePowerMode.test.ts
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { usePowerMode } from './usePowerMode';
 import { vi, describe, it, expect, afterEach } from 'vitest';
 
