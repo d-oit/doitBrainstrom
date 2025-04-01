@@ -8,13 +8,33 @@ import {
   getMindMap
 } from '../utils/indexedDB/dbService';
 import { logInfo, logError, logWarn } from '../utils/logger';
-import { StorageError, SyncError } from '../utils/errorHandler';
+import { StorageError } from '../utils/errorHandler';
 
 // Define variables outside the conditional block
 let s3: any = null;
 let BUCKET_NAME = '';
 const MIND_MAP_KEY = 'mind-map-data.json';
 let isS3Initialized = false;
+
+// Define specific S3 error types
+export enum S3ErrorType {
+  ACCESS_DENIED = 'ACCESS_DENIED',
+  NOT_CONFIGURED = 'NOT_CONFIGURED',
+  INITIALIZATION_FAILED = 'INITIALIZATION_FAILED',
+  NETWORK_ERROR = 'NETWORK_ERROR'
+}
+
+// Define interfaces for return types
+export interface MindMapInitResult {
+  data: MindMapData;
+  source: 's3' | 'indexeddb' | 'new';
+  error: S3ErrorType | null;
+}
+
+export interface SaveResult {
+  success: boolean;
+  error: S3ErrorType | null;
+}
 
 // Check if S3 is configured
 const isS3Configured = () => {
@@ -48,11 +68,11 @@ const initializeS3 = async () => {
       accessKeyId: S3_ACCESS_KEY_ID,
       secretAccessKey: S3_SECRET_ACCESS_KEY,
       signatureVersion: 'v4',
-      s3ForcePathStyle: true, // Needed for non-AWS S3 endpoints
-      region: 'us-east-1', // Default region
+      s3ForcePathStyle: true,
+      region: 'us-east-1'
     });
 
-    // Test the connection by listing buckets
+    // Test the connection by checking bucket access
     try {
       await s3.headBucket({ Bucket: BUCKET_NAME }).promise();
       isS3Initialized = true;
@@ -83,11 +103,13 @@ const checkS3Available = async () => {
 };
 
 // Save mind map data to S3
-export const saveMindMapToS3 = async (mindMapData: MindMapData): Promise<boolean> => {
+export const saveMindMapToS3 = async (mindMapData: MindMapData): Promise<SaveResult> => {
   const isAvailable = await checkS3Available();
   if (!isAvailable) {
-    logWarn('S3 is not configured or initialization failed');
-    return false;
+    return {
+      success: false,
+      error: S3ErrorType.NOT_CONFIGURED
+    };
   }
 
   try {
@@ -102,62 +124,19 @@ export const saveMindMapToS3 = async (mindMapData: MindMapData): Promise<boolean
 
     await s3.putObject(params).promise();
     logInfo('Mind map data saved to S3 successfully');
-    return true;
+    return {
+      success: true,
+      error: null
+    };
   } catch (error) {
     const errorMessage = 'Error saving mind map data to S3';
     logError(errorMessage, error);
-    return false;
-  }
-};
-
-// Load mind map data from S3
-export const loadMindMapFromS3 = async (): Promise<MindMapData | null> => {
-  const isAvailable = await checkS3Available();
-  if (!isAvailable) {
-    logWarn('S3 is not configured or initialization failed');
-    return null;
-  }
-
-  try {
-    logInfo('Loading mind map data from S3...');
-
-    const params = {
-      Bucket: BUCKET_NAME,
-      Key: MIND_MAP_KEY
+    return {
+      success: false,
+      error: (error as any).code === 'AccessDenied' ? S3ErrorType.ACCESS_DENIED : S3ErrorType.NETWORK_ERROR
     };
-
-    const response = await s3.getObject(params).promise();
-
-    if (response.Body) {
-      try {
-        const data = JSON.parse(response.Body.toString()) as MindMapData;
-        logInfo('Mind map data loaded from S3 successfully');
-        return data;
-      } catch (parseError) {
-        const errorMessage = 'Error parsing mind map data from S3';
-        logError(errorMessage, parseError);
-        return null;
-      }
-    }
-
-    logWarn('No mind map data found in S3');
-    return null;
-  } catch (error) {
-    if (error && (error as any).code === 'NoSuchKey') {
-      logInfo('No mind map file exists in S3 yet');
-      return null;
-    }
-
-    const errorMessage = 'Error loading mind map data from S3';
-    logError(errorMessage, error);
-    return null;
   }
 };
-
-export interface MindMapInitResult {
-  data: MindMapData;
-  source: 's3' | 'indexeddb' | 'new';
-}
 
 // Initialize mind map data (from S3 or IndexedDB)
 export const initializeMindMapData = async (defaultId: string = 'default'): Promise<MindMapInitResult> => {
@@ -168,11 +147,16 @@ export const initializeMindMapData = async (defaultId: string = 'default'): Prom
     const isAvailable = await checkS3Available();
     if (isAvailable) {
       try {
-        const s3Data = await loadMindMapFromS3();
+        const params = {
+          Bucket: BUCKET_NAME,
+          Key: MIND_MAP_KEY
+        };
 
-        if (s3Data) {
+        const response = await s3.getObject(params).promise();
+        if (response.Body) {
+          const s3Data = JSON.parse(response.Body.toString()) as MindMapData;
           logInfo('Using data from S3');
-          // If S3 data exists, save it to IndexedDB and return it
+
           try {
             await saveMindMap({
               id: defaultId,
@@ -186,11 +170,18 @@ export const initializeMindMapData = async (defaultId: string = 'default'): Prom
 
           return {
             data: s3Data,
-            source: 's3'
+            source: 's3',
+            error: null
           };
         }
       } catch (s3Error) {
-        logWarn('Failed to load data from S3, falling back to local storage', s3Error);
+        if ((s3Error as any).code === 'AccessDenied') {
+          return {
+            data: { nodes: [], links: [] },
+            source: 'new',
+            error: S3ErrorType.ACCESS_DENIED
+          };
+        }
       }
     }
 
@@ -202,7 +193,8 @@ export const initializeMindMapData = async (defaultId: string = 'default'): Prom
         logInfo('Using data from IndexedDB');
         return {
           data: localData.data,
-          source: 'indexeddb'
+          source: 'indexeddb',
+          error: null
         };
       }
     } catch (dbError) {
@@ -216,7 +208,6 @@ export const initializeMindMapData = async (defaultId: string = 'default'): Prom
       links: []
     };
 
-    // Save the empty mind map to IndexedDB
     try {
       await saveMindMap({
         id: defaultId,
@@ -230,24 +221,15 @@ export const initializeMindMapData = async (defaultId: string = 'default'): Prom
 
     return {
       data: emptyMindMap,
-      source: 'new'
+      source: 'new',
+      error: null
     };
   } catch (error) {
-    const errorMessage = 'Error initializing mind map data';
-    logError(errorMessage, error);
-
-    if (window.ErrorNotificationContext?.showError) {
-      window.ErrorNotificationContext.showError(
-        'Failed to initialize mind map data. Using empty map.'
-      );
-    }
-
+    logError('Error initializing mind map data:', error);
     return {
-      data: {
-        nodes: [],
-        links: []
-      },
-      source: 'new'
+      data: { nodes: [], links: [] },
+      source: 'new',
+      error: S3ErrorType.NETWORK_ERROR
     };
   }
 };
@@ -256,7 +238,7 @@ export const initializeMindMapData = async (defaultId: string = 'default'): Prom
 export const saveMindMapLocally = async (
   mindMapData: MindMapData,
   id: string = 'default'
-): Promise<boolean> => {
+): Promise<SaveResult> => {
   try {
     logInfo('Saving mind map data locally...');
 
@@ -275,8 +257,8 @@ export const saveMindMapLocally = async (
       // Try to sync immediately if online and S3 is available
       if (isAvailable && navigator.onLine) {
         try {
-          const success = await saveMindMapToS3(mindMapData);
-          if (success) {
+          const result = await saveMindMapToS3(mindMapData);
+          if (result.success) {
             // Update synced status in IndexedDB
             await saveMindMap({
               id,
@@ -285,26 +267,29 @@ export const saveMindMapLocally = async (
               synced: true
             });
           }
+          return result;
         } catch (syncError) {
           logError('Failed to sync with S3:', syncError);
+          return {
+            success: false,
+            error: S3ErrorType.NETWORK_ERROR
+          };
         }
       }
 
-      return true;
+      return {
+        success: true,
+        error: null
+      };
     } catch (dbError) {
       logError('Error saving to IndexedDB:', dbError);
       throw new StorageError('Failed to save mind map to IndexedDB', dbError as Error);
     }
   } catch (error) {
-    const errorMessage = 'Error saving mind map locally';
-    logError(errorMessage, error);
-
-    if (window.ErrorNotificationContext?.showError) {
-      window.ErrorNotificationContext.showError(
-        'Failed to save your changes. Please try again.'
-      );
-    }
-
-    return false;
+    logError('Error saving mind map locally:', error);
+    return {
+      success: false,
+      error: S3ErrorType.NETWORK_ERROR
+    };
   }
 };

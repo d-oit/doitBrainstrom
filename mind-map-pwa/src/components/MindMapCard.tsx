@@ -1,6 +1,7 @@
 // src/components/MindMapCard.tsx
 import React, { memo } from 'react';
-import { Card, CardContent, Typography, useTheme, useMediaQuery } from '@mui/material';
+import { Card, CardContent, Typography, useTheme } from '@mui/material';
+import { useResponsive } from '../contexts/ResponsiveContext';
 import '../styles/responsive.css';
 
 interface MindMapCardProps {
@@ -17,35 +18,41 @@ const MindMapCard: React.FC<MindMapCardProps> = ({
   draggable = false
 }) => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
+  const { viewport, shouldReduceAnimations } = useResponsive();
+  const { isMobile, isTablet } = viewport;
 
   return (
     <Card
       className="mind-map-card"
       sx={{
-        minWidth: isMobile ? 150 : isTablet ? 180 : 200,
-        maxWidth: isMobile ? 200 : isTablet ? 250 : 300,
+        minWidth: { xs: 150, sm: 180, md: 200 },
+        maxWidth: { xs: 200, sm: 250, md: 300 },
         cursor: onClick ? 'pointer' : 'default',
         userSelect: 'none',
-        transition: 'all 0.2s ease-in-out',
+        transition: shouldReduceAnimations ? 'none' : 'all 0.2s ease-in-out',
         '&:hover': {
-          transform: 'scale(1.02)',
+          transform: shouldReduceAnimations ? 'none' : 'scale(1.02)',
           boxShadow: 3
         },
         '& .MuiCardContent-root': {
-          padding: isMobile ? '12px' : '16px'
-        }
+          padding: { xs: '12px', sm: '16px' }
+        },
+        // Touch-friendly tap target
+        minHeight: { xs: '80px', sm: '100px' }
       }}
       onClick={onClick}
       draggable={draggable}
+      // Improve accessibility
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      aria-label={onClick ? `Select ${title}` : undefined}
     >
       <CardContent>
         <Typography
           variant="h5"
           component="div"
           sx={{
-            fontSize: isMobile ? '16px' : isTablet ? '18px' : '20px',
+            fontSize: { xs: '16px', sm: '18px', md: '20px' },
             fontWeight: 'medium',
             wordBreak: 'break-word'
           }}
@@ -58,7 +65,7 @@ const MindMapCard: React.FC<MindMapCardProps> = ({
             color="text.secondary"
             sx={{
               mt: 1,
-              fontSize: isMobile ? '12px' : '14px',
+              fontSize: { xs: '12px', sm: '14px' },
               wordBreak: 'break-word'
             }}
           >

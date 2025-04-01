@@ -1,7 +1,6 @@
 // src/hooks/useViewportAdaptation.ts
 import { useState, useEffect } from 'react';
-
-export type Breakpoint = 'mobile' | 'tablet' | 'desktop';
+import { Breakpoint, breakpoints } from '../styles/breakpoints';
 
 export interface ViewportConfig {
   breakpoint: Breakpoint;
@@ -11,6 +10,12 @@ export interface ViewportConfig {
   isLandscape: boolean;
   isPortrait: boolean;
   pixelRatio: number;
+  safeAreaInsets: {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+  };
 }
 
 /**
@@ -19,13 +24,19 @@ export interface ViewportConfig {
  */
 export const useViewportAdaptation = (): ViewportConfig => {
   const [config, setConfig] = useState<ViewportConfig>({
-    breakpoint: 'desktop',
+    breakpoint: 'xl',
     isMobile: false,
     isTablet: false,
     isDesktop: true,
     isLandscape: true,
     isPortrait: false,
-    pixelRatio: window.devicePixelRatio || 1
+    pixelRatio: window.devicePixelRatio || 1,
+    safeAreaInsets: {
+      top: 0,
+      right: 0,
+      bottom: 0,
+      left: 0
+    }
   });
 
   useEffect(() => {
@@ -34,24 +45,36 @@ export const useViewportAdaptation = (): ViewportConfig => {
       const height = window.innerHeight;
       const isLandscape = width > height;
       const pixelRatio = window.devicePixelRatio || 1;
-      
-      let breakpoint: Breakpoint;
-      if (width >= 1440) {
-        breakpoint = 'desktop';
-      } else if (width >= 768) {
-        breakpoint = 'tablet';
-      } else {
-        breakpoint = 'mobile';
+
+      // Determine breakpoint based on Material UI v6 breakpoints
+      let breakpoint: Breakpoint = 'xs';
+      if (width >= breakpoints.xl) {
+        breakpoint = 'xl';
+      } else if (width >= breakpoints.lg) {
+        breakpoint = 'lg';
+      } else if (width >= breakpoints.md) {
+        breakpoint = 'md';
+      } else if (width >= breakpoints.sm) {
+        breakpoint = 'sm';
       }
+
+      // Get safe area insets if available (for notches, etc.)
+      const safeAreaInsets = {
+        top: parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sat') || '0', 10),
+        right: parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sar') || '0', 10),
+        bottom: parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sab') || '0', 10),
+        left: parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sal') || '0', 10)
+      };
 
       setConfig({
         breakpoint,
-        isMobile: breakpoint === 'mobile',
-        isTablet: breakpoint === 'tablet',
-        isDesktop: breakpoint === 'desktop',
+        isMobile: breakpoint === 'xs' || breakpoint === 'sm',
+        isTablet: breakpoint === 'md',
+        isDesktop: breakpoint === 'lg' || breakpoint === 'xl',
         isLandscape,
         isPortrait: !isLandscape,
-        pixelRatio
+        pixelRatio,
+        safeAreaInsets
       });
     };
 

@@ -1,7 +1,8 @@
 // src/contexts/MindMapContext.tsx
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
-import { initializeMindMapData, saveMindMapLocally } from '../services/s3SyncService';
+import { initializeMindMapData, saveMindMapLocally, S3ErrorType } from '../services/s3SyncService';
 import { MindMapData, MindMapNode, MindMapLink, generateId } from '../utils/MindMapDataModel';
+import { S3Error } from '../utils/errorHandler';
 
 interface MindMapContextProps {
   mindMapData: MindMapData;
@@ -30,16 +31,44 @@ export const MindMapContextProvider: React.FC<{ children: React.ReactNode }> = (
       setIsLoading(true);
       try {
         const result = await initializeMindMapData();
+
+        if (result.error) {
+          setSyncStatus('error');
+          let errorMessage = 'Error connecting to S3. Changes will be saved locally.';
+          
+          switch (result.error) {
+            case S3ErrorType.ACCESS_DENIED:
+              errorMessage = 'Access denied to S3 storage. Check your permissions.';
+              break;
+            case S3ErrorType.NOT_CONFIGURED:
+              errorMessage = 'S3 storage is not configured. Using local storage.';
+              setSyncStatus('idle'); // Not an error, just using local storage
+              break;
+            case S3ErrorType.NETWORK_ERROR:
+              errorMessage = 'Network error connecting to S3. Using local storage.';
+              break;
+          }
+          
+          if (window.ErrorNotificationContext?.showError) {
+            window.ErrorNotificationContext.showError(errorMessage);
+          }
+          
+          if (window.ErrorNotificationContext?.showError) {
+            window.ErrorNotificationContext.showError(errorMessage);
+          }
+          return;
+        }
+        
         setMindMapData(result.data);
         // Only set success if data came from S3
         setSyncStatus(result.source === 's3' ? 'success' : 'idle');
       } catch (error) {
         console.error('Error loading mind map data:', error);
         setSyncStatus('error');
-        // Show error in ErrorNotificationContext
+        
         if (window.ErrorNotificationContext?.showError) {
           window.ErrorNotificationContext.showError(
-            'Error connecting to S3. Changes will be saved locally.'
+            'Failed to load mind map data. Using empty map.'
           );
         }
       } finally {
@@ -64,7 +93,15 @@ export const MindMapContextProvider: React.FC<{ children: React.ReactNode }> = (
     if (navigator.onLine) {
       setSyncStatus('syncing');
       try {
-        const success = await saveMindMapLocally(mindMapData);
+        const { success, error } = await saveMindMapLocally(mindMapData);
+        
+        if (error === S3ErrorType.ACCESS_DENIED) {
+          if (window.ErrorNotificationContext?.showError) {
+            window.ErrorNotificationContext.showError(
+              'Access denied to S3 storage. Changes saved locally only.'
+            );
+          }
+        }
         setSyncStatus(success ? 'success' : 'error');
         return success;
       } catch (error) {

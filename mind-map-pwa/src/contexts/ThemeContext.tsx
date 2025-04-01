@@ -1,7 +1,8 @@
 // src/contexts/ThemeContext.tsx
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { ThemeProvider } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
+import themes, { lightTheme, darkTheme, getSystemTheme } from '../styles/theme';
 
 type ThemeMode = 'light' | 'dark' | 'system';
 
@@ -27,21 +28,16 @@ export const ThemeContextProvider: React.FC<{ children: React.ReactNode }> = ({ 
   }, [mode]);
 
   const getTheme = (mode: ThemeMode) => {
-    let themeMode: 'light' | 'dark' = 'light';
-    if (mode === 'dark') {
-      themeMode = 'dark';
-    } else if (mode === 'system') {
-      const prefersDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-      themeMode = prefersDarkMode ? 'dark' : 'light';
-    } else {
-      themeMode = 'light';
+    switch (mode) {
+      case 'dark':
+        return darkTheme;
+      case 'light':
+        return lightTheme;
+      case 'system':
+        return getSystemTheme();
+      default:
+        return lightTheme;
     }
-
-    return createTheme({
-      palette: {
-        mode: themeMode,
-      },
-    });
   };
 
   const theme = getTheme(mode);

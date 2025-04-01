@@ -1,0 +1,55 @@
+/* Safe area insets for modern devices with notches, etc. */
+:root {
+  --sat: env(safe-area-inset-top, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+}
+
+/* Apply safe area padding to main container */
+.safe-area-padding {
+  padding-top: var(--sat);
+  padding-right: var(--sar);
+  padding-bottom: var(--sab);
+  padding-left: var(--sal);
+}
+
+/* Apply safe area margin to elements */
+.safe-area-margin {
+  margin-top: var(--sat);
+  margin-right: var(--sar);
+  margin-bottom: var(--sab);
+  margin-left: var(--sal);
+}
+
+/* Apply safe area insets to fixed position elements */
+.fixed-bottom {
+  position: fixed;
+  bottom: 0;
+  bottom: calc(0px + var(--sab));
+  width: 100%;
+}
+
+.fixed-top {
+  position: fixed;
+  top: 0;
+  top: calc(0px + var(--sat));
+  width: 100%;
+}
+
+/* Utility classes for specific inset applications */
+.safe-area-top {
+  padding-top: var(--sat);
+}
+
+.safe-area-right {
+  padding-right: var(--sar);
+}
+
+.safe-area-bottom {
+  padding-bottom: var(--sab);
+}
+
+.safe-area-left {
+  padding-left: var(--sal);
+}
