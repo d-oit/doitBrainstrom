@@ -52,7 +52,7 @@ vi.mock('./components/MindMapCard', () => ({
 // Mock the S3 service
 const mockListBuckets = vi.fn();
 // Default to successful response
-mockListBuckets.mockResolvedValue([{ Name: 'test-bucket' }]);
+mockListBuckets.mockResolvedValue({ buckets: [{ Name: 'test-bucket' }], error: null });
 
 vi.mock('./services/s3Service', () => ({
   listBuckets: mockListBuckets
@@ -70,6 +70,7 @@ const MockI18nProvider = ({ children }: { children: React.ReactNode }) => {
       's3.connectionTest': 'S3 Connection Test',
       's3.connectionSuccess': 'Successfully connected to S3',
       's3.connectionError': 'Failed to connect to S3',
+      's3.noBuckets': 'No buckets found',
       's3.availableBuckets': 'Available Buckets',
       'mindMap.mainIdea': 'Main Idea',
       'mindMap.mainIdeaDesc': 'Central concept of your mind map',
@@ -129,7 +130,7 @@ describe('App Integration', () => {
     // Setup user event
     const user = userEvent.setup();
     // Mock successful S3 connection
-    mockListBuckets.mockResolvedValue([{ Name: 'test-bucket' }]);
+    mockListBuckets.mockResolvedValue({ buckets: [{ Name: 'test-bucket' }], error: null });
 
     render(
       <MockI18nProvider>
@@ -148,11 +149,34 @@ describe('App Integration', () => {
     expect(screen.getByText('test-bucket')).toBeInTheDocument();
   });
 
-  it('shows error message when S3 connection fails', async () => {
+  it('shows error message when S3 connection returns no buckets', async () => {
     // Setup user event
     const user = userEvent.setup();
     // Mock failed S3 connection (empty array)
-    mockListBuckets.mockResolvedValue([]);
+    mockListBuckets.mockResolvedValue({ buckets: [], error: null });
+
+    render(
+      <MockI18nProvider>
+        <App />
+      </MockI18nProvider>
+    );
+
+    // Click on S3 Connection tab
+    const s3Tab = screen.getByRole('tab', { name: /S3 Connection/i });
+    // Use userEvent to simulate a click
+    await user.click(s3Tab);
+
+    // Error message should be displayed
+    expect(await screen.findByText('No buckets found')).toBeInTheDocument();
+    // Success message should not be displayed
+    expect(screen.queryByText('Successfully connected to S3')).not.toBeInTheDocument();
+  });
+
+  it('shows error message when S3 connection returns an error object', async () => {
+    // Setup user event
+    const user = userEvent.setup();
+    // Mock S3 connection that returns an error
+    mockListBuckets.mockResolvedValue({ buckets: [], error: 'Connection error' });
 
     render(
       <MockI18nProvider>
@@ -171,10 +195,10 @@ describe('App Integration', () => {
     expect(screen.queryByText('Successfully connected to S3')).not.toBeInTheDocument();
   });
 
-  it('shows error message when S3 connection throws an error', async () => {
+  it('shows error message when S3 connection throws an exception', async () => {
     // Setup user event
     const user = userEvent.setup();
-    // Mock S3 connection that throws an error
+    // Mock S3 connection that throws an exception
     mockListBuckets.mockRejectedValue(new Error('Connection error'));
 
     render(

@@ -44,14 +44,22 @@ function App() {
   useEffect(() => {
     const fetchBuckets = async () => {
       try {
-        const bucketsData = await listBuckets()
+        const result = await listBuckets()
+
+        // Check if there was an error
+        if (result.error) {
+          setBuckets(null)
+          setError(t('s3.connectionError'))
+          return
+        }
+
         // Only set buckets if the array has items, otherwise show error
-        if (bucketsData && bucketsData.length > 0) {
-          setBuckets(bucketsData)
+        if (result.buckets && result.buckets.length > 0) {
+          setBuckets(result.buckets)
           setError(null) // Clear any previous errors
         } else {
           setBuckets(null)
-          setError(t('s3.connectionError'))
+          setError(t('s3.noBuckets'))
         }
       } catch (err) {
         setBuckets(null)

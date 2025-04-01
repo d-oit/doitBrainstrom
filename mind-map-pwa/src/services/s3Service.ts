@@ -58,26 +58,26 @@ const checkS3Available = () => {
 
 export const listBuckets = async () => { // Example function to test connection
   if (!checkS3Available()) {
-    // Return empty array when S3 is not available
-    return [];
+    // Return special error object when S3 is not available
+    return { error: 'S3 is not configured or initialization failed', buckets: [] };
   }
 
   try {
     const response = await s3.listBuckets().promise();
     logInfo("S3 Buckets:", response.Buckets);
-    return response.Buckets || []; // Ensure we always return an array
+    return { buckets: response.Buckets || [], error: null }; // Ensure we always return an array
   } catch (error) {
     const errorMessage = "Error connecting to S3";
     logError(errorMessage, error);
-    // Return empty array instead of throwing to make S3 truly optional
-    return [];
+    // Return error object with empty buckets array
+    return { error: errorMessage, buckets: [] };
   }
 };
 
 export const getBucketContents = async (bucketName: string) => {
   if (!checkS3Available()) {
-    // Return empty array when S3 is not available
-    return [];
+    // Return special error object when S3 is not available
+    return { error: 'S3 is not configured or initialization failed', contents: [] };
   }
 
   try {
@@ -85,11 +85,11 @@ export const getBucketContents = async (bucketName: string) => {
       Bucket: bucketName || S3_BUCKET_NAME
     }).promise();
     logInfo("Bucket contents:", response.Contents);
-    return response.Contents || []; // Ensure we always return an array
+    return { contents: response.Contents || [], error: null }; // Ensure we always return an array
   } catch (error) {
     const errorMessage = "Error getting bucket contents";
     logError(errorMessage, error);
-    // Return empty array instead of throwing to make S3 truly optional
-    return [];
+    // Return error object with empty contents array
+    return { error: errorMessage, contents: [] };
   }
 };

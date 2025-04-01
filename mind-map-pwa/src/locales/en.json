@@ -21,6 +21,7 @@
   "s3": {
     "connectionTest": "S3 Connection Test",
     "connectionError": "Failed to connect to S3. Please check your credentials.",
+    "noBuckets": "No buckets found in your S3 account.",
     "connectionSuccess": "Successfully connected to S3!",
     "availableBuckets": "Available Buckets:"
   },
