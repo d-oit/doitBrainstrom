@@ -83,7 +83,12 @@ describe('useFoldableDisplay', () => {
   });
 
   it('should detect fold angle', () => {
+    // Set up the mock with a specific fold angle
     mockFoldableDisplay(true, true, 'horizontal', 130);
+
+    // Force the hook to use the foldableDevice API by removing getWindowSegments
+    delete (window as any).getWindowSegments;
+
     const { result } = renderHook(() => useFoldableDisplay());
 
     expect(result.current.foldAngle).toBe(130);

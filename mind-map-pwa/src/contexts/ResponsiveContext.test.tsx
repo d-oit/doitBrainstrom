@@ -97,7 +97,7 @@ describe('ResponsiveContext', () => {
   it('should throw error when used outside provider', () => {
     // Suppress console.error for this test
     const originalError = console.error;
-    console.error = jest.fn();
+    console.error = vi.fn();
 
     expect(() => {
       render(<TestComponent />);

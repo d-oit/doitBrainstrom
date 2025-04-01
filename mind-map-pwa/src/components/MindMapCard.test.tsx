@@ -10,7 +10,8 @@ vi.mock('@mui/material', () => ({
   useTheme: () => ({
     breakpoints: {
       up: () => false,
-      down: () => false
+      down: () => false,
+      between: () => false
     }
   }),
   useMediaQuery: () => false,

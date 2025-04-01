@@ -6,11 +6,12 @@ import { ResponsiveContextProvider } from '../contexts/ResponsiveContext';
 import { vi, describe, it, expect } from 'vitest';
 
 // Mock the useResponsive hook
-vi.mock('../contexts/ResponsiveContext', () => {
-  const originalModule = vi.importActual('../contexts/ResponsiveContext');
+vi.mock('../contexts/ResponsiveContext', async () => {
+  const actual = await vi.importActual('../contexts/ResponsiveContext');
 
   return {
-    ...originalModule,
+    ...actual,
+    ResponsiveContextProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
     useResponsive: vi.fn().mockReturnValue({
       shouldVirtualizeList: true,
       viewport: {
@@ -50,10 +51,11 @@ describe('VirtualizedList', () => {
     expect(screen.queryByTestId('item-Item 10')).not.toBeInTheDocument();
   });
 
-  it('renders all items when virtualization is disabled', () => {
+  it('renders all items when virtualization is disabled', async () => {
     // Override the mock to disable virtualization
     // Import at the top level instead of using require
-    useResponsive.mockImplementation(() => ({
+    const { useResponsive } = await import('../contexts/ResponsiveContext');
+    vi.mocked(useResponsive).mockImplementation(() => ({
       shouldVirtualizeList: false,
       viewport: {
         breakpoint: 'desktop',

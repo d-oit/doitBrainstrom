@@ -1,5 +1,33 @@
 # Project Status
 
+## Test Fixes
+
+### 2025-04-02: Fixed Test Mocking Issues
+
+**Issues:**
+1. Missing Divider component in Material UI mock in Layout.accessibility.test.tsx
+2. Missing theme.breakpoints.between function in MindMapCard.test.tsx
+3. Missing ResponsiveContextProvider export in ResponsiveImage.test.tsx and VirtualizedList.test.tsx
+4. Incorrect useResponsive mock implementation in ResponsiveImage.test.tsx and VirtualizedList.test.tsx
+5. Failing useFoldableDisplay.test.ts for fold angle detection
+6. Using jest.fn() instead of vi.fn() in ResponsiveContext.test.tsx
+
+**Changes:**
+1. Added Divider component to Material UI mock in Layout.accessibility.test.tsx
+2. Added between function to theme.breakpoints mock in MindMapCard.test.tsx
+3. Updated ResponsiveContext mock to properly export ResponsiveContextProvider
+4. Fixed useResponsive mock implementation to use proper import and mocking
+5. Modified the test for detecting fold angle to ensure it uses the foldableDevice API
+6. Replaced jest.fn() with vi.fn() in ResponsiveContext.test.tsx
+
+**Files Modified:**
+- src/components/Layout.accessibility.test.tsx
+- src/components/MindMapCard.test.tsx
+- src/components/ResponsiveImage.test.tsx
+- src/components/VirtualizedList.test.tsx
+- src/hooks/useFoldableDisplay.test.ts
+- src/contexts/ResponsiveContext.test.tsx
+
 ## Bug Fixes
 
 ### 2025-04-01: Fixed Multiple UI and Functionality Issues

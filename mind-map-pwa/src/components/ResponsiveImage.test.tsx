@@ -6,11 +6,12 @@ import { ResponsiveContextProvider } from '../contexts/ResponsiveContext';
 import { vi, describe, it, expect } from 'vitest';
 
 // Mock the useResponsive hook
-vi.mock('../contexts/ResponsiveContext', () => {
-  const originalModule = vi.importActual('../contexts/ResponsiveContext');
+vi.mock('../contexts/ResponsiveContext', async () => {
+  const actual = await vi.importActual('../contexts/ResponsiveContext');
 
   return {
-    ...originalModule,
+    ...actual,
+    ResponsiveContextProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
     useResponsive: vi.fn().mockReturnValue({
       shouldReduceImageQuality: false,
       network: {
@@ -86,7 +87,8 @@ describe('ResponsiveImage', () => {
   it('uses low-res image when shouldReduceImageQuality is true', async () => {
     // Override the mock to enable image quality reduction
     // Import at the top level instead of using require
-    useResponsive.mockImplementationOnce(() => ({
+    const { useResponsive } = await import('../contexts/ResponsiveContext');
+    vi.mocked(useResponsive).mockImplementationOnce(() => ({
       shouldReduceImageQuality: true,
       network: {
         online: true,

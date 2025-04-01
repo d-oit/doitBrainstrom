@@ -36,7 +36,8 @@ vi.mock('@mui/material', () => ({
   Typography: ({ children, ...props }: any) => <div {...props}>{children}</div>,
   Container: ({ children, ...props }: any) => <div {...props}>{children}</div>,
   Box: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-  Stack: ({ children, ...props }: any) => <div {...props}>{children}</div>
+  Stack: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+  Divider: ({ children, ...props }: any) => <div {...props}>{children}</div>
 }), { virtual: true });
 
 // Mock the components used in Layout
