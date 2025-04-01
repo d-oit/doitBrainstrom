@@ -205,7 +205,7 @@ export const displayUserFriendlyError = (message: string): void => {
     console.error('User-friendly error:', message);
 
     // Optional: Show a simple alert if no UI component is available
-    // alert(message);
+    alert(message);
   }
 };
 
