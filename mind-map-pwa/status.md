@@ -11,6 +11,12 @@
 4. Incorrect useResponsive mock implementation in ResponsiveImage.test.tsx and VirtualizedList.test.tsx
 5. Failing useFoldableDisplay.test.ts for fold angle detection
 6. Using jest.fn() instead of vi.fn() in ResponsiveContext.test.tsx
+7. Missing ResponsiveContext mock in Layout.accessibility.test.tsx
+8. Issues with closest() method in MindMapCard.test.tsx
+9. Incorrect Skeleton mock in ResponsiveImage.test.tsx
+10. Incorrect mock implementation in VirtualizedList.test.tsx
+11. Hoisting issues with mockListBuckets in App.test.tsx
+12. Playwright tests being run by Vitest
 
 **Changes:**
 1. Added Divider component to Material UI mock in Layout.accessibility.test.tsx
@@ -19,6 +25,12 @@
 4. Fixed useResponsive mock implementation to use proper import and mocking
 5. Modified the test for detecting fold angle to ensure it uses the foldableDevice API
 6. Replaced jest.fn() with vi.fn() in ResponsiveContext.test.tsx
+7. Added complete ResponsiveContext mock to Layout.accessibility.test.tsx
+8. Fixed MindMapCard.test.tsx to use data-testid instead of closest()
+9. Added proper Skeleton mock with role="img" in ResponsiveImage.test.tsx
+10. Fixed VirtualizedList.test.tsx to use a complete mock implementation
+11. Moved mockListBuckets declaration before App import in App.test.tsx
+12. Excluded e2e directory from Vitest tests in vitest.config.ts
 
 **Files Modified:**
 - src/components/Layout.accessibility.test.tsx
@@ -27,6 +39,8 @@
 - src/components/VirtualizedList.test.tsx
 - src/hooks/useFoldableDisplay.test.ts
 - src/contexts/ResponsiveContext.test.tsx
+- src/App.test.tsx
+- vitest.config.ts
 
 ## Bug Fixes
 

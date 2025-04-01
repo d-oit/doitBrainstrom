@@ -1,6 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
+// Mock the S3 service - must be defined before importing App
+const mockListBuckets = vi.fn();
+// Default to successful response
+mockListBuckets.mockResolvedValue({ buckets: [{ Name: 'test-bucket' }], error: null });
+
+vi.mock('./services/s3Service', () => ({
+  listBuckets: mockListBuckets
+}), { virtual: true });
+
 import App from './App';
 import { I18nContext } from './contexts/I18nContext';
 
@@ -49,13 +59,50 @@ vi.mock('./components/MindMapCard', () => ({
   )
 }), { virtual: true });
 
-// Mock the S3 service
-const mockListBuckets = vi.fn();
-// Default to successful response
-mockListBuckets.mockResolvedValue({ buckets: [{ Name: 'test-bucket' }], error: null });
-
-vi.mock('./services/s3Service', () => ({
-  listBuckets: mockListBuckets
+// Mock ResponsiveContext
+vi.mock('./contexts/ResponsiveContext', () => ({
+  ResponsiveContextProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  useResponsive: () => ({
+    shouldVirtualizeList: false,
+    viewport: {
+      breakpoint: 'desktop',
+      isMobile: false,
+      isTablet: false,
+      isDesktop: true,
+      isLandscape: true,
+      isPortrait: false,
+      pixelRatio: 1
+    },
+    network: {
+      online: true,
+      connectionType: 'wifi',
+      effectiveType: '4g',
+      downlink: 10,
+      rtt: 50,
+      saveData: false
+    },
+    memory: {
+      deviceMemory: 8,
+      lowMemoryMode: false
+    },
+    power: {
+      isLowPowerMode: false,
+      batteryLevel: 0.8,
+      batteryCharging: true,
+      reducedMotion: false
+    },
+    foldable: {
+      isFoldable: false,
+      isSpanned: false,
+      foldSize: null,
+      foldAngle: null,
+      spanDirection: null,
+      screenSegments: null
+    },
+    shouldReduceAnimations: false,
+    shouldReduceImageQuality: false,
+    shouldUseOfflineFirst: false
+  })
 }), { virtual: true });
 
 // Create a mock I18n provider

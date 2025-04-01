@@ -5,32 +5,57 @@ import ResponsiveImage from './ResponsiveImage';
 import { ResponsiveContextProvider } from '../contexts/ResponsiveContext';
 import { vi, describe, it, expect } from 'vitest';
 
-// Mock the useResponsive hook
-vi.mock('../contexts/ResponsiveContext', async () => {
-  const actual = await vi.importActual('../contexts/ResponsiveContext');
+// Mock Material UI components
+vi.mock('@mui/material', () => ({
+  Skeleton: ({ children, ...props }: any) => <span data-testid="skeleton" role="img" aria-hidden="true" {...props}>{children}</span>,
+  Box: ({ children, ...props }: any) => <div {...props}>{children}</div>
+}), { virtual: true });
 
-  return {
-    ...actual,
-    ResponsiveContextProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-    useResponsive: vi.fn().mockReturnValue({
-      shouldReduceImageQuality: false,
-      network: {
-        online: true,
-        connectionType: 'wifi',
-        effectiveType: '4g',
-        downlink: 10,
-        rtt: 50,
-        saveData: false
-      },
-      power: {
-        isLowPowerMode: false,
-        batteryLevel: 0.8,
-        batteryCharging: true,
-        reducedMotion: false
-      }
-    })
-  };
-});
+// Mock the useResponsive hook
+vi.mock('../contexts/ResponsiveContext', () => ({
+  ResponsiveContextProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  useResponsive: () => ({
+    shouldReduceImageQuality: false,
+    network: {
+      online: true,
+      connectionType: 'wifi',
+      effectiveType: '4g',
+      downlink: 10,
+      rtt: 50,
+      saveData: false
+    },
+    power: {
+      isLowPowerMode: false,
+      batteryLevel: 0.8,
+      batteryCharging: true,
+      reducedMotion: false
+    },
+    viewport: {
+      breakpoint: 'desktop',
+      isMobile: false,
+      isTablet: false,
+      isDesktop: true,
+      isLandscape: true,
+      isPortrait: false,
+      pixelRatio: 1
+    },
+    memory: {
+      deviceMemory: 8,
+      lowMemoryMode: false
+    },
+    foldable: {
+      isFoldable: false,
+      isSpanned: false,
+      foldSize: null,
+      foldAngle: null,
+      spanDirection: null,
+      screenSegments: null
+    },
+    shouldReduceAnimations: false,
+    shouldVirtualizeList: false,
+    shouldUseOfflineFirst: false
+  })
+}), { virtual: true });
 
 // Mock Image implementation
 class MockImage {
@@ -86,25 +111,50 @@ describe('ResponsiveImage', () => {
 
   it('uses low-res image when shouldReduceImageQuality is true', async () => {
     // Override the mock to enable image quality reduction
-    // Import at the top level instead of using require
-    const { useResponsive } = await import('../contexts/ResponsiveContext');
-    vi.mocked(useResponsive).mockImplementationOnce(() => ({
-      shouldReduceImageQuality: true,
-      network: {
-        online: true,
-        connectionType: 'cellular',
-        effectiveType: '3g',
-        downlink: 1.5,
-        rtt: 150,
-        saveData: true
-      },
-      power: {
-        isLowPowerMode: false,
-        batteryLevel: 0.8,
-        batteryCharging: true,
-        reducedMotion: false
-      }
-    }));
+    vi.mock('../contexts/ResponsiveContext', () => ({
+      ResponsiveContextProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+      useResponsive: () => ({
+        shouldReduceImageQuality: true,
+        network: {
+          online: true,
+          connectionType: 'cellular',
+          effectiveType: '3g',
+          downlink: 1.5,
+          rtt: 150,
+          saveData: true
+        },
+        power: {
+          isLowPowerMode: false,
+          batteryLevel: 0.8,
+          batteryCharging: true,
+          reducedMotion: false
+        },
+        viewport: {
+          breakpoint: 'mobile',
+          isMobile: true,
+          isTablet: false,
+          isDesktop: false,
+          isLandscape: false,
+          isPortrait: true,
+          pixelRatio: 2
+        },
+        memory: {
+          deviceMemory: 4,
+          lowMemoryMode: false
+        },
+        foldable: {
+          isFoldable: false,
+          isSpanned: false,
+          foldSize: null,
+          foldAngle: null,
+          spanDirection: null,
+          screenSegments: null
+        },
+        shouldReduceAnimations: false,
+        shouldVirtualizeList: true,
+        shouldUseOfflineFirst: true
+      })
+    }), { virtual: true });
 
     render(
       <ResponsiveContextProvider>

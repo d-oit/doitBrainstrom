@@ -27,6 +27,51 @@ vi.mock('../contexts/I18nContext', () => ({
   })
 }), { virtual: true });
 
+// Mock ResponsiveContext
+vi.mock('../contexts/ResponsiveContext', () => ({
+  useResponsive: () => ({
+    network: {
+      online: true,
+      connectionType: 'wifi',
+      effectiveType: '4g',
+      downlink: 10,
+      rtt: 50,
+      saveData: false
+    },
+    viewport: {
+      breakpoint: 'desktop',
+      isMobile: false,
+      isTablet: false,
+      isDesktop: true,
+      isLandscape: true,
+      isPortrait: false,
+      pixelRatio: 1
+    },
+    memory: {
+      deviceMemory: 8,
+      lowMemoryMode: false
+    },
+    foldable: {
+      isFoldable: false,
+      isSpanned: false,
+      foldSize: null,
+      foldAngle: null,
+      spanDirection: null,
+      screenSegments: null
+    },
+    power: {
+      isLowPowerMode: false,
+      batteryLevel: 0.8,
+      batteryCharging: true,
+      reducedMotion: false
+    },
+    shouldReduceAnimations: false,
+    shouldVirtualizeList: false,
+    shouldReduceImageQuality: false,
+    shouldUseOfflineFirst: false
+  })
+}), { virtual: true });
+
 import { I18nContext } from '../contexts/I18nContext';
 
 // Mock Material UI components

@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import MindMapCard from './MindMapCard';
 // Mock Material UI components
 vi.mock('@mui/material', () => ({
-  Card: ({ children, ...props }: any) => <div className="MuiCard-root" {...props}>{children}</div>,
+  Card: ({ children, ...props }: any) => <div data-testid="mui-card" className="MuiCard-root" {...props}>{children}</div>,
   CardContent: ({ children, ...props }: any) => <div {...props}>{children}</div>,
   Typography: ({ children, ...props }: any) => <div {...props}>{children}</div>,
   useTheme: () => ({
@@ -59,34 +59,26 @@ describe('MindMapCard Component', () => {
     const handleClick = vi.fn();
     renderWithTheme(<MindMapCard title="Clickable Card" onClick={handleClick} />);
 
-    const card = screen.getByText(/Clickable Card/i).closest('.MuiCard-root');
+    const card = screen.getByTestId('mui-card');
     expect(card).toBeInTheDocument();
 
-    if (card) {
-      await userEvent.click(card);
-      expect(handleClick).toHaveBeenCalledTimes(1);
-    }
+    await userEvent.click(card);
+    expect(handleClick).toHaveBeenCalledTimes(1);
   });
 
   it('applies draggable attribute when draggable prop is true', () => {
     renderWithTheme(<MindMapCard title="Draggable Card" draggable={true} />);
 
-    const card = screen.getByText(/Draggable Card/i).closest('.MuiCard-root');
+    const card = screen.getByTestId('mui-card');
     expect(card).toBeInTheDocument();
-
-    if (card) {
-      expect(card).toHaveAttribute('draggable', 'true');
-    }
+    expect(card).toHaveAttribute('draggable', 'true');
   });
 
   it('is not draggable by default', () => {
     renderWithTheme(<MindMapCard title="Non-Draggable Card" />);
 
-    const card = screen.getByText(/Non-Draggable Card/i).closest('.MuiCard-root');
+    const card = screen.getByTestId('mui-card');
     expect(card).toBeInTheDocument();
-
-    if (card) {
-      expect(card).toHaveAttribute('draggable', 'false');
-    }
+    expect(card).toHaveAttribute('draggable', 'false');
   });
 });
