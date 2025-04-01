@@ -32,7 +32,7 @@ function TabPanel(props: TabPanelProps) {
       {...other}
     >
       {value === index && (
-        <Box sx={{ pt: 3 }}>
+        <Box sx={{ pt: 3, height: 'calc(100vh - 200px)' }}>
           {children}
         </Box>
       )}
@@ -40,84 +40,17 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-function App() {
-  const [buckets, setBuckets] = useState<AWS.S3.Bucket[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [tabValue, setTabValue] = useState(0);
-  const { t } = useI18n();
-
-  // Initialize app state from IndexedDB
-  useEffect(() => {
-    const initializeAppState = async () => {
-      try {
-        // Check if IndexedDB functions are available
-        if (typeof runAllMigrations === 'function' && typeof getTabStateAsync === 'function') {
-          // Run migrations from localStorage to IndexedDB
-          await runAllMigrations();
-
-          // Load tab state from IndexedDB
-          const savedTabValue = await getTabStateAsync();
-          setTabValue(savedTabValue);
-        }
-      } catch (error) {
-        console.error('Failed to initialize app state from IndexedDB:', error);
-        // Already using default tab value as fallback
-      }
-    };
-
-    initializeAppState();
-  }, []);
-
-  useEffect(() => {
-    const fetchBuckets = async () => {
-      setIsLoading(true);
-      setBuckets(null);
-      setError(null);
-
-      try {
-        // Dynamically import the s3Service only when needed
-        const { listBuckets } = await import('./services/s3Service');
-        const result = await listBuckets();
-
-        // Always check for error first
-        if (result.error) {
-          setError(t(result.error === 'No buckets found' ? 's3.noBuckets' : 's3.connectionError'));
-          return;
-        }
-
-        // Double check buckets array
-        if (!result.buckets || result.buckets.length === 0) {
-          setError(t('s3.noBuckets'));
-          return;
-        }
-
-        setBuckets(result.buckets);
-      } catch (err) {
-        console.error('Unexpected error:', err);
-        setError(t('s3.connectionError'));
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    // Only fetch when S3 tab is active
-    if (tabValue === 1) {
-      fetchBuckets();
-    }
-  }, [t, tabValue]);
-
-  const handleTabChange = (newValue: number) => {
-    setTabValue(newValue);
-
-    // Save tab state to IndexedDB if available
-    if (typeof setTabState === 'function') {
-      setTabState(newValue);
-    }
-  };
-
+// Separate component for the main app content
+function AppContent({ tabValue, onTabChange, buckets, error, isLoading, t }: {
+  tabValue: number;
+  onTabChange: (value: number) => void;
+  buckets: AWS.S3.Bucket[] | null;
+  error: string | null;
+  isLoading: boolean;
+  t: (key: string, params?: Record<string, string>) => string;
+}) {
   return (
-    <Layout currentTab={tabValue} onTabChange={handleTabChange}>
+    <Layout currentTab={tabValue} onTabChange={onTabChange}>
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom>
           {t('app.title')}
@@ -200,7 +133,95 @@ function App() {
         <FloatingChatButton position="bottom-right" />
       </ChatContextProvider>
     </Layout>
-  )
+  );
+}
+
+function App() {
+  const [buckets, setBuckets] = useState<AWS.S3.Bucket[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [tabValue, setTabValue] = useState(0);
+  const { t, isReady } = useI18n();
+
+  // Initialize app state from IndexedDB
+  useEffect(() => {
+    const initializeAppState = async () => {
+      try {
+        if (typeof runAllMigrations === 'function' && typeof getTabStateAsync === 'function') {
+          await runAllMigrations();
+          const savedTabValue = await getTabStateAsync();
+          setTabValue(savedTabValue);
+        }
+      } catch (error) {
+        console.error('Failed to initialize app state from IndexedDB:', error);
+      }
+    };
+    initializeAppState();
+  }, []);
+
+  useEffect(() => {
+    const fetchBuckets = async () => {
+      if (tabValue !== 1) return;
+      
+      setIsLoading(true);
+      setBuckets(null);
+      setError(null);
+
+      try {
+        const { listBuckets } = await import('./services/s3Service');
+        const result = await listBuckets();
+
+        if (result.error) {
+          setError(t(result.error === 'No buckets found' ? 's3.noBuckets' : 's3.connectionError'));
+          return;
+        }
+
+        if (!result.buckets || result.buckets.length === 0) {
+          setError(t('s3.noBuckets'));
+          return;
+        }
+
+        setBuckets(result.buckets);
+      } catch (err) {
+        console.error('Unexpected error:', err);
+        setError(t('s3.connectionError'));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchBuckets();
+  }, [t, tabValue]);
+
+  const handleTabChange = (newValue: number) => {
+    setTabValue(newValue);
+    if (typeof setTabState === 'function') {
+      setTabState(newValue);
+    }
+  };
+
+  if (!isReady) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="100vh"
+        sx={{ bgcolor: 'background.default' }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  return <AppContent
+    tabValue={tabValue}
+    onTabChange={handleTabChange}
+    buckets={buckets}
+    error={error}
+    isLoading={isLoading}
+    t={t}
+  />;
 }
 
 export default App

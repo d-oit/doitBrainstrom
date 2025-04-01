@@ -16,7 +16,10 @@ const ErrorNotificationContext = createContext<ErrorNotificationContextProps | u
 export const ErrorNotificationContextProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
-  const { dir } = useI18n();
+  const { dir, isReady } = useI18n();
+
+  // Default to ltr if i18n context is not ready yet
+  const effectiveDir = isReady ? dir : 'ltr';
 
   // Make the context available globally for error handler
   useEffect(() => {
@@ -66,7 +69,7 @@ export const ErrorNotificationContextProvider: React.FC<{ children: React.ReactN
         autoHideDuration={6000}
         onClose={handleClose}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        dir={dir}
+        dir={effectiveDir}
       >
         <Alert
           onClose={handleClose}

@@ -16,6 +16,7 @@ interface I18nContextProps {
   setLocale: (locale: string) => void;
   t: (key: string, params?: Record<string, string>) => string;
   dir: 'ltr' | 'rtl';
+  isReady: boolean;
 }
 
 export const I18nContext = createContext<I18nContextProps | undefined>(undefined);
@@ -24,13 +25,14 @@ export const I18nContextProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [locale, setLocale] = useState('en');
   const [translations, setTranslations] = useState<Record<string, any>>({});
   const [dir, setDir] = useState<'ltr' | 'rtl'>('ltr');
+  const [isReady, setIsReady] = useState(false);
 
   // Load translations for the current locale
   useEffect(() => {
-    // Import English translations synchronously as a fallback
-    const enTranslations = require('../locales/en.json');
-
     const loadTranslations = async () => {
+      // Load English translations first
+      const enModule = await import('../locales/en.json');
+      const enTranslations = enModule.default;
       try {
         // Set English translations first to ensure we always have something
         setTranslations(enTranslations);
@@ -152,9 +154,13 @@ export const I18nContextProvider: React.FC<{ children: React.ReactNode }> = ({ c
     return value;
   };
 
+  useEffect(() => {
+    setIsReady(true);
+  }, [translations]);
+
   return (
-    <I18nContext.Provider value={{ locale, setLocale, t, dir }}>
-      {children}
+    <I18nContext.Provider value={{ locale, setLocale, t, dir, isReady }}>
+      {isReady ? children : null}
     </I18nContext.Provider>
   );
 };
