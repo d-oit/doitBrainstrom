@@ -213,7 +213,11 @@ try {
 - Implement ARIA attributes for dynamic content
 - Ensure keyboard navigation works properly
 - Test with screen readers
-- Follow WCAG 2.1 Level AA guidelines
+- Follow WCAG 2.2 Level AA guidelines
+- Support high contrast mode
+- Implement reduced motion preferences
+- Provide color blindness accommodations
+- Ensure proper focus management
 
 ## 6. State Management Guidelines
 
@@ -259,24 +263,42 @@ try {
 - Use heading levels correctly (h1, h2, etc.)
 - Use lists (ul, ol) for list content
 - Use buttons for interactive elements
+- Ensure proper document structure with landmarks
 
 ### ARIA Attributes
 - Add aria-label for elements without visible text
 - Use aria-expanded for expandable elements
 - Implement aria-live regions for dynamic content
 - Use role attributes appropriately
+- Add aria-current for indicating current state
 
 ### Keyboard Navigation
 - Ensure all interactive elements are keyboard accessible
 - Implement logical tab order
 - Use tabIndex appropriately
 - Provide keyboard shortcuts for common actions
+- Create visible focus indicators that meet WCAG 2.2 requirements
+- Implement focus trapping for modals and dialogs
 
 ### Screen Reader Support
-- Test with screen readers (NVDA, VoiceOver)
+- Test with screen readers (NVDA, VoiceOver, JAWS)
 - Ensure all content is announced correctly
 - Provide text alternatives for non-text content
 - Implement proper form labels
+- Add descriptive names for interactive elements
+
+### Visual Accessibility
+- Support high contrast mode
+- Implement color schemes for different types of color blindness
+- Ensure sufficient color contrast (minimum 4.5:1 for normal text)
+- Avoid conveying information through color alone
+- Support text resizing up to 200% without loss of content
+
+### Motion and Animation
+- Respect prefers-reduced-motion media query
+- Provide controls to pause, stop, or hide moving content
+- Avoid content that flashes more than three times per second
+- Make animations optional where possible
 
 ## 9. Security Guidelines
 

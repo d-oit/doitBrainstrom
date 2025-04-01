@@ -1,6 +1,7 @@
 {
   "name": "d.o.it Brainstroming",
-  "short_name": "doit-brainstorming",
+  "short_name": "doit-brainstroming",
+  "description": "A sleek, user-friendly mind mapping app with real-time collaboration, built with React 18, TypeScript, and Vite. Features offline capabilities, S3 data sync, responsive design, accessibility, and security.",
   "icons": [
     {
       "src": "icons/icon-48x48.png",
@@ -54,7 +55,9 @@
     }
   ],
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#000000"
+  "orientation": "portrait",
+  "background_color": "#00008B",
+  "theme_color": "#00008B"
 }

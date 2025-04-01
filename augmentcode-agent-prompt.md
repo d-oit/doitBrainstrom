@@ -1,7 +1,7 @@
 ANALYZE:
-- Parse all `.md` files in `@specs/`
+- Parse all `.md` files in `specs/`
 - Map dependencies between specifications
-- If exists: validate against `/docs` 
+- If exists: validate against the folder `docs` 
 - Audit current codebase state
 
 IMPLEMENT:

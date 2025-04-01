@@ -1,68 +1,108 @@
 // src/contexts/ThemeContext.tsx
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useMemo } from 'react';
 import { ThemeProvider, CssVarsProvider } from '@mui/material/styles';
 import { CssBaseline, useMediaQuery } from '@mui/material';
-import { lightTheme, darkTheme, getSystemTheme, lightThemeCssVars } from '../styles/theme';
+import { ThemeMode, ThemeSettings, ThemeContextType } from '../types/theme';
+import {
+  createAppTheme,
+  createLegacyTheme,
+  detectSystemPreference,
+  watchSystemPreference,
+  loadThemeSettings,
+  saveThemeSettings
+} from '../styles/theme-engine';
 
-type ThemeMode = 'light' | 'dark' | 'system';
-
-interface ThemeContextProps {
-  mode: ThemeMode;
-  setMode: (mode: ThemeMode) => void;
-  useCssVars: boolean;
-  setUseCssVars: (useCssVars: boolean) => void;
-}
-
-const ThemeContext = createContext<ThemeContextProps | undefined>(undefined);
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeContextProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [mode, setMode] = useState<ThemeMode>('system');
-  const [useCssVars, setUseCssVars] = useState<boolean>(true); // Default to using CSS variables
-  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
+  // Load theme settings from localStorage
+  const [settings, setSettings] = useState<ThemeSettings>(loadThemeSettings());
+  const [systemPreference, setSystemPreference] = useState<'light' | 'dark'>(detectSystemPreference());
 
+  // Destructure settings for easier access
+  const { mode, useCssVars } = settings;
+
+  // Watch for system preference changes
   useEffect(() => {
-    const storedMode = localStorage.getItem('themeMode') as ThemeMode | null;
-    const storedUseCssVars = localStorage.getItem('useCssVars');
-
-    if (storedMode) {
-      setMode(storedMode);
-    }
-
-    if (storedUseCssVars !== null) {
-      setUseCssVars(storedUseCssVars === 'true');
-    }
+    const unwatch = watchSystemPreference((preference) => {
+      setSystemPreference(preference);
+    });
+    return unwatch;
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem('themeMode', mode);
-  }, [mode]);
-
-  useEffect(() => {
-    localStorage.setItem('useCssVars', String(useCssVars));
-  }, [useCssVars]);
-
-  const getTheme = (mode: ThemeMode) => {
-    switch (mode) {
-      case 'dark':
-        return darkTheme;
-      case 'light':
-        return lightTheme;
-      case 'system':
-        return getSystemTheme();
-      default:
-        return lightTheme;
-    }
+  // Update individual settings
+  const setMode = (newMode: ThemeMode) => {
+    updateSettings({ mode: newMode });
   };
 
-  const theme = getTheme(mode);
-  const currentMode = mode === 'system' ? (prefersDarkMode ? 'dark' : 'light') : mode;
+  const setUseCssVars = (newUseCssVars: boolean) => {
+    updateSettings({ useCssVars: newUseCssVars });
+  };
+
+  // Update multiple settings at once
+  const updateSettings = (newSettings: Partial<ThemeSettings>) => {
+    const updatedSettings = { ...settings, ...newSettings };
+    setSettings(updatedSettings);
+    saveThemeSettings(updatedSettings);
+  };
+
+  // Determine if high contrast mode is active
+  const isHighContrastMode = mode === 'high-contrast';
+
+  // Create the appropriate theme based on settings
+  const theme = useMemo(() => {
+    return useCssVars
+      ? createAppTheme(mode === 'system' ? systemPreference : mode, settings)
+      : createLegacyTheme(mode === 'system' ? systemPreference : mode, settings);
+  }, [mode, systemPreference, settings, useCssVars]);
+
+  // Determine the current mode for CSS vars provider
+  const currentMode = mode === 'system' ? systemPreference : mode;
+  const cssVarsMode = currentMode === 'high-contrast' ? 'dark' : currentMode;
+
+  // Apply CSS classes to body based on theme
+  useEffect(() => {
+    const body = document.body;
+
+    // Remove all theme classes first
+    body.classList.remove('light-theme', 'dark-theme', 'high-contrast-theme');
+
+    // Add the appropriate theme class
+    if (currentMode === 'dark') {
+      body.classList.add('dark-theme');
+    } else if (currentMode === 'high-contrast') {
+      body.classList.add('high-contrast-theme');
+      body.classList.add('high-contrast-mode');
+    } else {
+      body.classList.add('light-theme');
+    }
+
+    // Add reduced motion class if needed
+    if (settings.reducedMotion) {
+      body.classList.add('reduced-motion');
+    } else {
+      body.classList.remove('reduced-motion');
+    }
+  }, [currentMode, settings.reducedMotion]);
+
+  // Create context value
+  const contextValue: ThemeContextType = {
+    mode,
+    setMode,
+    useCssVars,
+    setUseCssVars,
+    settings,
+    updateSettings,
+    isHighContrastMode,
+    systemPreference
+  };
 
   return (
-    <ThemeContext.Provider value={{ mode, setMode, useCssVars, setUseCssVars }}>
+    <ThemeContext.Provider value={contextValue}>
       {useCssVars ? (
         <CssVarsProvider
-          theme={lightThemeCssVars}
-          defaultMode={currentMode}
+          theme={theme}
+          defaultMode={cssVarsMode as 'light' | 'dark'}
           modeStorageKey="mind-map-theme-mode"
         >
           <CssBaseline />

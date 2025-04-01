@@ -227,18 +227,22 @@ export const ErrorNotificationContextProvider: React.FC<{ children: React.ReactN
    - Translate technical errors to user-understandable language
    - Include actionable information when possible
    - Use the user's preferred language for error messages
+   - Ensure error messages are accessible (screen reader friendly)
 4. **Log errors with appropriate context**
    - Include relevant state information with error logs
    - Add user actions that led to the error
    - Capture environment information (browser, OS, etc.)
+   - Include theme and accessibility settings for UI-related errors
 5. **Handle offline scenarios gracefully**
    - Detect and adapt to network status changes
    - Provide clear offline indicators in the UI
    - Implement robust sync mechanisms for when connection returns
+   - Cache theme settings for offline use
 6. **Use error boundaries for UI components**
    - Place error boundaries strategically in the component tree
    - Create meaningful fallback UIs for different components
    - Reset error state when appropriate
+   - Ensure fallback UIs respect current theme settings
 7. **Sanitize sensitive data before logging**
    - Remove authentication tokens, passwords, and personal data
    - Use data masking for sensitive fields
@@ -247,3 +251,11 @@ export const ErrorNotificationContextProvider: React.FC<{ children: React.ReactN
    - Have alternative data sources when primary sources fail
    - Implement retry logic with exponential backoff
    - Cache critical data to ensure availability
+9. **Handle theme-related errors gracefully**
+   - Provide fallback to default theme if custom theme fails to load
+   - Handle CSS variable application errors
+   - Ensure high contrast mode works even if other theme features fail
+10. **Ensure accessibility in error states**
+    - Maintain keyboard navigation in error states
+    - Ensure error messages are announced to screen readers
+    - Maintain sufficient color contrast in error indicators

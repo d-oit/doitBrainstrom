@@ -158,16 +158,30 @@ This document provides a step-by-step guide for deploying the d.o. Brainstroming
    - Check if the service worker is registered and active
    - Test offline functionality by disconnecting from the internet and reloading
 
-3. Set up custom domain (optional):
+3. Test theme system functionality:
+   - Verify all theme modes work correctly (light, dark, system, high-contrast)
+   - Test theme transitions for smoothness
+   - Verify accessibility features (reduced motion, color blindness support)
+   - Test system preference detection
+   - Verify theme persistence across page reloads
+
+4. Test responsive design:
+   - Verify layout on different device sizes (mobile, tablet, desktop)
+   - Test orientation changes (portrait/landscape)
+   - Verify touch interactions on mobile devices
+   - Test with different browsers (Chrome, Firefox, Safari, Edge)
+
+5. Set up custom domain (optional):
    - Configure DNS settings with your domain registrar
    - Point your domain to your hosting provider
    - Set up HTTPS for your custom domain
    - Verify domain is working correctly
 
-4. Integrate production monitoring:
+6. Integrate production monitoring:
    - Set up Google Analytics or similar service
    - Configure performance monitoring
    - Set up error tracking with Sentry or similar service
+   - Implement accessibility monitoring
 
 ## 4. Rollback Procedure
 

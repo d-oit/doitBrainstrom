@@ -21,9 +21,13 @@
 - **2.4 Accessibility Testing:**
   - [Description of accessibility testing methods (automated, manual)]
   - [Link to accessibility test reports/results (e.g., Axe, WAVE)]
+  - [Summary of theme system accessibility testing (high contrast mode, color blindness support)]
+  - [Results of keyboard navigation and screen reader testing]
 - **2.5 Performance Testing:**
   - [Description of performance testing approach and metrics measured]
   - [Summary of performance test results and identified bottlenecks]
+  - [Theme transition performance metrics]
+  - [Responsive design performance across different devices]
 - **2.6 Cross-Browser Testing:**
   - [List of browsers tested (Chrome, Firefox, Safari, Edge)]
   - [Summary of cross-browser compatibility issues found and resolved]

@@ -34,27 +34,51 @@ The "Last Write Wins" strategy has some limitations:
 - It doesn't handle partial updates or selective merging of changes.
 - It assumes that newer changes are always more important than older ones.
 
+## Enhanced Conflict Resolution Implementation
+
+The application now implements a more sophisticated conflict resolution system with the following features:
+
+1. **Version Vectors for Conflict Detection**:
+   - Each change is tracked with a version vector that records the state of the document.
+   - Conflicts are detected by comparing version vectors rather than simple timestamps.
+   - This allows for more accurate conflict detection in distributed scenarios.
+
+2. **Conflict Resolution UI**:
+   - When conflicts are detected, a visual diff interface is presented to the user.
+   - Users can choose which changes to keep or merge changes manually.
+   - The UI respects the current theme settings, including high contrast mode for accessibility.
+
+3. **Automatic Merging of Non-Conflicting Changes**:
+   - Changes to different parts of the mind map are automatically merged.
+   - Only direct conflicts (same node/link modified differently) require manual resolution.
+   - This reduces the need for user intervention in most cases.
+
+4. **Offline Operation Queue**:
+   - Changes made offline are stored in a prioritized queue.
+   - Operations are applied in order when connectivity is restored.
+   - The queue is persisted across browser sessions for reliability.
+
+5. **Configurable Retry Logic**:
+   - Failed sync operations are retried with exponential backoff.
+   - Retry intervals and maximum attempts are configurable via environment variables.
+   - Users are notified of sync status and retry attempts.
+
 ## Future Considerations
 
-For future versions of the application, more sophisticated conflict resolution strategies could be implemented:
+For future versions of the application, even more advanced conflict resolution strategies could be implemented:
 
-1. **Three-Way Merge**:
-   - Keep track of the base version (last synced version) and compare both the local and remote changes against it.
-   - Automatically merge non-conflicting changes.
-   - Provide a UI for users to manually resolve conflicting changes.
-
-2. **Operational Transformation (OT)**:
+1. **Operational Transformation (OT)**:
    - Track individual operations (add node, delete link, etc.) rather than just the final state.
    - Transform operations to preserve user intent when applied in different orders.
    - Suitable for real-time collaborative editing.
 
-3. **Conflict-Free Replicated Data Types (CRDTs)**:
+2. **Conflict-Free Replicated Data Types (CRDTs)**:
    - Use data structures that can be concurrently edited without conflicts.
    - Each operation is designed to be commutative, associative, and idempotent.
    - Eliminates the need for explicit conflict resolution in many cases.
 
-4. **Version Control**:
-   - Maintain a history of versions for each mind map.
+3. **Full Version Control**:
+   - Maintain a complete history of versions for each mind map.
    - Allow users to view and restore previous versions.
    - Provide a UI for comparing and merging different versions.
 
