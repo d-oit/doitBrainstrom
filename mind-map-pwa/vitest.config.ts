@@ -9,7 +9,7 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
     include: ['**/*.{test,spec}.{ts,tsx}'],
-    exclude: ['e2e/**/*', 'node_modules/@testing-library/jest-dom/types/__tests__/**/*'],
+    exclude: ['e2e/**/*', 'node_modules/**/*.{test,spec}.{ts,tsx,js,jsx}'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html'],

@@ -21,6 +21,9 @@
 14. Image loading simulation not working in ResponsiveImage tests
 15. Virtualization not working as expected in VirtualizedList tests
 16. Jest-dom type tests in node_modules causing errors
+17. Persistent hoisting issues in App.test.tsx
+18. Document.createElement mocking issues in ResponsiveImage.test.tsx
+19. VirtualizedList test still failing with the previous approach
 
 **Changes:**
 1. Added Divider component to Material UI mock in Layout.accessibility.test.tsx
@@ -39,6 +42,10 @@
 14. Improved Image loading simulation in ResponsiveImage tests with proper mocking
 15. Mocked VirtualizedList component directly to control rendering behavior
 16. Excluded jest-dom type tests from Vitest configuration
+17. Completely rewrote App.test.tsx to fix hoisting issues
+18. Replaced document.createElement mocking with Image constructor mocking in ResponsiveImage.test.tsx
+19. Rewrote VirtualizedList.test.tsx with a better mocking approach
+20. Excluded all node_modules tests from Vitest configuration
 
 **Files Modified:**
 - src/components/Layout.accessibility.test.tsx
