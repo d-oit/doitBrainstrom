@@ -1,5 +1,5 @@
 // src/components/Layout.tsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { AppBar, Toolbar, Box, Stack, Divider } from '@mui/material';
 import ThemeSwitcher from './ThemeSwitcher';
 import LocaleSwitcher from './LocaleSwitcher';
@@ -18,14 +18,47 @@ import TouchFriendly from './touch/TouchFriendly';
 // Import accessibility components
 import AccessibilityMenu from './accessibility/AccessibilityMenu';
 import SkipLinks from './accessibility/SkipLinks';
+// Import navigation components
+import NavigationDrawer from './navigation/NavigationDrawer';
+import DrawerToggle from './navigation/DrawerToggle';
+import Breadcrumbs from './navigation/Breadcrumbs';
+// Import navigation storage service
+import { getDrawerState, setDrawerState } from '../services/navigationStorageService';
+// Import CSS
+import '../styles/drawer.css';
+import '../styles/breadcrumbs.css';
 
 interface LayoutProps {
   children: React.ReactNode;
+  currentTab?: number;
+  onTabChange?: (tabIndex: number) => void;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children }) => {
+const Layout: React.FC<LayoutProps> = ({ 
+  children, 
+  currentTab = 0, 
+  onTabChange = () => {} 
+}) => {
   const { t, dir } = useI18n();
   const { viewport } = useResponsive();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // Initialize drawer state from localStorage
+  useEffect(() => {
+    const initDrawerState = () => {
+      const storedState = getDrawerState();
+      setDrawerOpen(storedState);
+    };
+    
+    initDrawerState();
+  }, []);
+
+  // Handle drawer toggle
+  const handleDrawerToggle = () => {
+    const newState = !drawerOpen;
+    setDrawerOpen(newState);
+    setDrawerState(newState);
+  };
 
   // Sanitize any text that might come from translations
   const appTitle = sanitizeTextInput(t('app.title'));
@@ -44,6 +77,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         { id: 'navigation', label: t('accessibility.skipToNavigation') }
       ]} />
 
+      {/* Navigation Drawer */}
+      <NavigationDrawer 
+        open={drawerOpen} 
+        onClose={handleDrawerToggle}
+        currentTab={currentTab}
+        onTabChange={onTabChange}
+      />
+
       {/* Use semantic header element with safe area padding */}
       <header className="safe-area-top" role="banner">
         {/* Show offline banner for tablet view */}
@@ -54,10 +95,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             minHeight: viewport.layout.toolbarHeight,
             px: { xs: 1, sm: 2, md: 3 }
           }}>
+            {/* Drawer Toggle Button */}
+            <DrawerToggle onClick={handleDrawerToggle} />
+            
             <ContainerQuery type="component">
               <Heading1
                 className="card-title"
-                style={{ flexGrow: 1 }}
+                style={{ flexGrow: 1, marginLeft: '16px' }}
                 aria-label="Application title"
               >
                 {appTitle}
@@ -107,6 +151,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         role="main"
         aria-label={t('accessibility.mainContent')}
         style={{ flex: 1, display: 'flex', flexDirection: 'column' }}
+        className={`main-content ${drawerOpen && !viewport.isMobile ? 'drawer-open' : ''}`}
       >
         <ResponsiveGrid
           container
@@ -116,6 +161,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           className="content-context"
         >
           <ResponsiveGridItem xs={12}>
+            {/* Breadcrumbs */}
+            <Breadcrumbs currentTab={currentTab} onTabChange={onTabChange} />
+            
             <ContainerQuery type="content">
               <Box className="content-grid" sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                 {children}
@@ -126,7 +174,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </main>
 
       {/* Add semantic footer with safe area padding */}
-      <footer className="safe-area-bottom" role="contentinfo" aria-label={t('accessibility.footerInfo')}>
+      <footer 
+        className={`safe-area-bottom ${drawerOpen && !viewport.isMobile ? 'drawer-open' : ''}`} 
+        role="contentinfo" 
+        aria-label={t('accessibility.footerInfo')}
+      >
         <ResponsiveGrid container fluid={false} gap="md">
           <ResponsiveGridItem xs={12}>
             <Box sx={{

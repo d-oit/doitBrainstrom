@@ -53,6 +53,14 @@
     "dataSaverEnabled": "Data Saver mode enabled",
     "unknownDetails": "Connection details unavailable"
   },
+  "navigation": {
+    "title": "Navigation",
+    "sidebarLabel": "Main Navigation",
+    "breadcrumbsLabel": "Breadcrumb Navigation",
+    "openDrawer": "Open navigation menu",
+    "closeDrawer": "Close navigation menu",
+    "home": "Home"
+  },
   "common": {
     "cancel": "Cancel",
     "save": "Save",

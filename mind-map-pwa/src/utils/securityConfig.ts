@@ -30,7 +30,7 @@ export const securityConfig = {
    */
   indexedDB: {
     // Version management for schema updates
-    currentVersion: 2, // Updated to match DB_CONFIG.version
+    currentVersion: 3, // Updated to match DB_CONFIG.version
     // Maximum storage quota (in bytes)
     maxStorageQuota: 50 * 1024 * 1024, // 50MB
     // Data retention period (in days)

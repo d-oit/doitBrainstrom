@@ -2,10 +2,11 @@ import { useState, useEffect, lazy, Suspense } from 'react'
 import './styles/App.css'
 // s3Service will be imported dynamically
 import Layout from './components/Layout'
-import { Box, Grid, Typography, Alert, Paper, Tabs, Tab, CircularProgress } from '@mui/material'
+import { Box, Typography, Alert, Paper, CircularProgress } from '@mui/material'
 import { useI18n } from './contexts/I18nContext'
 import { ChatContextProvider } from './contexts/ChatContext'
 import FloatingChatButton from './components/Chat/FloatingChatButton'
+import { ResponsiveGrid, ResponsiveGridItem } from './components/layout/ResponsiveGrid'
 
 // Lazy load components
 const MindMapCard = lazy(() => import('./components/MindMapCard'))
@@ -82,12 +83,12 @@ function App() {
     }
   }, [t, tabValue]);
 
-  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (newValue: number) => {
     setTabValue(newValue);
   };
 
   return (
-    <Layout>
+    <Layout currentTab={tabValue} onTabChange={handleTabChange}>
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom>
           {t('app.title')}
@@ -95,14 +96,6 @@ function App() {
         <Typography variant="subtitle1" gutterBottom>
           {t('app.subtitle')}
         </Typography>
-      </Box>
-
-      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs value={tabValue} onChange={handleTabChange} aria-label="app tabs">
-          <Tab label={t('tabs.mindMap')} id="tab-0" aria-controls="tabpanel-0" />
-          <Tab label={t('tabs.s3Connection')} id="tab-1" aria-controls="tabpanel-1" />
-          <Tab label={t('tabs.sampleCards')} id="tab-2" aria-controls="tabpanel-2" />
-        </Tabs>
       </Box>
 
       <TabPanel value={tabValue} index={0}>
@@ -145,32 +138,32 @@ function App() {
         <Typography variant="h5" component="h2" gutterBottom>
           {t('tabs.sampleCards')}
         </Typography>
-        <Grid container spacing={3}>
-          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+        <ResponsiveGrid container gap="md">
+          <ResponsiveGridItem xs={12} sm={6} md={4}>
             <Suspense fallback={<Box p={2}><CircularProgress size={20} /></Box>}>
               <MindMapCard
                 title={t('mindMap.mainIdea')}
                 description={t('mindMap.mainIdeaDesc')}
               />
             </Suspense>
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          </ResponsiveGridItem>
+          <ResponsiveGridItem xs={12} sm={6} md={4}>
             <Suspense fallback={<Box p={2}><CircularProgress size={20} /></Box>}>
               <MindMapCard
                 title={t('mindMap.supportingConcept')}
                 description={t('mindMap.supportingConceptDesc')}
               />
             </Suspense>
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          </ResponsiveGridItem>
+          <ResponsiveGridItem xs={12} sm={6} md={4}>
             <Suspense fallback={<Box p={2}><CircularProgress size={20} /></Box>}>
               <MindMapCard
                 title={t('mindMap.anotherConcept')}
                 description={t('mindMap.anotherConceptDesc')}
               />
             </Suspense>
-          </Grid>
-        </Grid>
+          </ResponsiveGridItem>
+        </ResponsiveGrid>
       </TabPanel>
 
       {/* Chat Button */}

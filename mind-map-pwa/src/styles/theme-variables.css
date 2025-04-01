@@ -1,0 +1,98 @@
+/* src/styles/theme-variables.css */
+
+/* Light theme variables */
+:root {
+  /* Drawer variables */
+  --drawer-bg-color: #ffffff;
+  --drawer-text-color: rgba(0, 0, 0, 0.87);
+  --drawer-border-color: rgba(0, 0, 0, 0.12);
+  --drawer-hover-color: rgba(0, 0, 0, 0.04);
+  --drawer-active-color: rgba(33, 150, 243, 0.12);
+  --drawer-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  
+  /* Breadcrumb variables */
+  --breadcrumb-bg-color: rgba(0, 0, 0, 0.03);
+  --breadcrumb-text-color: rgba(0, 0, 0, 0.6);
+  --breadcrumb-link-color: #1976d2;
+  --breadcrumb-link-hover-color: #0d47a1;
+  --breadcrumb-separator-color: rgba(0, 0, 0, 0.4);
+  --breadcrumb-current-color: rgba(0, 0, 0, 0.87);
+}
+
+/* Dark theme variables */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Drawer variables */
+    --drawer-bg-color: #1e1e1e;
+    --drawer-text-color: #ffffff;
+    --drawer-border-color: rgba(255, 255, 255, 0.12);
+    --drawer-hover-color: rgba(255, 255, 255, 0.08);
+    --drawer-active-color: rgba(144, 202, 249, 0.16);
+    --drawer-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    
+    /* Breadcrumb variables */
+    --breadcrumb-bg-color: rgba(255, 255, 255, 0.05);
+    --breadcrumb-text-color: rgba(255, 255, 255, 0.6);
+    --breadcrumb-link-color: #90caf9;
+    --breadcrumb-link-hover-color: #bbdefb;
+    --breadcrumb-separator-color: rgba(255, 255, 255, 0.4);
+    --breadcrumb-current-color: rgba(255, 255, 255, 0.87);
+  }
+}
+
+/* Dark theme class for manual theme switching */
+.dark-theme {
+  /* Drawer variables */
+  --drawer-bg-color: #1e1e1e;
+  --drawer-text-color: #ffffff;
+  --drawer-border-color: rgba(255, 255, 255, 0.12);
+  --drawer-hover-color: rgba(255, 255, 255, 0.08);
+  --drawer-active-color: rgba(144, 202, 249, 0.16);
+  --drawer-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  
+  /* Breadcrumb variables */
+  --breadcrumb-bg-color: rgba(255, 255, 255, 0.05);
+  --breadcrumb-text-color: rgba(255, 255, 255, 0.6);
+  --breadcrumb-link-color: #90caf9;
+  --breadcrumb-link-hover-color: #bbdefb;
+  --breadcrumb-separator-color: rgba(255, 255, 255, 0.4);
+  --breadcrumb-current-color: rgba(255, 255, 255, 0.87);
+}
+
+/* Light theme class for manual theme switching */
+.light-theme {
+  /* Drawer variables */
+  --drawer-bg-color: #ffffff;
+  --drawer-text-color: rgba(0, 0, 0, 0.87);
+  --drawer-border-color: rgba(0, 0, 0, 0.12);
+  --drawer-hover-color: rgba(0, 0, 0, 0.04);
+  --drawer-active-color: rgba(33, 150, 243, 0.12);
+  --drawer-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  
+  /* Breadcrumb variables */
+  --breadcrumb-bg-color: rgba(0, 0, 0, 0.03);
+  --breadcrumb-text-color: rgba(0, 0, 0, 0.6);
+  --breadcrumb-link-color: #1976d2;
+  --breadcrumb-link-hover-color: #0d47a1;
+  --breadcrumb-separator-color: rgba(0, 0, 0, 0.4);
+  --breadcrumb-current-color: rgba(0, 0, 0, 0.87);
+}
+
+/* High contrast theme for accessibility */
+.high-contrast-theme {
+  /* Drawer variables */
+  --drawer-bg-color: #000000;
+  --drawer-text-color: #ffffff;
+  --drawer-border-color: #ffffff;
+  --drawer-hover-color: #333333;
+  --drawer-active-color: #ffff00;
+  --drawer-shadow: 0 2px 10px rgba(255, 255, 255, 0.5);
+  
+  /* Breadcrumb variables */
+  --breadcrumb-bg-color: #000000;
+  --breadcrumb-text-color: #ffffff;
+  --breadcrumb-link-color: #ffff00;
+  --breadcrumb-link-hover-color: #00ffff;
+  --breadcrumb-separator-color: #ffffff;
+  --breadcrumb-current-color: #ffffff;
+}
