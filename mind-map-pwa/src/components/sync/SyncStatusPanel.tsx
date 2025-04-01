@@ -1,5 +1,5 @@
 // src/components/sync/SyncStatusPanel.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   IconButton,
@@ -9,7 +9,9 @@ import {
   Paper,
   Typography,
   LinearProgress,
-  styled
+  styled,
+  Snackbar,
+  Alert
 } from '@mui/material';
 import {
   CloudDone,
@@ -21,6 +23,8 @@ import {
 import { useMindMap } from '../../contexts/MindMapContext';
 import { useI18n } from '../../contexts/I18nContext';
 import { useResponsive } from '../../contexts/ResponsiveContext';
+import SyncErrorDialog from './SyncErrorDialog';
+import { S3ErrorType } from '../../services/s3SyncService';
 
 // Mobile implementation with just an icon and badge
 const MobileSyncStatus = styled(Box)(() => ({
@@ -37,13 +41,19 @@ const DesktopSyncPanel = styled(Paper)(({ theme }) => ({
 }));
 
 export const SyncStatusPanel: React.FC = () => {
-  const { syncStatus, syncMindMap, isLoading } = useMindMap();
-  // Mock values for demonstration purposes
-  const lastSyncTime = new Date().toLocaleTimeString();
-  const queuedChanges = 0;
-  const syncProgress = 0;
+  const { syncStatus, syncMindMap, isLoading, lastSyncTime, syncError, syncErrorDetails } = useMindMap();
   const { t } = useI18n();
   const { viewport } = useResponsive();
+
+  // State for error dialog
+  const [errorDialogOpen, setErrorDialogOpen] = useState(false);
+  const [syncSnackbarOpen, setSyncSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error' | 'info' | 'warning'>('info');
+
+  // Use real values or fallbacks
+  const queuedChanges = 0; // This would come from the context in a real implementation
+  const syncProgress = syncStatus === 'syncing' ? 70 : 0; // Example progress value
 
   const getStatusIcon = () => {
     if (isLoading) {
@@ -85,87 +95,180 @@ export const SyncStatusPanel: React.FC = () => {
 
   const handleSync = () => {
     if (syncStatus !== 'syncing' && !isLoading) {
-      syncMindMap();
+      // Attempt to sync and handle the result
+      syncMindMap().then(result => {
+        if (result && result.success) {
+          setSnackbarSeverity('success');
+          setSnackbarMessage(t('sync.syncSuccessful'));
+          setSyncSnackbarOpen(true);
+        } else if (result && result.error) {
+          // Show error dialog instead of just a snackbar for errors
+          setErrorDialogOpen(true);
+        }
+      }).catch(() => {
+        // Handle any unexpected errors
+        setSnackbarSeverity('error');
+        setSnackbarMessage(t('sync.unexpectedError'));
+        setSyncSnackbarOpen(true);
+      });
     }
   };
 
-  // Mobile view - just icon with badge
+  const handleCloseErrorDialog = () => {
+    setErrorDialogOpen(false);
+  };
+
+  const handleCloseSnackbar = () => {
+    setSyncSnackbarOpen(false);
+  };
+
+  // Mobile view - just icon with badge that opens dialog on click
   if (viewport.isMobile) {
     return (
-      <MobileSyncStatus>
-        <IconButton size="small">
-          <Badge badgeContent={queuedChanges > 0 ? queuedChanges : undefined} color="primary">
-            <Tooltip title={getStatusText()}>
-              {getStatusIcon()}
-            </Tooltip>
-          </Badge>
-        </IconButton>
-      </MobileSyncStatus>
+      <>
+        <MobileSyncStatus>
+          <IconButton
+            size="small"
+            onClick={handleSync}
+            disabled={syncStatus === 'syncing' || isLoading}
+          >
+            <Badge badgeContent={queuedChanges > 0 ? queuedChanges : undefined} color="primary">
+              <Tooltip title={getStatusText()}>
+                {getStatusIcon()}
+              </Tooltip>
+            </Badge>
+          </IconButton>
+        </MobileSyncStatus>
+
+        {/* Error Dialog */}
+        <SyncErrorDialog
+          open={errorDialogOpen}
+          onClose={handleCloseErrorDialog}
+          errorType={syncError as S3ErrorType}
+          errorDetails={syncErrorDetails}
+        />
+
+        {/* Success/Info Snackbar */}
+        <Snackbar
+          open={syncSnackbarOpen}
+          autoHideDuration={4000}
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        >
+          <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity}>
+            {snackbarMessage}
+          </Alert>
+        </Snackbar>
+      </>
     );
   }
 
-  // Tablet view - icon with text
+  // Tablet view - icon with text and action button
   if (viewport.isTablet) {
     return (
-      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-        <Tooltip title={getStatusText()}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mr: 1 }}>
-            {getStatusIcon()}
-          </Box>
-        </Tooltip>
+      <>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Tooltip title={getStatusText()}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mr: 1 }}>
+              {getStatusIcon()}
+            </Box>
+          </Tooltip>
 
-        <Tooltip title={t('sync.refresh')}>
-          <span>
-            <IconButton
-              size="small"
-              onClick={handleSync}
-              disabled={syncStatus === 'syncing' || isLoading}
-              aria-label={t('sync.refresh')}
-            >
-              <Refresh />
-            </IconButton>
-          </span>
-        </Tooltip>
-      </Box>
+          <Tooltip title={t('sync.refresh')}>
+            <span>
+              <IconButton
+                size="small"
+                onClick={handleSync}
+                disabled={syncStatus === 'syncing' || isLoading}
+                aria-label={t('sync.refresh')}
+              >
+                <Refresh />
+              </IconButton>
+            </span>
+          </Tooltip>
+        </Box>
+
+        {/* Error Dialog */}
+        <SyncErrorDialog
+          open={errorDialogOpen}
+          onClose={handleCloseErrorDialog}
+          errorType={syncError as S3ErrorType}
+          errorDetails={syncErrorDetails}
+        />
+
+        {/* Success/Info Snackbar */}
+        <Snackbar
+          open={syncSnackbarOpen}
+          autoHideDuration={4000}
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        >
+          <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity}>
+            {snackbarMessage}
+          </Alert>
+        </Snackbar>
+      </>
     );
   }
 
   // Desktop view - detailed panel
   return (
-    <DesktopSyncPanel elevation={2}>
-      <Typography variant="h6">{t('sync.status')}</Typography>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-        {getStatusIcon()}
-        <Typography variant="body2" sx={{ ml: 1 }}>
-          {getStatusText()}
-        </Typography>
-      </Box>
+    <>
+      <DesktopSyncPanel elevation={2}>
+        <Typography variant="h6">{t('sync.status')}</Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+          {getStatusIcon()}
+          <Typography variant="body2" sx={{ ml: 1 }}>
+            {getStatusText()}
+          </Typography>
+        </Box>
 
-      <LinearProgress
-        variant={syncStatus === 'syncing' ? "indeterminate" : "determinate"}
-        value={syncProgress}
+        <LinearProgress
+          variant={syncStatus === 'syncing' ? "indeterminate" : "determinate"}
+          value={syncProgress}
+        />
+
+        <Box sx={{ mt: 1 }}>
+          <Typography variant="body2">
+            {t('sync.lastSynced')}: {lastSyncTime || t('sync.never')}
+          </Typography>
+          <Typography variant="body2">
+            {t('sync.queuedChanges')}: {queuedChanges}
+          </Typography>
+        </Box>
+
+        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+          <IconButton
+            onClick={handleSync}
+            disabled={syncStatus === 'syncing' || isLoading}
+            aria-label={t('sync.refresh')}
+            size="small"
+          >
+            <Refresh />
+          </IconButton>
+        </Box>
+      </DesktopSyncPanel>
+
+      {/* Error Dialog */}
+      <SyncErrorDialog
+        open={errorDialogOpen}
+        onClose={handleCloseErrorDialog}
+        errorType={syncError as S3ErrorType}
+        errorDetails={syncErrorDetails}
       />
 
-      <Box sx={{ mt: 1 }}>
-        <Typography variant="body2">
-          {t('sync.lastSynced')}: {lastSyncTime || t('sync.never')}
-        </Typography>
-        <Typography variant="body2">
-          {t('sync.queuedChanges')}: {queuedChanges}
-        </Typography>
-      </Box>
-
-      <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
-        <IconButton
-          onClick={handleSync}
-          disabled={syncStatus === 'syncing' || isLoading}
-          aria-label={t('sync.refresh')}
-          size="small"
-        >
-          <Refresh />
-        </IconButton>
-      </Box>
-    </DesktopSyncPanel>
+      {/* Success/Info Snackbar */}
+      <Snackbar
+        open={syncSnackbarOpen}
+        autoHideDuration={4000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
+    </>
   );
 };
 

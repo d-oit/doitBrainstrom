@@ -14,7 +14,10 @@ interface MindMapContextProps {
   updateNodeSize: (nodeId: string, width: number, height: number) => void;
   isLoading: boolean;
   syncStatus: 'idle' | 'syncing' | 'success' | 'error';
-  syncMindMap: () => Promise<boolean>;
+  syncError: S3ErrorType | undefined;
+  syncErrorDetails?: string;
+  lastSyncTime?: string;
+  syncMindMap: () => Promise<{ success: boolean; error?: S3ErrorType; details?: string }>;
 }
 
 const MindMapContext = createContext<MindMapContextProps | undefined>(undefined);
@@ -23,6 +26,9 @@ export const MindMapContextProvider: React.FC<{ children: React.ReactNode }> = (
   const [mindMapData, setMindMapData] = useState<MindMapData>({ nodes: [], links: [] });
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'success' | 'error'>('idle');
+  const [syncError, setSyncError] = useState<S3ErrorType | undefined>(undefined);
+  const [syncErrorDetails, setSyncErrorDetails] = useState<string | undefined>(undefined);
+  const [lastSyncTime, setLastSyncTime] = useState<string | undefined>(undefined);
 
   // Load mind map data from IndexedDB or S3 on component mount
   useEffect(() => {
@@ -35,7 +41,7 @@ export const MindMapContextProvider: React.FC<{ children: React.ReactNode }> = (
         // Handle S3 errors and set appropriate status
         if (result.error) {
           let errorMessage = 'Error connecting to S3. Changes will be saved locally.';
-          
+
           switch (result.error) {
             case S3ErrorType.ACCESS_DENIED:
               errorMessage = 'Access denied to S3 storage. Check your permissions.';
@@ -92,45 +98,57 @@ export const MindMapContextProvider: React.FC<{ children: React.ReactNode }> = (
   }, [mindMapData, isLoading]);
 
   // Function to manually trigger synchronization
-  const syncMindMap = useCallback(async (): Promise<boolean> => {
+  const syncMindMap = useCallback(async (): Promise<{ success: boolean; error?: S3ErrorType; details?: string }> => {
+    // Reset error state at the beginning of a sync attempt
+    setSyncError(undefined);
+    setSyncErrorDetails(undefined);
+
     if (navigator.onLine) {
       setSyncStatus('syncing');
       try {
         const result = await saveMindMapLocally(mindMapData);
-        
-        if (result.error) {
-          let errorMessage = 'Error syncing to S3. Changes saved locally.';
-          
-          switch (result.error) {
-            case S3ErrorType.ACCESS_DENIED:
-              errorMessage = 'Access denied to S3 storage. Changes saved locally only.';
-              break;
-            case S3ErrorType.NETWORK_ERROR:
-              errorMessage = 'Network error while syncing. Changes saved locally only.';
-              break;
-          }
 
-          if (window.ErrorNotificationContext?.showError) {
-            window.ErrorNotificationContext.showError(errorMessage);
-          }
+        if (result.error) {
+          // Store the error details for the UI to display
+          setSyncError(result.error);
+          setSyncErrorDetails(result.details);
+
+          // Don't show error notifications automatically - let the UI handle it
+          // when the user explicitly clicks the sync button
+        } else {
+          // Update last sync time on success
+          setLastSyncTime(new Date().toLocaleString());
         }
 
         setSyncStatus(result.success ? 'success' : 'error');
-        return result.success;
+        return {
+          success: result.success,
+          error: result.error,
+          details: result.details
+        };
       } catch (error) {
         console.error('Error syncing mind map:', error);
         setSyncStatus('error');
-        if (window.ErrorNotificationContext?.showError) {
-          window.ErrorNotificationContext.showError(
-            'Failed to sync changes. Will try again later.'
-          );
-        }
-        return false;
+        setSyncError(S3ErrorType.NETWORK_ERROR);
+        setSyncErrorDetails((error as Error).message);
+
+        return {
+          success: false,
+          error: S3ErrorType.NETWORK_ERROR,
+          details: (error as Error).message
+        };
       }
     } else {
       console.log('App is offline, sync queued for when online');
       setSyncStatus('idle');
-      return false;
+      setSyncError(S3ErrorType.NETWORK_ERROR);
+      setSyncErrorDetails('Device is offline. Please check your connection and try again.');
+
+      return {
+        success: false,
+        error: S3ErrorType.NETWORK_ERROR,
+        details: 'Device is offline. Please check your connection and try again.'
+      };
     }
   }, [mindMapData, setSyncStatus]);
 
@@ -295,6 +313,9 @@ export const MindMapContextProvider: React.FC<{ children: React.ReactNode }> = (
     updateNodeSize,
     isLoading,
     syncStatus,
+    syncError,
+    syncErrorDetails,
+    lastSyncTime,
     syncMindMap
   };
 

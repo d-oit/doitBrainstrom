@@ -15,6 +15,8 @@ let s3: any = null;
 let BUCKET_NAME = '';
 const MIND_MAP_KEY = 'mind-map-data.json';
 let isS3Initialized = false;
+let isS3Available = false;
+let lastS3Error: { type: S3ErrorType; details?: string } | undefined = undefined;
 
 // Define specific S3 error types
 export enum S3ErrorType {
@@ -33,7 +35,8 @@ export interface MindMapInitResult {
 
 export interface SaveResult {
   success: boolean;
-  error: S3ErrorType | null;
+  error?: S3ErrorType;
+  details?: string;
 }
 
 // Check if S3 is configured
@@ -46,10 +49,14 @@ const isS3Configured = () => {
 
 // Initialize S3 asynchronously
 const initializeS3 = async () => {
-  if (isS3Initialized) return true;
+  if (isS3Initialized && isS3Available) return { success: true };
   if (!isS3Configured()) {
     logWarn('S3 is not configured');
-    return false;
+    lastS3Error = { type: S3ErrorType.NOT_CONFIGURED };
+    return {
+      success: false,
+      error: S3ErrorType.NOT_CONFIGURED
+    };
   }
 
   try {
@@ -76,39 +83,119 @@ const initializeS3 = async () => {
     try {
       await s3.headBucket({ Bucket: BUCKET_NAME }).promise();
       isS3Initialized = true;
+      isS3Available = true;
+      lastS3Error = undefined;
       logInfo('S3 client initialized and bucket access confirmed');
-      return true;
+      return { success: true };
     } catch (bucketError) {
       logError('S3 bucket access denied:', bucketError);
-      isS3Initialized = false;
-      return false;
+      isS3Initialized = true; // Client is initialized but bucket access failed
+      isS3Available = false;
+
+      // Determine the specific error type
+      if ((bucketError as any).code === 'AccessDenied') {
+        lastS3Error = {
+          type: S3ErrorType.ACCESS_DENIED,
+          details: (bucketError as Error).message
+        };
+      } else {
+        lastS3Error = {
+          type: S3ErrorType.NETWORK_ERROR,
+          details: (bucketError as Error).message
+        };
+      }
+
+      return {
+        success: false,
+        error: lastS3Error.type,
+        details: lastS3Error.details
+      };
     }
   } catch (error) {
     logError('Failed to initialize S3:', error);
     isS3Initialized = false;
-    return false;
+    isS3Available = false;
+    lastS3Error = {
+      type: S3ErrorType.INITIALIZATION_FAILED,
+      details: (error as Error).message
+    };
+    return {
+      success: false,
+      error: lastS3Error.type,
+      details: lastS3Error.details
+    };
   }
 };
 
 // Helper function to check if S3 is available and accessible
-const checkS3Available = async () => {
-  if (!isS3Initialized) {
-    const initialized = await initializeS3();
-    if (!initialized) {
+const checkS3Available = async (forceCheck = false) => {
+  // If we already know S3 is not available and we're not forcing a check,
+  // return the cached result to avoid unnecessary network requests
+  if (!forceCheck && lastS3Error) {
+    return {
+      available: false,
+      error: lastS3Error.type,
+      details: lastS3Error.details
+    };
+  }
+
+  // If S3 is not initialized or we're forcing a check, initialize it
+  if (!isS3Initialized || forceCheck) {
+    const initResult = await initializeS3();
+    if (!initResult.success) {
       logWarn('S3 is not configured or initialization failed');
-      return false;
+      return {
+        available: false,
+        error: initResult.error || S3ErrorType.NOT_CONFIGURED,
+        details: initResult.details
+      };
     }
   }
-  return isS3Initialized && s3 !== null;
+
+  // If we've already verified S3 is available and we're not forcing a check,
+  // return the cached result
+  if (!forceCheck && isS3Available) {
+    return { available: true };
+  }
+
+  try {
+    // Verify bucket access
+    await s3.headBucket({ Bucket: BUCKET_NAME }).promise();
+    isS3Available = true;
+    lastS3Error = undefined;
+    return { available: true };
+  } catch (error) {
+    logError('S3 bucket access error:', error);
+    isS3Available = false;
+
+    if ((error as any).code === 'AccessDenied') {
+      lastS3Error = {
+        type: S3ErrorType.ACCESS_DENIED,
+        details: (error as Error).message
+      };
+    } else {
+      lastS3Error = {
+        type: S3ErrorType.NETWORK_ERROR,
+        details: (error as Error).message
+      };
+    }
+
+    return {
+      available: false,
+      error: lastS3Error.type,
+      details: lastS3Error.details
+    };
+  }
 };
 
 // Save mind map data to S3
 export const saveMindMapToS3 = async (mindMapData: MindMapData): Promise<SaveResult> => {
-  const isAvailable = await checkS3Available();
-  if (!isAvailable) {
+  const s3Status = await checkS3Available(true); // Force a fresh check
+  if (!s3Status.available) {
     return {
       success: false,
-      error: S3ErrorType.NOT_CONFIGURED
+      error: s3Status.error || S3ErrorType.NOT_CONFIGURED,
+      details: s3Status.details
     };
   }
 
@@ -125,8 +212,7 @@ export const saveMindMapToS3 = async (mindMapData: MindMapData): Promise<SaveRes
     await s3.putObject(params).promise();
     logInfo('Mind map data saved to S3 successfully');
     return {
-      success: true,
-      error: null
+      success: true
     };
   } catch (error) {
     const errorMessage = 'Error saving mind map data to S3';
@@ -143,9 +229,10 @@ export const initializeMindMapData = async (defaultId: string = 'default'): Prom
   try {
     logInfo('Initializing mind map data...');
 
-    // Try to load from S3 first if available
-    const isAvailable = await checkS3Available();
-    if (isAvailable) {
+    // Try to load from S3 only if explicitly configured
+    // We don't want to trigger network requests on app load
+    // unless S3 has been previously successfully initialized
+    if (isS3Initialized && isS3Available) {
       try {
         const params = {
           Bucket: BUCKET_NAME,
@@ -278,8 +365,7 @@ export const saveMindMapLocally = async (
       }
 
       return {
-        success: true,
-        error: null
+        success: true
       };
     } catch (dbError) {
       logError('Error saving to IndexedDB:', dbError);
