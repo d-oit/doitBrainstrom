@@ -1,6 +1,6 @@
 // src/components/MindMapCard.tsx
 import React, { memo } from 'react';
-import { Card, CardContent, Typography, useTheme } from '@mui/material';
+import { Card, CardContent, Typography } from '@mui/material';
 import { useResponsive } from '../contexts/ResponsiveContext';
 import '../styles/responsive.css';
 
@@ -17,9 +17,8 @@ const MindMapCard: React.FC<MindMapCardProps> = ({
   onClick,
   draggable = false
 }) => {
-  const theme = useTheme();
-  const { viewport, shouldReduceAnimations } = useResponsive();
-  const { isMobile, isTablet } = viewport;
+  // We only need the shouldReduceAnimations from the responsive context
+  const { shouldReduceAnimations } = useResponsive();
 
   return (
     <Card

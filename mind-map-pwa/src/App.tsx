@@ -112,7 +112,7 @@ function App() {
           <Typography variant="h5" component="h2" gutterBottom>
             {t('s3.connectionTest')}
           </Typography>
-          
+
           {isLoading ? (
             <Box display="flex" justifyContent="center" p={2}>
               <CircularProgress />
@@ -142,7 +142,7 @@ function App() {
           {t('tabs.sampleCards')}
         </Typography>
         <Grid container spacing={3}>
-          <Grid item xs={12} sm={6} md={4}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <Suspense fallback={<Box p={2}><CircularProgress size={20} /></Box>}>
               <MindMapCard
                 title={t('mindMap.mainIdea')}
@@ -150,7 +150,7 @@ function App() {
               />
             </Suspense>
           </Grid>
-          <Grid item xs={12} sm={6} md={4}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <Suspense fallback={<Box p={2}><CircularProgress size={20} /></Box>}>
               <MindMapCard
                 title={t('mindMap.supportingConcept')}
@@ -158,7 +158,7 @@ function App() {
               />
             </Suspense>
           </Grid>
-          <Grid item xs={12} sm={6} md={4}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <Suspense fallback={<Box p={2}><CircularProgress size={20} /></Box>}>
               <MindMapCard
                 title={t('mindMap.anotherConcept')}

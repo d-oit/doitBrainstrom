@@ -1,8 +1,8 @@
 // src/contexts/ThemeContext.tsx
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { ThemeProvider, Experimental_CssVarsProvider as CssVarsProvider } from '@mui/material/styles';
+import { ThemeProvider, CssVarsProvider } from '@mui/material/styles';
 import { CssBaseline, useMediaQuery } from '@mui/material';
-import themes, { lightTheme, darkTheme, getSystemTheme, lightThemeCssVars } from '../styles/theme';
+import { lightTheme, darkTheme, getSystemTheme, lightThemeCssVars } from '../styles/theme';
 
 type ThemeMode = 'light' | 'dark' | 'system';
 

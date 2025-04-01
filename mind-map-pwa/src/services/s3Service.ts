@@ -4,7 +4,6 @@ import '../utils/globalPolyfill';
 
 // Dynamically import AWS SDK only if needed
 import { logInfo, logError, logWarn } from '../utils/logger';
-import { NetworkError } from '../utils/errorHandler';
 
 // Define variables outside the conditional block
 let s3: any = null;
@@ -133,14 +132,14 @@ export const getBucketContents = async (bucketName: string) => {
     const response = await s3.listObjects({
       Bucket: bucketName || S3_BUCKET_NAME
     }).promise();
-    
+
     if (!response.Contents || response.Contents.length === 0) {
       return {
         error: 'No contents found in bucket',
         contents: []
       };
     }
-    
+
     logInfo("Bucket contents:", response.Contents);
     return {
       contents: response.Contents,

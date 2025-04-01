@@ -1,5 +1,5 @@
-import { createTheme, ThemeOptions, experimental_extendTheme as extendTheme } from '@mui/material/styles';
-import { breakpoints } from './breakpoints';
+import { createTheme, ThemeOptions, extendTheme } from '@mui/material/styles';
+import { breakpoints, mediaQueries } from './breakpoints';
 
 // Define common theme options
 const commonThemeOptions: ThemeOptions = {
@@ -83,7 +83,7 @@ const commonThemeOptions: ThemeOptions = {
         root: {
           paddingLeft: '16px',
           paddingRight: '16px',
-          [breakpoints.up('sm')]: {
+          [mediaQueries.up('sm')]: {
             paddingLeft: '24px',
             paddingRight: '24px',
           },

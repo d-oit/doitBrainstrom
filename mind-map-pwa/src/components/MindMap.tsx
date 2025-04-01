@@ -24,11 +24,18 @@ const MindMap: React.FC = () => {
   } = useResponsive();
 
   // Responsive configuration based on viewport
-  const canvasConfig = {
-    mobile: { nodeSize: 32, fontScale: 0.8, linkWidth: 1 },
-    tablet: { nodeSize: 40, fontScale: 1.0, linkWidth: 1.5 },
-    desktop: { nodeSize: 48, fontScale: 1.2, linkWidth: 2 }
-  }[breakpoint];
+  const getCanvasConfig = () => {
+    // Map Material UI breakpoints to our config
+    if (breakpoint === 'xs' || breakpoint === 'sm') {
+      return { nodeSize: 32, fontScale: 0.8, linkWidth: 1 }; // mobile
+    } else if (breakpoint === 'md') {
+      return { nodeSize: 40, fontScale: 1.0, linkWidth: 1.5 }; // tablet
+    } else {
+      return { nodeSize: 48, fontScale: 1.2, linkWidth: 2 }; // desktop (lg, xl)
+    }
+  };
+
+  const canvasConfig = getCanvasConfig();
 
   const [newNodeText, setNewNodeText] = useState('');
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
