@@ -2,6 +2,23 @@
 
 ## Bug Fixes
 
+### 2025-04-01: Fixed Multiple UI and Functionality Issues
+
+**Issues:**
+1. MUI Tooltip warning with disabled button
+2. IndexedDB error in getUnsyncedMindMaps function
+3. Missing logo192.png file referenced in browser
+
+**Changes:**
+1. Added a span wrapper around the disabled IconButton in the SyncStatus component to fix the MUI Tooltip warning
+2. Modified the getUnsyncedMindMaps function to use in-memory filtering instead of IDBKeyRange.only(false)
+3. Copied the existing icon-192x192.png to logo192.png to satisfy browser references
+
+**Files Modified:**
+- src/components/SyncStatus.tsx
+- src/utils/indexedDB/dbService.ts
+- Added new file: public/logo192.png (copied from public/icons/icon-192x192.png)
+
 ### 2025-04-01: Fixed Context Provider Order Issue
 
 **Issue:** The application was throwing an error "useI18n must be used within an I18nContextProvider" because the ErrorNotificationContextProvider was trying to use the useI18n hook but was rendered before the I18nContextProvider.
