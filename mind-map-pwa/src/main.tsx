@@ -1,4 +1,5 @@
-window.global = window;
+// Import polyfill first to ensure global is defined before any other imports
+import './utils/globalPolyfill';
 
 import React from 'react'
 import ReactDOM from 'react-dom/client'
@@ -25,8 +26,8 @@ registerServiceWorker();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <ErrorNotificationContextProvider>
-      <I18nContextProvider>
+    <I18nContextProvider>
+      <ErrorNotificationContextProvider>
         <ThemeContextProvider>
           <ResponsiveContextProvider>
             <MindMapContextProvider>
@@ -34,7 +35,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             </MindMapContextProvider>
           </ResponsiveContextProvider>
         </ThemeContextProvider>
-      </I18nContextProvider>
-    </ErrorNotificationContextProvider>
+      </ErrorNotificationContextProvider>
+    </I18nContextProvider>
   </React.StrictMode>,
 )
