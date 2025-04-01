@@ -58,13 +58,14 @@ const checkS3Available = () => {
 
 export const listBuckets = async () => { // Example function to test connection
   if (!checkS3Available()) {
+    // Return empty array when S3 is not available
     return [];
   }
 
   try {
     const response = await s3.listBuckets().promise();
     logInfo("S3 Buckets:", response.Buckets);
-    return response.Buckets;
+    return response.Buckets || []; // Ensure we always return an array
   } catch (error) {
     const errorMessage = "Error connecting to S3";
     logError(errorMessage, error);
@@ -75,6 +76,7 @@ export const listBuckets = async () => { // Example function to test connection
 
 export const getBucketContents = async (bucketName: string) => {
   if (!checkS3Available()) {
+    // Return empty array when S3 is not available
     return [];
   }
 
@@ -83,7 +85,7 @@ export const getBucketContents = async (bucketName: string) => {
       Bucket: bucketName || S3_BUCKET_NAME
     }).promise();
     logInfo("Bucket contents:", response.Contents);
-    return response.Contents;
+    return response.Contents || []; // Ensure we always return an array
   } catch (error) {
     const errorMessage = "Error getting bucket contents";
     logError(errorMessage, error);

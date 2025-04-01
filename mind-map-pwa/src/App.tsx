@@ -45,10 +45,16 @@ function App() {
     const fetchBuckets = async () => {
       try {
         const bucketsData = await listBuckets()
-        if (bucketsData) {
+        // Only set buckets if the array has items, otherwise show error
+        if (bucketsData && bucketsData.length > 0) {
           setBuckets(bucketsData)
+          setError(null) // Clear any previous errors
+        } else {
+          setBuckets(null)
+          setError(t('s3.connectionError'))
         }
       } catch (err) {
+        setBuckets(null)
         setError(t('s3.connectionError'))
         console.error(err)
       }

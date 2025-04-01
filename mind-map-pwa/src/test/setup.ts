@@ -1,17 +1,19 @@
-import { expect, afterEach, vi } from 'vitest';
+import { expect, afterEach, vi, beforeEach } from 'vitest';
+import '@testing-library/jest-dom';
+import { cleanup } from '@testing-library/react';
 
 // Make vi available globally
 global.vi = vi;
 
-// Mock DOM globals for node environment
-global.document = {
-  createElement: () => ({
-    textContent: '',
-    innerHTML: ''
-  })
-};
+// Setup for each test
+beforeEach(() => {
+  // Any setup needed before each test
+});
 
 // Clean up after each test
 afterEach(() => {
-  // No cleanup needed in node environment
+  // Clean up any React testing library elements
+  cleanup();
+  // Reset any mocks
+  vi.restoreAllMocks();
 });
