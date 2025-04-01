@@ -9,16 +9,16 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0 --fix",
     "preview": "vite preview",
-    "test": "vitest run",
+    "test": "node --max-old-space-size=4096 node_modules/vitest/vitest.mjs run",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest run --coverage",
+    "test:coverage": "node --max-old-space-size=4096 node_modules/vitest/vitest.mjs run --coverage",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "test:sanitization": "vitest run src/utils/inputSanitization.test.ts",
-    "test:performance": "vitest run src/utils/performanceMonitoring.test.ts",
-    "test:mindmapcard": "vitest run src/components/MindMapCard.test.tsx",
-    "test:app": "vitest run src/App.test.tsx",
-    "test:layout": "vitest run src/components/Layout.accessibility.test.tsx"
+    "test:sanitization": "node --max-old-space-size=4096 node_modules/vitest/vitest.mjs run src/utils/inputSanitization.test.ts",
+    "test:performance": "node --max-old-space-size=4096 node_modules/vitest/vitest.mjs run src/utils/performanceMonitoring.test.ts",
+    "test:mindmapcard": "node --max-old-space-size=4096 node_modules/vitest/vitest.mjs run src/components/MindMapCard.test.tsx",
+    "test:app": "node --max-old-space-size=4096 node_modules/vitest/vitest.mjs run src/App.test.tsx",
+    "test:layout": "node --max-old-space-size=4096 node_modules/vitest/vitest.mjs run src/components/Layout.accessibility.test.tsx"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

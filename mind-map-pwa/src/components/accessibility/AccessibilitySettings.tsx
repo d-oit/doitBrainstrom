@@ -12,7 +12,6 @@ import {
   Switch,
   FormControlLabel,
   FormControl,
-  FormLabel,
   RadioGroup,
   Radio,
   Slider,
@@ -53,23 +52,23 @@ const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({ open, onC
   const { mode, setMode } = useAppTheme();
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
-  
+
   const [activeTab, setActiveTab] = useState(0);
-  
+
   // Handle tab change
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
   };
-  
+
   // Handle settings changes
   const handleToggleScreenReaderSupport = (event: React.ChangeEvent<HTMLInputElement>) => {
     updateSettings({ screenReaderSupport: event.target.checked });
   };
-  
+
   const handleToggleKeyboardNavigation = (event: React.ChangeEvent<HTMLInputElement>) => {
     updateSettings({ keyboardNavigation: event.target.checked });
   };
-  
+
   const handleToggleHighContrast = (event: React.ChangeEvent<HTMLInputElement>) => {
     updateSettings({ highContrast: event.target.checked });
     if (event.target.checked) {
@@ -78,19 +77,19 @@ const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({ open, onC
       setMode('light');
     }
   };
-  
+
   const handleToggleReducedMotion = (event: React.ChangeEvent<HTMLInputElement>) => {
     updateSettings({ reducedMotion: event.target.checked });
   };
-  
+
   const handleToggleLargeText = (event: React.ChangeEvent<HTMLInputElement>) => {
     updateSettings({ largeText: event.target.checked });
   };
-  
+
   const handleColorBlindnessChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     updateSettings({ colorBlindnessType: event.target.value as any });
   };
-  
+
   // Reset all settings to defaults
   const handleResetSettings = () => {
     updateSettings({
@@ -101,12 +100,12 @@ const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({ open, onC
       largeText: false,
       colorBlindnessType: 'none'
     });
-    
+
     if (mode === 'high-contrast') {
       setMode('light');
     }
   };
-  
+
   return (
     <Dialog
       open={open}
@@ -134,7 +133,7 @@ const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({ open, onC
           </IconButton>
         </Box>
       </DialogTitle>
-      
+
       <Box sx={{ px: 3, pb: 1 }}>
         <Tabs
           value={activeTab}
@@ -143,39 +142,39 @@ const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({ open, onC
           variant="scrollable"
           scrollButtons="auto"
         >
-          <Tab 
-            label={t('accessibility.visualSettings')} 
-            id="tab-0" 
+          <Tab
+            label={t('accessibility.visualSettings')}
+            id="tab-0"
             aria-controls="tabpanel-0"
             icon={<ColorLens />}
             iconPosition="start"
           />
-          <Tab 
-            label={t('accessibility.motionSettings')} 
-            id="tab-1" 
+          <Tab
+            label={t('accessibility.motionSettings')}
+            id="tab-1"
             aria-controls="tabpanel-1"
             icon={<Speed />}
             iconPosition="start"
           />
-          <Tab 
-            label={t('accessibility.screenReaderSettings')} 
-            id="tab-2" 
+          <Tab
+            label={t('accessibility.screenReaderSettings')}
+            id="tab-2"
             aria-controls="tabpanel-2"
             icon={<VisibilityOff />}
             iconPosition="start"
           />
-          <Tab 
-            label={t('accessibility.keyboardSettings')} 
-            id="tab-3" 
+          <Tab
+            label={t('accessibility.keyboardSettings')}
+            id="tab-3"
             aria-controls="tabpanel-3"
             icon={<Keyboard />}
             iconPosition="start"
           />
         </Tabs>
       </Box>
-      
+
       <Divider />
-      
+
       <DialogContent>
         {/* Visual Settings */}
         <Box
@@ -189,7 +188,7 @@ const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({ open, onC
               <Typography variant="h6" gutterBottom>
                 {t('accessibility.contrastSettings')}
               </Typography>
-              
+
               <FormControlLabel
                 control={
                   <Switch
@@ -210,12 +209,12 @@ const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({ open, onC
                   </Box>
                 }
               />
-              
+
               <Box sx={{ mt: 3 }}>
                 <Typography variant="h6" gutterBottom>
                   {t('accessibility.textSettings')}
                 </Typography>
-                
+
                 <FormControlLabel
                   control={
                     <Switch
@@ -237,12 +236,12 @@ const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({ open, onC
                   }
                 />
               </Box>
-              
+
               <Box sx={{ mt: 3 }}>
                 <Typography variant="h6" gutterBottom>
                   {t('accessibility.colorBlindnessSettings')}
                 </Typography>
-                
+
                 <FormControl component="fieldset">
                   <RadioGroup
                     aria-label="color blindness type"
@@ -277,12 +276,12 @@ const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({ open, onC
                     />
                   </RadioGroup>
                 </FormControl>
-                
+
                 <Box sx={{ mt: 2 }}>
                   <Typography variant="subtitle2" gutterBottom>
                     {t('accessibility.colorBlindnessPreview')}
                   </Typography>
-                  
+
                   <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                     <Paper
                       sx={{
@@ -298,7 +297,7 @@ const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({ open, onC
                         {t('common.primary')}
                       </Typography>
                     </Paper>
-                    
+
                     <Paper
                       sx={{
                         width: 100,
@@ -313,7 +312,7 @@ const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({ open, onC
                         {t('common.secondary')}
                       </Typography>
                     </Paper>
-                    
+
                     <Paper
                       sx={{
                         width: 100,
@@ -328,7 +327,7 @@ const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({ open, onC
                         {t('common.error')}
                       </Typography>
                     </Paper>
-                    
+
                     <Paper
                       sx={{
                         width: 100,
@@ -343,7 +342,7 @@ const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({ open, onC
                         {t('common.warning')}
                       </Typography>
                     </Paper>
-                    
+
                     <Paper
                       sx={{
                         width: 100,
@@ -364,7 +363,7 @@ const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({ open, onC
             </>
           )}
         </Box>
-        
+
         {/* Motion Settings */}
         <Box
           role="tabpanel"
@@ -377,7 +376,7 @@ const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({ open, onC
               <Typography variant="h6" gutterBottom>
                 {t('accessibility.motionSettings')}
               </Typography>
-              
+
               <FormControlLabel
                 control={
                   <Switch
@@ -399,18 +398,18 @@ const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({ open, onC
                   </Box>
                 }
               />
-              
+
               {isReducedMotionActive && !settings.reducedMotion && (
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1, ml: 4 }}>
                   {t('accessibility.reducedMotionSystemEnabled')}
                 </Typography>
               )}
-              
+
               <Box sx={{ mt: 3 }}>
                 <Typography variant="h6" gutterBottom>
                   {t('accessibility.animationSpeed')}
                 </Typography>
-                
+
                 <Box sx={{ px: 2 }}>
                   <Slider
                     disabled={isReducedMotionActive}
@@ -423,7 +422,7 @@ const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({ open, onC
                     valueLabelDisplay="auto"
                     valueLabelFormat={(value) => `${value}x`}
                   />
-                  
+
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
                     <Typography variant="body2" color="text.secondary">
                       {t('accessibility.slower')}
@@ -433,7 +432,7 @@ const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({ open, onC
                     </Typography>
                   </Box>
                 </Box>
-                
+
                 {isReducedMotionActive && (
                   <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
                     {t('accessibility.animationSpeedDisabled')}
@@ -443,7 +442,7 @@ const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({ open, onC
             </>
           )}
         </Box>
-        
+
         {/* Screen Reader Settings */}
         <Box
           role="tabpanel"
@@ -456,7 +455,7 @@ const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({ open, onC
               <Typography variant="h6" gutterBottom>
                 {t('accessibility.screenReaderSettings')}
               </Typography>
-              
+
               <FormControlLabel
                 control={
                   <Switch
@@ -477,12 +476,12 @@ const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({ open, onC
                   </Box>
                 }
               />
-              
+
               <Box sx={{ mt: 3 }}>
                 <Typography variant="h6" gutterBottom>
                   {t('accessibility.announcementVerbosity')}
                 </Typography>
-                
+
                 <FormControl fullWidth sx={{ mt: 1 }}>
                   <Select
                     value="medium"
@@ -493,7 +492,7 @@ const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({ open, onC
                     <MenuItem value="high">{t('accessibility.verbosity.high')}</MenuItem>
                   </Select>
                 </FormControl>
-                
+
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                   {t('accessibility.verbosityDescription')}
                 </Typography>
@@ -501,7 +500,7 @@ const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({ open, onC
             </>
           )}
         </Box>
-        
+
         {/* Keyboard Settings */}
         <Box
           role="tabpanel"
@@ -514,7 +513,7 @@ const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({ open, onC
               <Typography variant="h6" gutterBottom>
                 {t('accessibility.keyboardSettings')}
               </Typography>
-              
+
               <FormControlLabel
                 control={
                   <Switch
@@ -535,7 +534,7 @@ const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({ open, onC
                   </Box>
                 }
               />
-              
+
               <Box sx={{ mt: 3 }}>
                 <Button
                   variant="outlined"
@@ -545,7 +544,7 @@ const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({ open, onC
                 >
                   {t('accessibility.customizeKeyboardShortcuts')}
                 </Button>
-                
+
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                   {t('accessibility.customizeKeyboardShortcutsDescription')}
                 </Typography>
@@ -554,9 +553,9 @@ const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({ open, onC
           )}
         </Box>
       </DialogContent>
-      
+
       <Divider />
-      
+
       <DialogActions>
         <Button
           startIcon={<RestartAlt />}

@@ -1,5 +1,5 @@
 // src/styles/theme-engine.ts
-import { createTheme, experimental_extendTheme, ThemeOptions } from '@mui/material/styles';
+import { createTheme, ThemeOptions } from '@mui/material/styles';
 import { ThemeMode, AccessibleThemeOptions, ThemeSettings } from '../types/theme';
 
 // Color palettes
@@ -245,8 +245,8 @@ const createThemeOptions = (mode: ThemeMode, settings?: ThemeSettings): Accessib
     components: {
       ...commonThemeOptions.components,
       MuiCssBaseline: {
-        styleOverrides: (theme) => ({
-          ...commonThemeOptions.components?.MuiCssBaseline?.styleOverrides?.(theme),
+        styleOverrides: {
+          ...(typeof commonThemeOptions.components?.MuiCssBaseline?.styleOverrides === 'object' ? commonThemeOptions.components?.MuiCssBaseline?.styleOverrides : {}),
           // Add high contrast specific styles
           ...(isHighContrast && {
             '& :focus-visible': {
@@ -270,7 +270,7 @@ const createThemeOptions = (mode: ThemeMode, settings?: ThemeSettings): Accessib
               scrollBehavior: 'auto !important',
             },
           }),
-        }),
+        },
       },
     },
   };
@@ -308,7 +308,7 @@ const applyColorBlindnessAdjustments = (palette: any, colorScheme: string) => {
 // Create theme for Material UI v7
 export const createAppTheme = (mode: ThemeMode, settings?: ThemeSettings) => {
   const themeOptions = createThemeOptions(mode, settings);
-  return experimental_extendTheme(themeOptions);
+  return createTheme(themeOptions);
 };
 
 // Create theme for Material UI v5 (fallback)
@@ -328,28 +328,28 @@ export const detectSystemPreference = (): 'light' | 'dark' => {
 // Watch for system preference changes
 export const watchSystemPreference = (callback: (preference: 'light' | 'dark') => void): (() => void) => {
   if (typeof window === 'undefined') return () => {};
-  
+
   const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-  
+
   const listener = (e: MediaQueryListEvent) => {
     callback(e.matches ? 'dark' : 'light');
   };
-  
+
   // Add listener with modern API
   if (mediaQuery.addEventListener) {
     mediaQuery.addEventListener('change', listener);
     return () => mediaQuery.removeEventListener('change', listener);
-  } 
+  }
   // Fallback for older browsers
   else if ('addListener' in mediaQuery) {
-    // @ts-ignore - For older browsers
+    // For older browsers
     mediaQuery.addListener(listener);
     return () => {
-      // @ts-ignore - For older browsers
+      // For older browsers
       mediaQuery.removeListener(listener);
     };
   }
-  
+
   return () => {};
 };
 

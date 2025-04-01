@@ -2,8 +2,10 @@
  * @vitest-environment jsdom
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import React from 'react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom'; // This adds the toBeInTheDocument matcher
 import userEvent from '@testing-library/user-event';
 
 // Mock all imports before importing App
@@ -31,27 +33,62 @@ vi.mock('@mui/material', () => {
         values: { xs: 0, sm: 600, md: 900, lg: 1200, xl: 1536 }
       }
     }),
-    Box: ({ children, ...props }: any) => <div data-testid="box" {...props}>{children}</div>,
-    Grid: ({ children, ...props }: any) => <div data-testid="grid" {...props}>{children}</div>,
-    Typography: ({ children, ...props }: any) => <div data-testid="typography" {...props}>{children}</div>,
-    Alert: ({ children, ...props }: any) => <div data-testid="alert" {...props}>{children}</div>,
-    Paper: ({ children, ...props }: any) => <div data-testid="paper" {...props}>{children}</div>,
-    Tabs: ({ children, ...props }: any) => <div role="tablist" data-testid="tabs" {...props}>{children}</div>,
-    Tab: ({ label, id, 'aria-controls': ariaControls, ...props }: any) => <div role="tab" data-testid="tab" tabIndex={0} id={id} aria-controls={ariaControls} {...props}>{label}</div>,
-    CircularProgress: ({ ...props }: any) => <div data-testid="progress" {...props}>Loading...</div>
+    Box: ({ children, justifyContent, ...props }: any) => {
+      const { className, ...htmlProps } = props;
+      return <div data-testid="box" className={className} {...htmlProps}>{children}</div>;
+    },
+    Grid: ({ children, ...props }: any) => {
+      const { className, ...htmlProps } = props;
+      return <div data-testid="grid" className={className} {...htmlProps}>{children}</div>;
+    },
+    Typography: ({ children, gutterBottom, variant, ...props }: any) => {
+      const { className, ...htmlProps } = props;
+      return <div data-testid="typography" className={className} {...htmlProps}>{children}</div>;
+    },
+    Alert: ({ children, severity, ...props }: any) => {
+      const { className, ...htmlProps } = props;
+      return <div data-testid="alert" className={className} {...htmlProps}>{children}</div>;
+    },
+    Paper: ({ children, elevation, ...props }: any) => {
+      const { className, ...htmlProps } = props;
+      return <div data-testid="paper" className={className} {...htmlProps}>{children}</div>;
+    },
+    Tabs: ({ children, ...props }: any) => {
+      return (
+        <div role="tablist" data-testid="tabs" {...props}>
+          {React.Children.map(children, (child: any) => (
+            <button
+              type="button"
+              role="tab"
+              data-testid="tab"
+              aria-selected="true"
+              tabIndex={0}
+            >
+              {child.props.label}
+            </button>
+          ))}
+        </div>
+      );
+    },
+    Tab: ({ label }: any) => {
+      return null; // Handling moved to Tabs component
+    },
+    CircularProgress: ({ size, ...props }: any) => {
+      const { className, ...htmlProps } = props;
+      return <div data-testid="progress" className={className} {...htmlProps}>Loading...</div>;
+    }
   };
 });
 
 vi.mock('./contexts/I18nContext', () => ({
   I18nContext: {
-    Provider: ({ children, value }: { children: React.ReactNode, value: any }) => <div>{children}</div>
+    Provider: ({ children, value }: { children: React.ReactNode, value: any }) => <div data-testid="i18n-provider">{children}</div>
   },
   useI18n: () => ({
     t: (key: string) => key,
     locale: 'en',
     setLocale: vi.fn(),
-    dir: 'ltr',
-    availableLocales: ['en', 'es', 'ar']
+    dir: 'ltr'
   })
 }));
 
@@ -174,8 +211,7 @@ const MockI18nProvider = ({ children }: { children: React.ReactNode }) => {
       t: mockT,
       locale: 'en',
       setLocale: vi.fn(),
-      dir: 'ltr',
-      availableLocales: ['en', 'es', 'ar']
+      dir: 'ltr'
     }}>
       {children}
     </I18nContext.Provider>
@@ -188,8 +224,6 @@ describe('App Integration', () => {
     vi.resetAllMocks();
   });
   it('renders the App with tabs', async () => {
-    // Setup user event
-    const user = userEvent.setup();
     render(
       <MockI18nProvider>
         <App />
@@ -214,8 +248,7 @@ describe('App Integration', () => {
   });
 
   it('shows success message when S3 connection succeeds', async () => {
-    // Setup user event
-    const user = userEvent.setup();
+    const _user = userEvent.setup();
     // Mock successful S3 connection
     vi.mocked(listBuckets).mockResolvedValue({ buckets: [{ Name: 'test-bucket' }], error: null });
 
@@ -228,7 +261,7 @@ describe('App Integration', () => {
     // Click on S3 Connection tab (second tab)
     const s3Tab = screen.getAllByTestId('tab')[1];
     // Use userEvent to simulate a click
-    await user.click(s3Tab);
+    await _user.click(s3Tab);
 
     // Wait for the S3 tab panel to be visible
     const s3TabPanel = await screen.findByRole('tabpanel', { hidden: false });
@@ -239,8 +272,7 @@ describe('App Integration', () => {
   });
 
   it('shows error message when S3 connection returns no buckets', async () => {
-    // Setup user event
-    const user = userEvent.setup();
+    const _user = userEvent.setup();
     // Mock failed S3 connection (empty array)
     vi.mocked(listBuckets).mockResolvedValue({ buckets: [], error: null });
 
@@ -253,7 +285,7 @@ describe('App Integration', () => {
     // Click on S3 Connection tab (second tab)
     const s3Tab = screen.getAllByTestId('tab')[1];
     // Use userEvent to simulate a click
-    await user.click(s3Tab);
+    await _user.click(s3Tab);
 
     // Wait for the S3 tab panel to be visible
     const s3TabPanel = await screen.findByRole('tabpanel', { hidden: false });
@@ -264,8 +296,7 @@ describe('App Integration', () => {
   });
 
   it('shows error message when S3 connection returns an error object', async () => {
-    // Setup user event
-    const user = userEvent.setup();
+    const _user = userEvent.setup();
     // Mock S3 connection that returns an error
     vi.mocked(listBuckets).mockResolvedValue({ buckets: [], error: 'Connection error' });
 
@@ -278,7 +309,7 @@ describe('App Integration', () => {
     // Click on S3 Connection tab (second tab)
     const s3Tab = screen.getAllByTestId('tab')[1];
     // Use userEvent to simulate a click
-    await user.click(s3Tab);
+    await _user.click(s3Tab);
 
     // Wait for the S3 tab panel to be visible
     const s3TabPanel = await screen.findByRole('tabpanel', { hidden: false });
@@ -289,8 +320,7 @@ describe('App Integration', () => {
   });
 
   it('shows error message when S3 connection throws an exception', async () => {
-    // Setup user event
-    const user = userEvent.setup();
+    const _user = userEvent.setup();
     // Mock S3 connection that throws an exception
     vi.mocked(listBuckets).mockRejectedValue(new Error('Connection error'));
 
@@ -303,7 +333,7 @@ describe('App Integration', () => {
     // Click on S3 Connection tab (second tab)
     const s3Tab = screen.getAllByTestId('tab')[1];
     // Use userEvent to simulate a click
-    await user.click(s3Tab);
+    await _user.click(s3Tab);
 
     // Wait for the S3 tab panel to be visible
     const s3TabPanel = await screen.findByRole('tabpanel', { hidden: false });

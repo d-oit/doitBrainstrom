@@ -5,9 +5,9 @@ ANALYZE:
 - Audit current codebase state
 
 IMPLEMENT:
-- For each specification:
+- For each specification.
   1. Develop solution based on dependency graph
-  2. Verify with `vitetest`
+  2. Verify with `vitetest`, `build` and `lint` (use the bash for all commands)
   3. Fix any failing tests
   4. Log completion in `status.md` with {date, feature, changes}
 

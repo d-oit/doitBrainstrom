@@ -15,7 +15,6 @@ import {
   DialogContent,
   DialogActions,
   Button,
-  Grid,
   Card,
   CardContent,
   CardActionArea,
@@ -223,20 +222,20 @@ const ThemeSwitcher: React.FC = () => {
             {t('theme.themePreview')}
           </Typography>
 
-          <Grid container spacing={2} sx={{ mb: 4 }}>
-            <Grid item xs={12} sm={6} md={3}>
+          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 2, mb: 4 }}>
+            <Box sx={{ gridColumn: { xs: 'span 12', sm: 'span 6', md: 'span 3' } }}>
               <ThemePreviewCard themeMode="system" label={t('theme.system')} />
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
+            </Box>
+            <Box sx={{ gridColumn: { xs: 'span 12', sm: 'span 6', md: 'span 3' } }}>
               <ThemePreviewCard themeMode="light" label={t('theme.light')} />
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
+            </Box>
+            <Box sx={{ gridColumn: { xs: 'span 12', sm: 'span 6', md: 'span 3' } }}>
               <ThemePreviewCard themeMode="dark" label={t('theme.dark')} />
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
+            </Box>
+            <Box sx={{ gridColumn: { xs: 'span 12', sm: 'span 6', md: 'span 3' } }}>
               <ThemePreviewCard themeMode="high-contrast" label={t('theme.highContrast')} />
-            </Grid>
-          </Grid>
+            </Box>
+          </Box>
 
           <Typography variant="h6" gutterBottom>
             {t('theme.accessibilitySettings')}

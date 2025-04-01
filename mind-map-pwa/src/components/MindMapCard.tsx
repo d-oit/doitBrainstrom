@@ -54,12 +54,12 @@ const MindMapCard: React.FC<MindMapCardProps> = ({
             </Heading4>
             {description && (
               <Paragraph
-                size="sm"
                 className="card-body"
                 style={{
                   color: 'text.secondary',
                   marginTop: '8px',
-                  wordBreak: 'break-word'
+                  wordBreak: 'break-word',
+                  fontSize: '0.875rem'
                 }}
               >
                 {description}

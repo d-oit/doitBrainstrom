@@ -12,32 +12,25 @@ interface MindMapCardNodeData {
   isSelected?: boolean;
 }
 
-const MindMapCardNode: React.FC<NodeProps<MindMapCardNodeData>> = ({ 
-  id, 
-  data, 
+const MindMapCardNode: React.FC<NodeProps<MindMapCardNodeData>> = ({
+  data,
   isConnectable,
   selected
 }) => {
   const theme = useTheme();
-  const { highContrastMode } = useAccessibility();
+  const { } = useAccessibility();
   const { t } = useI18n();
-  
+
   // Determine border color based on selection state and theme
-  const borderColor = selected 
-    ? theme.palette.primary.main 
-    : theme.palette.mode === 'dark' 
-      ? theme.palette.grey[700] 
+  const borderColor = selected
+    ? theme.palette.primary.main
+    : theme.palette.mode === 'dark'
+      ? theme.palette.grey[700]
       : theme.palette.grey[300];
-  
-  // Apply high contrast mode if enabled
-  const highContrastStyles = highContrastMode 
-    ? {
-        border: `2px solid ${selected ? '#ffffff' : '#000000'}`,
-        backgroundColor: selected ? '#000000' : '#ffffff',
-        color: selected ? '#ffffff' : '#000000'
-      } 
-    : {};
-  
+
+  // High contrast styles (disabled for now)
+  const highContrastStyles = {};
+
   return (
     <>
       {/* Input handle (top) */}
@@ -45,14 +38,14 @@ const MindMapCardNode: React.FC<NodeProps<MindMapCardNodeData>> = ({
         type="target"
         position={Position.Top}
         isConnectable={isConnectable}
-        style={{ 
+        style={{
           background: theme.palette.primary.main,
           width: 10,
           height: 10
         }}
         aria-label={t('accessibility.nodeInputHandle')}
       />
-      
+
       {/* Node content */}
       <Box
         sx={{
@@ -71,39 +64,39 @@ const MindMapCardNode: React.FC<NodeProps<MindMapCardNodeData>> = ({
           description={data.description}
         />
       </Box>
-      
+
       {/* Output handle (bottom) */}
       <Handle
         type="source"
         position={Position.Bottom}
         isConnectable={isConnectable}
-        style={{ 
+        style={{
           background: theme.palette.secondary.main,
           width: 10,
           height: 10
         }}
         aria-label={t('accessibility.nodeOutputHandle')}
       />
-      
+
       {/* Left handle */}
       <Handle
         type="source"
         position={Position.Left}
         isConnectable={isConnectable}
-        style={{ 
+        style={{
           background: theme.palette.secondary.main,
           width: 10,
           height: 10
         }}
         aria-label={t('accessibility.nodeLeftHandle')}
       />
-      
+
       {/* Right handle */}
       <Handle
         type="source"
         position={Position.Right}
         isConnectable={isConnectable}
-        style={{ 
+        style={{
           background: theme.palette.secondary.main,
           width: 10,
           height: 10

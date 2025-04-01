@@ -28,64 +28,64 @@ const FocusIndicatorContainer = styled(Box)(({ theme }) => ({
 const FocusIndicator: React.FC = () => {
   const { isHighContrastActive, isReducedMotionActive } = useAccessibility();
   const { mode } = useTheme();
-  
+
   const [focusedElement, setFocusedElement] = useState<HTMLElement | null>(null);
   const [position, setPosition] = useState({ left: 0, top: 0, width: 0, height: 0 });
   const [visible, setVisible] = useState(false);
-  
+
   // Track focus changes
   useEffect(() => {
     const handleFocusIn = (event: FocusEvent) => {
       const target = event.target as HTMLElement;
-      
+
       // Skip if the target is the body or document
-      if (target === document.body || target === document) {
+      if (target === document.body) {
         setVisible(false);
         return;
       }
-      
+
       // Skip if the target already has a visible outline
       const computedStyle = window.getComputedStyle(target);
-      const hasVisibleOutline = 
-        computedStyle.outlineStyle !== 'none' && 
+      const hasVisibleOutline =
+        computedStyle.outlineStyle !== 'none' &&
         computedStyle.outlineWidth !== '0px' &&
         computedStyle.outlineColor !== 'transparent';
-      
+
       if (hasVisibleOutline) {
         setVisible(false);
         return;
       }
-      
+
       // Update the focused element
       setFocusedElement(target);
       setVisible(true);
-      
+
       // Update position
       updatePosition(target);
     };
-    
+
     const handleFocusOut = () => {
       setVisible(false);
     };
-    
+
     // Update position when window is resized
     const handleResize = () => {
       if (focusedElement) {
         updatePosition(focusedElement);
       }
     };
-    
+
     // Update position when window is scrolled
     const handleScroll = () => {
       if (focusedElement) {
         updatePosition(focusedElement);
       }
     };
-    
+
     // Update position of the focus indicator
     const updatePosition = (element: HTMLElement) => {
       const rect = element.getBoundingClientRect();
-      
+
       setPosition({
         left: rect.left + window.scrollX,
         top: rect.top + window.scrollY,
@@ -93,13 +93,13 @@ const FocusIndicator: React.FC = () => {
         height: rect.height
       });
     };
-    
+
     // Add event listeners
     document.addEventListener('focusin', handleFocusIn);
     document.addEventListener('focusout', handleFocusOut);
     window.addEventListener('resize', handleResize);
     window.addEventListener('scroll', handleScroll, true);
-    
+
     // Clean up event listeners
     return () => {
       document.removeEventListener('focusin', handleFocusIn);
@@ -108,12 +108,12 @@ const FocusIndicator: React.FC = () => {
       window.removeEventListener('scroll', handleScroll, true);
     };
   }, [focusedElement]);
-  
+
   // Don't render if not visible
   if (!visible) {
     return null;
   }
-  
+
   return (
     <FocusIndicatorContainer
       className={`

@@ -1,6 +1,6 @@
 // src/components/Layout.tsx
 import React from 'react';
-import { AppBar, Toolbar, Typography, Box, Stack, Divider } from '@mui/material';
+import { AppBar, Toolbar, Box, Stack, Divider } from '@mui/material';
 import ThemeSwitcher from './ThemeSwitcher';
 import LocaleSwitcher from './LocaleSwitcher';
 import SyncStatusPanel from './sync/SyncStatusPanel';

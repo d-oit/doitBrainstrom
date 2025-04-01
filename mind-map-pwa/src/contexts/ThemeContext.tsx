@@ -1,7 +1,7 @@
 // src/contexts/ThemeContext.tsx
 import React, { createContext, useState, useContext, useEffect, useMemo } from 'react';
-import { ThemeProvider, CssVarsProvider } from '@mui/material/styles';
-import { CssBaseline, useMediaQuery } from '@mui/material';
+import { ThemeProvider } from '@mui/material/styles';
+import { CssBaseline } from '@mui/material';
 import { ThemeMode, ThemeSettings, ThemeContextType } from '../types/theme';
 import {
   createAppTheme,
@@ -56,9 +56,8 @@ export const ThemeContextProvider: React.FC<{ children: React.ReactNode }> = ({ 
       : createLegacyTheme(mode === 'system' ? systemPreference : mode, settings);
   }, [mode, systemPreference, settings, useCssVars]);
 
-  // Determine the current mode for CSS vars provider
+  // Determine the current mode
   const currentMode = mode === 'system' ? systemPreference : mode;
-  const cssVarsMode = currentMode === 'high-contrast' ? 'dark' : currentMode;
 
   // Apply CSS classes to body based on theme
   useEffect(() => {
@@ -100,14 +99,10 @@ export const ThemeContextProvider: React.FC<{ children: React.ReactNode }> = ({ 
   return (
     <ThemeContext.Provider value={contextValue}>
       {useCssVars ? (
-        <CssVarsProvider
-          theme={theme}
-          defaultMode={cssVarsMode as 'light' | 'dark'}
-          modeStorageKey="mind-map-theme-mode"
-        >
+        <ThemeProvider theme={theme}>
           <CssBaseline />
           {children}
-        </CssVarsProvider>
+        </ThemeProvider>
       ) : (
         <ThemeProvider theme={theme}>
           <CssBaseline />

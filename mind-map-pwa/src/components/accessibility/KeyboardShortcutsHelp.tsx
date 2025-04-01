@@ -26,7 +26,7 @@ import {
   Keyboard,
   Clear,
   Settings,
-  Edit
+
 } from '@mui/icons-material';
 import { useAccessibility } from '../../contexts/AccessibilityContext';
 import { useI18n } from '../../contexts/I18nContext';
@@ -39,43 +39,43 @@ interface KeyboardShortcutsHelpProps {
 
 const KeyboardShortcutsHelp: React.FC<KeyboardShortcutsHelpProps> = ({ open, onClose }) => {
   const { t } = useI18n();
-  const { keyboardShortcuts, formatShortcut, getShortcutsByGroup } = useAccessibility();
+  const { formatShortcut, getShortcutsByGroup } = useAccessibility();
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
-  
+
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState(0);
   const [filteredShortcuts, setFilteredShortcuts] = useState<Record<string, any[]>>({});
   const dialogRef = useRef<HTMLDivElement>(null);
-  
+
   // Get shortcuts grouped by category
   const shortcutsByGroup = getShortcutsByGroup();
-  
+
   // Filter shortcuts based on search query
   useEffect(() => {
     if (!searchQuery.trim()) {
       setFilteredShortcuts(shortcutsByGroup);
       return;
     }
-    
+
     const query = searchQuery.toLowerCase();
     const filtered: Record<string, any[]> = {};
-    
+
     Object.entries(shortcutsByGroup).forEach(([group, shortcuts]) => {
-      const matchingShortcuts = shortcuts.filter(shortcut => 
+      const matchingShortcuts = shortcuts.filter(shortcut =>
         shortcut.description.toLowerCase().includes(query) ||
         formatShortcut(shortcut).toLowerCase().includes(query) ||
         (shortcut.action && shortcut.action.toLowerCase().includes(query))
       );
-      
+
       if (matchingShortcuts.length > 0) {
         filtered[group] = matchingShortcuts;
       }
     });
-    
+
     setFilteredShortcuts(filtered);
   }, [searchQuery, shortcutsByGroup, formatShortcut]);
-  
+
   // Focus the dialog when it opens
   useEffect(() => {
     if (open && dialogRef.current) {
@@ -84,26 +84,26 @@ const KeyboardShortcutsHelp: React.FC<KeyboardShortcutsHelpProps> = ({ open, onC
       }, 100);
     }
   }, [open]);
-  
+
   // Handle tab change
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
   };
-  
+
   // Handle search input change
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);
   };
-  
+
   // Clear search
   const handleClearSearch = () => {
     setSearchQuery('');
   };
-  
+
   // Get the groups to display based on the active tab
   const getGroupsToDisplay = () => {
     const groups = Object.keys(filteredShortcuts);
-    
+
     if (activeTab === 0) {
       // All shortcuts
       return groups;
@@ -115,16 +115,16 @@ const KeyboardShortcutsHelp: React.FC<KeyboardShortcutsHelpProps> = ({ open, onC
       return groups.filter(group => group === 'Mind Map');
     } else {
       // Other shortcuts
-      return groups.filter(group => 
-        group !== 'Global' && 
-        group !== 'Navigation' && 
+      return groups.filter(group =>
+        group !== 'Global' &&
+        group !== 'Navigation' &&
         group !== 'Mind Map'
       );
     }
   };
-  
+
   const groupsToDisplay = getGroupsToDisplay();
-  
+
   return (
     <Dialog
       open={open}
@@ -153,7 +153,7 @@ const KeyboardShortcutsHelp: React.FC<KeyboardShortcutsHelpProps> = ({ open, onC
           </IconButton>
         </Box>
       </DialogTitle>
-      
+
       <Box sx={{ px: 3, pb: 1 }}>
         <TextField
           fullWidth
@@ -183,7 +183,7 @@ const KeyboardShortcutsHelp: React.FC<KeyboardShortcutsHelpProps> = ({ open, onC
           sx={{ mb: 2 }}
           aria-label={t('common.search')}
         />
-        
+
         <Tabs
           value={activeTab}
           onChange={handleTabChange}
@@ -197,9 +197,9 @@ const KeyboardShortcutsHelp: React.FC<KeyboardShortcutsHelpProps> = ({ open, onC
           <Tab label={t('accessibility.otherShortcuts')} id="tab-3" aria-controls="tabpanel-3" />
         </Tabs>
       </Box>
-      
+
       <Divider />
-      
+
       <DialogContent>
         {groupsToDisplay.length === 0 ? (
           <Box sx={{ textAlign: 'center', py: 4 }}>
@@ -213,7 +213,7 @@ const KeyboardShortcutsHelp: React.FC<KeyboardShortcutsHelpProps> = ({ open, onC
               <Typography variant="h6" gutterBottom>
                 {t(`accessibility.group.${group.toLowerCase()}`, { defaultValue: group })}
               </Typography>
-              
+
               <List dense>
                 {filteredShortcuts[group].map((shortcut, index) => (
                   <ListItem
@@ -248,9 +248,9 @@ const KeyboardShortcutsHelp: React.FC<KeyboardShortcutsHelpProps> = ({ open, onC
           ))
         )}
       </DialogContent>
-      
+
       <Divider />
-      
+
       <DialogActions>
         <Button
           startIcon={<Settings />}

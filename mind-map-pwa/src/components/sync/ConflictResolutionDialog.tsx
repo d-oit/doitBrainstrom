@@ -16,17 +16,14 @@ import {
   RadioGroup,
   FormControlLabel,
   FormControl,
-  FormLabel,
   Alert,
-  CircularProgress,
-  useTheme
+  CircularProgress
 } from '@mui/material';
 import {
   CompareArrows,
   MergeType,
   CloudDownload,
   CloudUpload,
-  History,
   Warning
 } from '@mui/icons-material';
 import { useI18n } from '../../contexts/I18nContext';
@@ -40,18 +37,18 @@ const DiffVisualization: React.FC<{
   remoteData: MindMapData;
   highlightChanges?: boolean;
 }> = ({ localData, remoteData, highlightChanges = true }) => {
-  const theme = useTheme();
+  // Get responsive context for viewport adaptations
   const { t } = useI18n();
-  
+
   // Find added, removed, and modified nodes
   const addedNodes: MindMapNode[] = [];
   const removedNodes: MindMapNode[] = [];
   const modifiedNodes: { local: MindMapNode; remote: MindMapNode }[] = [];
-  
+
   // Map nodes by ID for easier comparison
   const localNodesMap = new Map(localData.nodes.map(node => [node.id, node]));
   const remoteNodesMap = new Map(remoteData.nodes.map(node => [node.id, node]));
-  
+
   // Find added and modified nodes
   remoteData.nodes.forEach(remoteNode => {
     const localNode = localNodesMap.get(remoteNode.id);
@@ -61,23 +58,23 @@ const DiffVisualization: React.FC<{
       modifiedNodes.push({ local: localNode, remote: remoteNode });
     }
   });
-  
+
   // Find removed nodes
   localData.nodes.forEach(localNode => {
     if (!remoteNodesMap.has(localNode.id)) {
       removedNodes.push(localNode);
     }
   });
-  
+
   // Find added, removed, and modified links
   const addedLinks: MindMapLink[] = [];
   const removedLinks: MindMapLink[] = [];
   const modifiedLinks: { local: MindMapLink; remote: MindMapLink }[] = [];
-  
+
   // Map links by ID for easier comparison
   const localLinksMap = new Map(localData.links.map(link => [link.id, link]));
   const remoteLinksMap = new Map(remoteData.links.map(link => [link.id, link]));
-  
+
   // Find added and modified links
   remoteData.links.forEach(remoteLink => {
     const localLink = localLinksMap.get(remoteLink.id);
@@ -87,14 +84,14 @@ const DiffVisualization: React.FC<{
       modifiedLinks.push({ local: localLink, remote: remoteLink });
     }
   });
-  
+
   // Find removed links
   localData.links.forEach(localLink => {
     if (!remoteLinksMap.has(localLink.id)) {
       removedLinks.push(localLink);
     }
   });
-  
+
   // No differences
   if (
     addedNodes.length === 0 &&
@@ -110,7 +107,7 @@ const DiffVisualization: React.FC<{
       </Alert>
     );
   }
-  
+
   return (
     <Box sx={{ mt: 2 }}>
       {/* Nodes differences */}
@@ -119,12 +116,12 @@ const DiffVisualization: React.FC<{
           <Typography variant="h6" gutterBottom>
             {t('sync.conflict.nodeChanges')}
           </Typography>
-          
+
           {/* Added nodes */}
           {addedNodes.length > 0 && (
             <Box sx={{ mb: 2 }}>
               <Typography variant="subtitle1" color="success.main">
-                {t('sync.conflict.addedNodes', { count: addedNodes.length })}
+                {t('sync.conflict.addedNodes', { count: String(addedNodes.length) })}
               </Typography>
               <Paper variant="outlined" sx={{ p: 1, bgcolor: highlightChanges ? 'success.light' : 'background.paper' }}>
                 {addedNodes.map(node => (
@@ -137,12 +134,12 @@ const DiffVisualization: React.FC<{
               </Paper>
             </Box>
           )}
-          
+
           {/* Removed nodes */}
           {removedNodes.length > 0 && (
             <Box sx={{ mb: 2 }}>
               <Typography variant="subtitle1" color="error.main">
-                {t('sync.conflict.removedNodes', { count: removedNodes.length })}
+                {t('sync.conflict.removedNodes', { count: String(removedNodes.length) })}
               </Typography>
               <Paper variant="outlined" sx={{ p: 1, bgcolor: highlightChanges ? 'error.light' : 'background.paper' }}>
                 {removedNodes.map(node => (
@@ -155,12 +152,12 @@ const DiffVisualization: React.FC<{
               </Paper>
             </Box>
           )}
-          
+
           {/* Modified nodes */}
           {modifiedNodes.length > 0 && (
             <Box sx={{ mb: 2 }}>
               <Typography variant="subtitle1" color="warning.main">
-                {t('sync.conflict.modifiedNodes', { count: modifiedNodes.length })}
+                {t('sync.conflict.modifiedNodes', { count: String(modifiedNodes.length) })}
               </Typography>
               {modifiedNodes.map(({ local, remote }) => (
                 <Paper key={local.id} variant="outlined" sx={{ p: 1, mb: 1, bgcolor: highlightChanges ? 'warning.light' : 'background.paper' }}>
@@ -199,19 +196,19 @@ const DiffVisualization: React.FC<{
           )}
         </Box>
       )}
-      
+
       {/* Links differences */}
       {(addedLinks.length > 0 || removedLinks.length > 0 || modifiedLinks.length > 0) && (
         <Box>
           <Typography variant="h6" gutterBottom>
             {t('sync.conflict.linkChanges')}
           </Typography>
-          
+
           {/* Added links */}
           {addedLinks.length > 0 && (
             <Box sx={{ mb: 2 }}>
               <Typography variant="subtitle1" color="success.main">
-                {t('sync.conflict.addedLinks', { count: addedLinks.length })}
+                {t('sync.conflict.addedLinks', { count: String(addedLinks.length) })}
               </Typography>
               <Paper variant="outlined" sx={{ p: 1, bgcolor: highlightChanges ? 'success.light' : 'background.paper' }}>
                 {addedLinks.map(link => (
@@ -224,12 +221,12 @@ const DiffVisualization: React.FC<{
               </Paper>
             </Box>
           )}
-          
+
           {/* Removed links */}
           {removedLinks.length > 0 && (
             <Box sx={{ mb: 2 }}>
               <Typography variant="subtitle1" color="error.main">
-                {t('sync.conflict.removedLinks', { count: removedLinks.length })}
+                {t('sync.conflict.removedLinks', { count: String(removedLinks.length) })}
               </Typography>
               <Paper variant="outlined" sx={{ p: 1, bgcolor: highlightChanges ? 'error.light' : 'background.paper' }}>
                 {removedLinks.map(link => (
@@ -242,12 +239,12 @@ const DiffVisualization: React.FC<{
               </Paper>
             </Box>
           )}
-          
+
           {/* Modified links */}
           {modifiedLinks.length > 0 && (
             <Box sx={{ mb: 2 }}>
               <Typography variant="subtitle1" color="warning.main">
-                {t('sync.conflict.modifiedLinks', { count: modifiedLinks.length })}
+                {t('sync.conflict.modifiedLinks', { count: String(modifiedLinks.length) })}
               </Typography>
               {modifiedLinks.map(({ local, remote }) => (
                 <Paper key={local.id} variant="outlined" sx={{ p: 1, mb: 1, bgcolor: highlightChanges ? 'warning.light' : 'background.paper' }}>
@@ -315,40 +312,40 @@ const ConflictResolutionDialog: React.FC<ConflictResolutionDialogProps> = ({
   onResolve
 }) => {
   const { t } = useI18n();
-  const { viewport, shouldReduceAnimations } = useResponsive();
+  const { viewport } = useResponsive();
   const [tabIndex, setTabIndex] = useState(0);
   const [strategy, setStrategy] = useState<ResolutionStrategy>('merge');
   const [isResolving, setIsResolving] = useState(false);
   const [mergedData, setMergedData] = useState<MindMapData | null>(null);
-  
+
   // Format timestamps for display
   const formattedLocalTime = formatDate(new Date(localTimestamp));
   const formattedRemoteTime = formatDate(new Date(remoteTimestamp));
-  
+
   // Handle tab change
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabIndex(newValue);
   };
-  
+
   // Handle strategy change
   const handleStrategyChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setStrategy(event.target.value as ResolutionStrategy);
   };
-  
+
   // Generate merged data when strategy changes
   useEffect(() => {
     if (strategy === 'merge') {
       // Create a merged version that combines both changes
       // This is a simple merge that takes all nodes and links from both versions
       // and removes duplicates
-      
+
       // Start with local data
       const merged: MindMapData = {
         ...localData,
         nodes: [...localData.nodes],
         links: [...localData.links]
       };
-      
+
       // Add nodes from remote that don't exist in local
       const localNodeIds = new Set(localData.nodes.map(node => node.id));
       remoteData.nodes.forEach(remoteNode => {
@@ -356,7 +353,7 @@ const ConflictResolutionDialog: React.FC<ConflictResolutionDialogProps> = ({
           merged.nodes.push(remoteNode);
         }
       });
-      
+
       // Add links from remote that don't exist in local
       const localLinkIds = new Set(localData.links.map(link => link.id));
       remoteData.links.forEach(remoteLink => {
@@ -364,7 +361,7 @@ const ConflictResolutionDialog: React.FC<ConflictResolutionDialogProps> = ({
           merged.links.push(remoteLink);
         }
       });
-      
+
       setMergedData(merged);
     } else if (strategy === 'local') {
       setMergedData(localData);
@@ -379,7 +376,7 @@ const ConflictResolutionDialog: React.FC<ConflictResolutionDialogProps> = ({
           nodes: [...localData.nodes],
           links: [...localData.links]
         };
-        
+
         // Add nodes from remote that don't exist in local
         const localNodeIds = new Set(localData.nodes.map(node => node.id));
         remoteData.nodes.forEach(remoteNode => {
@@ -387,7 +384,7 @@ const ConflictResolutionDialog: React.FC<ConflictResolutionDialogProps> = ({
             merged.nodes.push(remoteNode);
           }
         });
-        
+
         // Add links from remote that don't exist in local
         const localLinkIds = new Set(localData.links.map(link => link.id));
         remoteData.links.forEach(remoteLink => {
@@ -395,18 +392,18 @@ const ConflictResolutionDialog: React.FC<ConflictResolutionDialogProps> = ({
             merged.links.push(remoteLink);
           }
         });
-        
+
         setMergedData(merged);
       }
     }
   }, [strategy, localData, remoteData]);
-  
+
   // Handle resolve button click
   const handleResolve = () => {
     if (!mergedData) return;
-    
+
     setIsResolving(true);
-    
+
     // Simulate a delay for UI feedback
     setTimeout(() => {
       onResolve(mergedData);
@@ -414,7 +411,7 @@ const ConflictResolutionDialog: React.FC<ConflictResolutionDialogProps> = ({
       onClose();
     }, 500);
   };
-  
+
   return (
     <Dialog
       open={open}
@@ -429,12 +426,12 @@ const ConflictResolutionDialog: React.FC<ConflictResolutionDialogProps> = ({
           {t('sync.conflict.title')}
         </Box>
       </DialogTitle>
-      
+
       <DialogContent>
         <Alert severity="warning" sx={{ mb: 2 }}>
           {t('sync.conflict.description')}
         </Alert>
-        
+
         <Box sx={{ mb: 3 }}>
           <Typography variant="subtitle1" gutterBottom>
             {t('sync.conflict.versions')}
@@ -454,7 +451,7 @@ const ConflictResolutionDialog: React.FC<ConflictResolutionDialogProps> = ({
                 {t('sync.conflict.linkCount')}: {localData.links.length}
               </Typography>
             </Paper>
-            
+
             <Paper variant="outlined" sx={{ p: 2, flex: 1 }}>
               <Typography variant="subtitle2" color="secondary">
                 {t('sync.conflict.remoteVersion')}
@@ -471,7 +468,7 @@ const ConflictResolutionDialog: React.FC<ConflictResolutionDialogProps> = ({
             </Paper>
           </Box>
         </Box>
-        
+
         <Box sx={{ mb: 3 }}>
           <Typography variant="subtitle1" gutterBottom>
             {t('sync.conflict.resolutionStrategy')}
@@ -526,7 +523,7 @@ const ConflictResolutionDialog: React.FC<ConflictResolutionDialogProps> = ({
             </RadioGroup>
           </FormControl>
         </Box>
-        
+
         <Box>
           <Typography variant="subtitle1" gutterBottom>
             {t('sync.conflict.differences')}
@@ -557,7 +554,7 @@ const ConflictResolutionDialog: React.FC<ConflictResolutionDialogProps> = ({
               )}
             </Tabs>
           </Box>
-          
+
           {/* Overview tab */}
           <Box
             role="tabpanel"
@@ -574,7 +571,7 @@ const ConflictResolutionDialog: React.FC<ConflictResolutionDialogProps> = ({
               />
             )}
           </Box>
-          
+
           {/* Details tab */}
           <Box
             role="tabpanel"
@@ -598,7 +595,7 @@ const ConflictResolutionDialog: React.FC<ConflictResolutionDialogProps> = ({
               </Box>
             )}
           </Box>
-          
+
           {/* Merged result tab */}
           {strategy === 'merge' && (
             <Box
@@ -630,7 +627,7 @@ const ConflictResolutionDialog: React.FC<ConflictResolutionDialogProps> = ({
           )}
         </Box>
       </DialogContent>
-      
+
       <DialogActions>
         <Button
           onClick={onClose}

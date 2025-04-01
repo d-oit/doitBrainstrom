@@ -1,13 +1,9 @@
 // src/components/MindMap.tsx
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Box, Paper, TextField, Button, Typography, VisuallyHidden, CircularProgress } from '@mui/material';
-import { useMindMap } from '../contexts/MindMapContext';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Box, Typography, CircularProgress } from '@mui/material';
 import { useI18n } from '../contexts/I18nContext';
-import { useResponsive } from '../contexts/ResponsiveContext';
 import { useAccessibility } from '../contexts/AccessibilityContext';
-import { loadPriority } from '../utils/performanceConfig';
 import ContainerQuery from './layout/ContainerQuery';
-import { Heading4, Paragraph } from './typography/FluidTypography';
 import '../styles/responsive.css';
 
 // Import React Flow components
@@ -17,11 +13,9 @@ import 'reactflow/dist/style.css';
 
 const MindMap: React.FC = () => {
   const { t } = useI18n();
-  const { viewport } = useResponsive();
   const { announceToScreenReader } = useAccessibility();
   const [isLoading, setIsLoading] = useState(true);
   const [stateManager, setStateManager] = useState<VersionedStateManager | null>(null);
-  const [newNodeText, setNewNodeText] = useState('');
 
   // Initialize the state manager
   useEffect(() => {
@@ -58,11 +52,9 @@ const MindMap: React.FC = () => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Accessibility description of the mind map */}
-      <VisuallyHidden>
-        <Typography id="mind-map-description">
-          {t('accessibility.mindMapDescription')}
-        </Typography>
-      </VisuallyHidden>
+      <Typography id="mind-map-description" sx={{ position: 'absolute', height: 1, width: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', clipPath: 'inset(50%)' }}>
+        {t('accessibility.mindMapDescription')}
+      </Typography>
 
       <ContainerQuery type="component">
         <Box sx={{ position: 'relative', flexGrow: 1 }}>

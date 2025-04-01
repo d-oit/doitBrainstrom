@@ -1,12 +1,12 @@
 // src/services/enhancedS3SyncService.ts
 import { logInfo, logError, logWarn } from '../utils/logger';
-import { StorageError } from '../utils/errorHandler';
+// import { StorageError } from '../utils/errorHandler';
 import { MindMapData } from '../utils/MindMapDataModel';
-import { initDB, saveMindMap, getMindMap } from '../utils/indexedDB/dbService';
-import { MindMapRecord } from '../utils/indexedDB/types';
-import { 
-  enqueueOperation, 
-  getPendingOperations, 
+import { saveMindMap, getMindMap } from '../utils/indexedDB/dbService';
+// import { MindMapRecord } from '../utils/indexedDB/types';
+import {
+  enqueueOperation,
+  getPendingOperations,
   updateOperationStatus,
   cleanupCompletedOperations,
   getOperationStats,
@@ -78,7 +78,13 @@ let BUCKET_NAME = '';
 let MIND_MAP_KEY = 'mind-map-data.json';
 let isS3Initialized = false;
 let isS3Available = false;
-let lastS3Error: { type: S3ErrorType; details: string } | undefined;
+interface S3Error {
+  type: S3ErrorType;
+  details: string;
+  retryCount?: number;
+}
+
+let lastS3Error: S3Error | undefined;
 let syncInProgress = false;
 let lastSyncTime: string | null = null;
 let nextSyncAttempt: string | null = null;
@@ -322,16 +328,16 @@ export const saveToS3 = async (mindMapData: MindMapData, mindMapId: string = 'de
     // Get the current version from S3 first to check for conflicts
     try {
       const currentS3Data = await getFromS3();
-      
+
       // If we have data from S3, check for conflicts
       if (currentS3Data && currentS3Data.data && currentS3Data.data.versionVector) {
         const remoteVector = currentS3Data.data.versionVector as VersionVector;
         const localVector = mindMapData.versionVector as VersionVector || createVersionVector();
-        
+
         // Check if there's a conflict
         if (hasConflict(localVector, remoteVector)) {
           logWarn('Conflict detected between local and remote data');
-          
+
           // Save to IndexedDB with conflict flag
           await saveMindMap({
             id: mindMapId,
@@ -344,14 +350,14 @@ export const saveToS3 = async (mindMapData: MindMapData, mindMapId: string = 'de
             hasConflict: true,
             remoteData: currentS3Data.data
           });
-          
+
           return {
             success: false,
             error: S3ErrorType.CONFLICT_DETECTED,
             details: 'Conflict detected between local and remote data'
           };
         }
-        
+
         // Merge version vectors
         mindMapData.versionVector = mergeVersionVectors(localVector, remoteVector);
       } else {
@@ -376,7 +382,7 @@ export const saveToS3 = async (mindMapData: MindMapData, mindMapId: string = 'de
 
     await s3.putObject(params).promise();
     logInfo('Mind map data saved to S3 successfully');
-    
+
     // Update IndexedDB with synced flag
     await saveMindMap({
       id: mindMapId,
@@ -384,17 +390,17 @@ export const saveToS3 = async (mindMapData: MindMapData, mindMapId: string = 'de
       lastModified: new Date().toISOString(),
       synced: true
     });
-    
+
     // Update last sync time
     lastSyncTime = new Date().toISOString();
-    
+
     return {
       success: true
     };
   } catch (error) {
     const errorMessage = 'Error saving mind map data to S3';
     logError(errorMessage, error);
-    
+
     // Try to save to IndexedDB with unsynced flag
     try {
       await saveMindMap({
@@ -403,7 +409,7 @@ export const saveToS3 = async (mindMapData: MindMapData, mindMapId: string = 'de
         lastModified: new Date().toISOString(),
         synced: false
       });
-      
+
       // Queue the operation for later retry
       const operationId = await enqueueOperation(
         OperationType.UPDATE,
@@ -413,12 +419,12 @@ export const saveToS3 = async (mindMapData: MindMapData, mindMapId: string = 'de
         OperationPriority.HIGH,
         MAX_RETRY_ATTEMPTS
       );
-      
+
       logInfo('Mind map save operation queued for later sync:', { operationId });
     } catch (dbError) {
       logError('Error saving to IndexedDB:', dbError);
     }
-    
+
     return {
       success: false,
       error: (error as any).code === 'AccessDenied' ? S3ErrorType.ACCESS_DENIED : S3ErrorType.NETWORK_ERROR,
@@ -469,7 +475,7 @@ export const getFromS3 = async (): Promise<{ data: MindMapData | null; error?: S
           data: null
         };
       }
-      
+
       throw error; // Re-throw for the outer catch block
     }
   } catch (error) {
@@ -496,11 +502,11 @@ export const initializeMindMapData = async (defaultId: string = 'default'): Prom
       if (!isS3Initialized) {
         await initializeS3();
       }
-      
+
       // Only try to get from S3 if it's available
       if (isS3Available) {
         const s3Result = await getFromS3();
-        
+
         if (s3Result.data) {
           // Save to IndexedDB for offline access
           try {
@@ -513,7 +519,7 @@ export const initializeMindMapData = async (defaultId: string = 'default'): Prom
           } catch (dbError) {
             logError('Failed to save S3 data to IndexedDB', dbError);
           }
-          
+
           return {
             data: s3Result.data,
             source: 's3',
@@ -525,7 +531,7 @@ export const initializeMindMapData = async (defaultId: string = 'default'): Prom
 
     // If we couldn't get data from S3, try IndexedDB
     const dbMindMap = await getMindMap(defaultId);
-    
+
     if (dbMindMap) {
       logInfo('Using data from IndexedDB');
       return {
@@ -544,7 +550,7 @@ export const initializeMindMapData = async (defaultId: string = 'default'): Prom
       synced: false,
       versionVector: createVersionVector()
     };
-    
+
     // Save the new mind map to IndexedDB
     try {
       await saveMindMap({
@@ -556,7 +562,7 @@ export const initializeMindMapData = async (defaultId: string = 'default'): Prom
     } catch (dbError) {
       logError('Failed to save new mind map to IndexedDB', dbError);
     }
-    
+
     return {
       data: newMindMap,
       source: 'new',
@@ -564,7 +570,7 @@ export const initializeMindMapData = async (defaultId: string = 'default'): Prom
     };
   } catch (error) {
     logError('Error initializing mind map data:', error);
-    
+
     // Return a new empty mind map as a fallback
     const fallbackMindMap: MindMapData = {
       nodes: [],
@@ -573,7 +579,7 @@ export const initializeMindMapData = async (defaultId: string = 'default'): Prom
       synced: false,
       versionVector: createVersionVector()
     };
-    
+
     return {
       data: fallbackMindMap,
       source: 'new',
@@ -591,9 +597,9 @@ export const processPendingOperations = async (limit: number = 10): Promise<Sync
       details: 'Sync already in progress'
     };
   }
-  
+
   syncInProgress = true;
-  
+
   try {
     // Check if S3 is available
     const availabilityCheck = await checkS3Availability();
@@ -605,10 +611,10 @@ export const processPendingOperations = async (limit: number = 10): Promise<Sync
         details: availabilityCheck.details
       };
     }
-    
+
     // Get pending operations
     const operations = await getPendingOperations(limit);
-    
+
     if (operations.length === 0) {
       logInfo('No pending operations to process');
       syncInProgress = false;
@@ -617,24 +623,24 @@ export const processPendingOperations = async (limit: number = 10): Promise<Sync
         pendingOperations: 0
       };
     }
-    
+
     logInfo(`Processing ${operations.length} pending operations`);
-    
+
     let successCount = 0;
     let failureCount = 0;
     let conflictCount = 0;
-    
+
     // Process each operation
     for (const operation of operations) {
       try {
         // Mark operation as in progress
         await updateOperationStatus(operation.id, OperationStatus.IN_PROGRESS);
-        
+
         // Process based on operation type
         if (operation.type === OperationType.UPDATE) {
           // For mind map updates, save to S3
           const saveResult = await saveToS3(operation.data, operation.entityId);
-          
+
           if (saveResult.success) {
             await updateOperationStatus(operation.id, OperationStatus.COMPLETED);
             successCount++;
@@ -656,18 +662,18 @@ export const processPendingOperations = async (limit: number = 10): Promise<Sync
         failureCount++;
       }
     }
-    
+
     // Update last sync time
     lastSyncTime = new Date().toISOString();
-    
+
     // Get updated stats
     const stats = await getOperationStats();
-    
+
     // Clean up old completed operations
     await cleanupCompletedOperations(7); // Clean up operations older than 7 days
-    
+
     syncInProgress = false;
-    
+
     return {
       success: true,
       details: `Processed ${operations.length} operations: ${successCount} succeeded, ${failureCount} failed, ${conflictCount} conflicts`,
@@ -694,45 +700,45 @@ export const syncMindMapData = async (mindMapId: string = 'default', force: bool
       details: 'Sync already in progress'
     };
   }
-  
+
   syncInProgress = true;
-  
+
   try {
     // Check if S3 is available
     const availabilityCheck = await checkS3Availability(true); // Force check
     if (!availabilityCheck.available) {
       syncInProgress = false;
-      
+
       // Schedule next sync attempt with exponential backoff
       const retryDelay = calculateBackoffDelay(
         lastS3Error?.retryCount || 0,
         BASE_RETRY_DELAY,
         MAX_RETRY_DELAY
       );
-      
+
       const nextAttemptTime = new Date(Date.now() + retryDelay);
       nextSyncAttempt = nextAttemptTime.toISOString();
-      
+
       // Increment retry count
       if (lastS3Error) {
         lastS3Error.retryCount = (lastS3Error.retryCount || 0) + 1;
       }
-      
+
       return {
         success: false,
         error: availabilityCheck.error,
         details: availabilityCheck.details
       };
     }
-    
+
     // Reset retry count on successful connection
     if (lastS3Error) {
       lastS3Error.retryCount = 0;
     }
-    
+
     // Get local mind map data
     const localMindMap = await getMindMap(mindMapId);
-    
+
     if (!localMindMap) {
       syncInProgress = false;
       return {
@@ -740,44 +746,44 @@ export const syncMindMapData = async (mindMapId: string = 'default', force: bool
         details: `Mind map with ID ${mindMapId} not found in IndexedDB`
       };
     }
-    
+
     // Get remote mind map data
     const remoteResult = await getFromS3();
-    
+
     if (!remoteResult.data) {
       // No remote data, upload local data
       logInfo('No remote data found, uploading local data');
       const saveResult = await saveToS3(localMindMap.data, mindMapId);
-      
+
       syncInProgress = false;
       lastSyncTime = new Date().toISOString();
-      
+
       return {
         success: saveResult.success,
         error: saveResult.error,
         details: saveResult.details
       };
     }
-    
+
     // Check for conflicts
     const localVector = localMindMap.data.versionVector as VersionVector || createVersionVector();
     const remoteVector = remoteResult.data.versionVector as VersionVector || createVersionVector();
-    
+
     const comparison = compareVersionVectors(localVector, remoteVector);
-    
+
     if (comparison === 'conflict') {
       logWarn('Conflict detected between local and remote data');
-      
+
       // Save conflict information to IndexedDB
       await saveMindMap({
         ...localMindMap,
         hasConflict: true,
         remoteData: remoteResult.data
       });
-      
+
       syncInProgress = false;
       lastSyncTime = new Date().toISOString();
-      
+
       return {
         success: false,
         error: S3ErrorType.CONFLICT_DETECTED,
@@ -787,17 +793,17 @@ export const syncMindMapData = async (mindMapId: string = 'default', force: bool
     } else if (comparison === 'ancestor') {
       // Local is older than remote, update local
       logInfo('Local data is older than remote, updating local');
-      
+
       await saveMindMap({
         id: mindMapId,
         data: remoteResult.data,
         lastModified: new Date().toISOString(),
         synced: true
       });
-      
+
       syncInProgress = false;
       lastSyncTime = new Date().toISOString();
-      
+
       return {
         success: true,
         details: 'Updated local data from remote'
@@ -805,12 +811,12 @@ export const syncMindMapData = async (mindMapId: string = 'default', force: bool
     } else if (comparison === 'descendant') {
       // Local is newer than remote, update remote
       logInfo('Local data is newer than remote, updating remote');
-      
+
       const saveResult = await saveToS3(localMindMap.data, mindMapId);
-      
+
       syncInProgress = false;
       lastSyncTime = new Date().toISOString();
-      
+
       return {
         success: saveResult.success,
         error: saveResult.error,
@@ -819,10 +825,10 @@ export const syncMindMapData = async (mindMapId: string = 'default', force: bool
     } else {
       // Data is the same, no action needed
       logInfo('Local and remote data are in sync');
-      
+
       syncInProgress = false;
       lastSyncTime = new Date().toISOString();
-      
+
       return {
         success: true,
         details: 'Local and remote data are in sync'
@@ -843,7 +849,7 @@ export const syncMindMapData = async (mindMapId: string = 'default', force: bool
 export const enableBackgroundSync = (intervalMs: number = BACKGROUND_SYNC_INTERVAL): void => {
   // Disable any existing background sync first
   disableBackgroundSync();
-  
+
   // Set up new background sync
   backgroundSyncIntervalId = window.setInterval(async () => {
     try {
@@ -856,7 +862,7 @@ export const enableBackgroundSync = (intervalMs: number = BACKGROUND_SYNC_INTERV
       logError('Error in background sync:', error);
     }
   }, intervalMs);
-  
+
   isBackgroundSyncEnabled = true;
   logInfo(`Background sync enabled with interval of ${intervalMs}ms`);
 };
@@ -876,10 +882,15 @@ export const registerBackgroundSync = async (): Promise<boolean> => {
   if ('serviceWorker' in navigator && 'SyncManager' in window) {
     try {
       const registration = await navigator.serviceWorker.ready;
-      
-      // Register for background sync
-      await registration.sync.register('mindmap-sync');
-      
+
+      // Register for background sync if SyncManager is available
+      if ('sync' in registration) {
+        await (registration as any).sync.register('mindmap-sync');
+      } else {
+        logWarn('SyncManager not available in service worker registration');
+        return false;
+      }
+
       logInfo('Background sync registered with service worker');
       return true;
     } catch (error) {
@@ -901,7 +912,7 @@ export const registerBackgroundSync = async (): Promise<boolean> => {
   } catch (error) {
     logError('Error initializing offline operations store:', error);
   }
-  
+
   // Initialize S3 if configured
   if (isS3Configured()) {
     initializeS3().catch(error => {

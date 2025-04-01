@@ -8,7 +8,7 @@ import ReactFlowAdapter from './ReactFlowAdapter';
 import { VersionedStateManager } from '../../utils/versioning/VersionedStateManager';
 import { VersionedNode, VersionedEdge, VirtualizationConfig } from '../../utils/flow/FlowTypes';
 import { useI18n } from '../../contexts/I18nContext';
-import { useResponsive } from '../../contexts/ResponsiveContext';
+// import { useResponsive } from '../../contexts/ResponsiveContext';
 import { logInfo, logError } from '../../utils/logger';
 import { generateId } from '../../utils/MindMapDataModel';
 
@@ -23,12 +23,12 @@ const FlowOrchestrator: React.FC<FlowOrchestratorProps> = ({
 }) => {
   const { t } = useI18n();
   const theme = useTheme();
-  const { viewport } = useResponsive();
+  // const { viewport } = useResponsive();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [notification, setNotification] = useState<{ message: string; severity: 'success' | 'error' | 'info' | 'warning' } | null>(null);
   const stateManagerRef = useRef<VersionedStateManager | null>(null);
-  
+
   // Initialize state manager
   useEffect(() => {
     const initStateManager = async () => {
@@ -47,56 +47,56 @@ const FlowOrchestrator: React.FC<FlowOrchestratorProps> = ({
         setIsLoading(false);
       }
     };
-    
+
     initStateManager();
-    
+
     // Cleanup
     return () => {
       // Any cleanup needed
     };
   }, []);
-  
+
   // Handle node click
   const handleNodeClick = useCallback((node: VersionedNode) => {
     logInfo('Node clicked:', node);
     // Additional node click handling
   }, []);
-  
+
   // Handle edge click
   const handleEdgeClick = useCallback((edge: VersionedEdge) => {
     logInfo('Edge clicked:', edge);
     // Additional edge click handling
   }, []);
-  
+
   // Handle viewport change
-  const handleViewportChange = useCallback((viewport: { x: number; y: number; zoom: number }) => {
+  const handleViewportChange = useCallback((_viewport: { x: number; y: number; zoom: number }) => {
     // Additional viewport change handling
   }, []);
-  
+
   // Add a new node
   const handleAddNode = useCallback(() => {
     if (!stateManagerRef.current) return;
-    
+
     try {
       // Create a new node at a random position
       const newNode = stateManagerRef.current.addNode({
         id: generateId(),
         type: 'mindMapCard',
-        position: { 
-          x: Math.random() * 400, 
-          y: Math.random() * 400 
+        position: {
+          x: Math.random() * 400,
+          y: Math.random() * 400
         },
-        data: { 
+        data: {
           title: t('mindMap.newNode'),
           description: t('mindMap.newNodeDescription')
         }
       });
-      
+
       setNotification({
         message: t('notifications.nodeAdded'),
         severity: 'success'
       });
-      
+
       logInfo('Node added:', newNode);
     } catch (error) {
       logError('Error adding node:', error);
@@ -106,14 +106,14 @@ const FlowOrchestrator: React.FC<FlowOrchestratorProps> = ({
       });
     }
   }, [t]);
-  
+
   // Undo last action
   const handleUndo = useCallback(() => {
     if (!stateManagerRef.current) return;
-    
+
     try {
       const success = stateManagerRef.current.undo();
-      
+
       if (success) {
         setNotification({
           message: t('notifications.actionUndone'),
@@ -133,34 +133,34 @@ const FlowOrchestrator: React.FC<FlowOrchestratorProps> = ({
       });
     }
   }, [t]);
-  
+
   // Save the current state
   const handleSave = useCallback(() => {
     // Call external save handler if provided
     if (onSave) {
       onSave();
     }
-    
+
     setNotification({
       message: t('notifications.saved'),
       severity: 'success'
     });
   }, [onSave, t]);
-  
+
   // Close notification
   const handleCloseNotification = () => {
     setNotification(null);
   };
-  
+
   // Configure virtualization based on viewport
   const virtualizationConfig: VirtualizationConfig = {
-    viewportWidth: viewport.width,
-    viewportHeight: viewport.height,
+    viewportWidth: window.innerWidth,
+    viewportHeight: window.innerHeight,
     nodeWidth: 250,
     nodeHeight: 150,
     overscanCount: 2
   };
-  
+
   if (isLoading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" height="100%" p={4}>
@@ -168,7 +168,7 @@ const FlowOrchestrator: React.FC<FlowOrchestratorProps> = ({
       </Box>
     );
   }
-  
+
   if (error) {
     return (
       <Paper elevation={3} sx={{ p: 3, bgcolor: 'error.light', color: 'error.contrastText' }}>
@@ -176,9 +176,9 @@ const FlowOrchestrator: React.FC<FlowOrchestratorProps> = ({
           {t('errors.title')}
         </Typography>
         <Typography>{error}</Typography>
-        <Button 
-          variant="contained" 
-          color="primary" 
+        <Button
+          variant="contained"
+          color="primary"
           sx={{ mt: 2 }}
           onClick={() => window.location.reload()}
         >
@@ -187,16 +187,16 @@ const FlowOrchestrator: React.FC<FlowOrchestratorProps> = ({
       </Paper>
     );
   }
-  
+
   return (
     <Box sx={{ width: '100%' }}>
       {/* Toolbar */}
-      <Paper 
-        elevation={1} 
-        sx={{ 
-          p: 1, 
-          mb: 2, 
-          display: 'flex', 
+      <Paper
+        elevation={1}
+        sx={{
+          p: 1,
+          mb: 2,
+          display: 'flex',
           flexWrap: 'wrap',
           gap: 1,
           justifyContent: 'flex-start',
@@ -214,7 +214,7 @@ const FlowOrchestrator: React.FC<FlowOrchestratorProps> = ({
         >
           {t('actions.addNode')}
         </Button>
-        
+
         <Button
           variant="outlined"
           color="secondary"
@@ -225,7 +225,7 @@ const FlowOrchestrator: React.FC<FlowOrchestratorProps> = ({
         >
           {t('actions.undo')}
         </Button>
-        
+
         <Button
           variant="outlined"
           color="primary"
@@ -236,9 +236,9 @@ const FlowOrchestrator: React.FC<FlowOrchestratorProps> = ({
           {t('actions.save')}
         </Button>
       </Paper>
-      
+
       {/* Flow diagram */}
-      {stateManagerRef.current && (
+      {stateManagerRef.current ? (
         <ReactFlowAdapter
           stateManager={stateManagerRef.current}
           isReadOnly={readOnly}
@@ -247,8 +247,8 @@ const FlowOrchestrator: React.FC<FlowOrchestratorProps> = ({
           onEdgeClick={handleEdgeClick}
           onViewportChange={handleViewportChange}
         />
-      )}
-      
+      ) : null}
+
       {/* Notifications */}
       <Snackbar
         open={!!notification}
@@ -256,15 +256,15 @@ const FlowOrchestrator: React.FC<FlowOrchestratorProps> = ({
         onClose={handleCloseNotification}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        {notification && (
-          <Alert 
-            onClose={handleCloseNotification} 
+        {notification ? (
+          <Alert
+            onClose={handleCloseNotification}
             severity={notification.severity}
             variant="filled"
           >
             {notification.message}
           </Alert>
-        )}
+        ) : <div />}
       </Snackbar>
     </Box>
   );

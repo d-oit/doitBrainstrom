@@ -29,7 +29,7 @@ vi.mock('@mui/material', () => ({
   ),
   Box: ({ children, sx, ...props }: any) => {
     // Convert sx object to style object
-    let styleObj: Record<string, any> = {};
+    const styleObj: Record<string, any> = {};
     if (sx) {
       if (sx.position) styleObj.position = sx.position;
       if (sx.zIndex) styleObj.zIndex = sx.zIndex;

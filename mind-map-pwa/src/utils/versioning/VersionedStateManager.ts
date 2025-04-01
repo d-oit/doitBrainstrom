@@ -1,11 +1,10 @@
 // src/utils/versioning/VersionedStateManager.ts
-import { FlowState, VersionedNode, VersionedEdge, OperationType } from '../flow/FlowTypes';
-import { 
-  createVersionVector, 
-  incrementVersion, 
-  mergeVersionVectors, 
-  compareVersionVectors, 
-  hasConflict 
+import { FlowState, VersionedNode, VersionedEdge } from '../flow/FlowTypes';
+import {
+  createVersionVector,
+  incrementVersion,
+  mergeVersionVectors,
+  compareVersionVectors
 } from '../version-vector';
 import { logInfo, logError } from '../logger';
 import { sanitizeNode, sanitizeEdge, validateNode, validateEdge } from '../security/InputSanitization';
@@ -31,11 +30,11 @@ export class VersionedStateManager {
       nodes: [],
       edges: [],
       viewport: { x: 0, y: 0, zoom: 1 },
-      versionVector: new Map<string, number>()
+      versionVector: {}
     };
 
     // Initialize version vector if empty
-    if (!this.currentState.versionVector || this.currentState.versionVector.size === 0) {
+    if (!this.currentState.versionVector || Object.keys(this.currentState.versionVector).length === 0) {
       this.currentState.versionVector = createVersionVector();
     }
 
@@ -65,7 +64,7 @@ export class VersionedStateManager {
       nodes: JSON.parse(JSON.stringify(this.currentState.nodes)),
       edges: JSON.parse(JSON.stringify(this.currentState.edges)),
       viewport: { ...this.currentState.viewport },
-      versionVector: new Map(this.currentState.versionVector)
+      versionVector: { ...this.currentState.versionVector }
     };
 
     // Add to history
@@ -401,16 +400,18 @@ export class VersionedStateManager {
       // Convert to a format suitable for IndexedDB
       const stateForStorage = {
         id: 'flow-state',
-        nodes: this.currentState.nodes,
-        edges: this.currentState.edges,
-        viewport: this.currentState.viewport,
-        versionVector: Object.fromEntries(this.currentState.versionVector),
-        lastModified: new Date().toISOString(),
-        synced: false
+        data: {
+          nodes: this.currentState.nodes,
+          edges: this.currentState.edges,
+          viewport: this.currentState.viewport,
+          versionVector: this.currentState.versionVector,
+          lastModified: new Date().toISOString(),
+          synced: false
+        }
       };
 
       // Save to IndexedDB
-      saveMindMap(stateForStorage)
+      saveMindMap(stateForStorage as any)
         .then(() => logInfo('State persisted to IndexedDB'))
         .catch(error => logError('Error persisting state to IndexedDB:', error));
     } catch (error) {
@@ -431,10 +432,10 @@ export class VersionedStateManager {
 
       // Convert from storage format
       const loadedState: FlowState = {
-        nodes: storedState.nodes,
-        edges: storedState.edges,
-        viewport: storedState.viewport,
-        versionVector: new Map(Object.entries(storedState.versionVector))
+        nodes: storedState.data.nodes,
+        edges: storedState.data.edges,
+        viewport: storedState.data.viewport,
+        versionVector: storedState.data.versionVector
       };
 
       // Update current state

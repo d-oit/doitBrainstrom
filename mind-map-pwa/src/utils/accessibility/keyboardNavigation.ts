@@ -14,6 +14,7 @@ export interface KeyboardShortcut {
   stopPropagation?: boolean; // Whether to stop event propagation
   description: string;  // Human-readable description of the shortcut
   group?: string;       // Group for organizing shortcuts in help dialogs
+  action?: string;      // Action identifier (used internally)
 }
 
 /**
@@ -66,7 +67,7 @@ export const defaultKeyboardShortcuts: KeyboardShortcutsMap = {
     group: 'Navigation',
     preventDefault: true
   },
-  
+
   // Mind map shortcuts
   'addNode': {
     key: 'a',
@@ -138,7 +139,7 @@ export const defaultKeyboardShortcuts: KeyboardShortcutsMap = {
     group: 'Mind Map',
     preventDefault: true
   },
-  
+
   // Navigation within mind map
   'moveUp': {
     key: 'ArrowUp',
@@ -164,7 +165,7 @@ export const defaultKeyboardShortcuts: KeyboardShortcutsMap = {
     group: 'Navigation',
     preventDefault: true
   },
-  
+
   // Sync shortcuts
   'syncNow': {
     key: 's',
@@ -194,12 +195,12 @@ export const matchesShortcut = (event: KeyboardEvent, shortcut: KeyboardShortcut
  */
 export const formatShortcut = (shortcut: KeyboardShortcut): string => {
   const parts: string[] = [];
-  
+
   if (shortcut.ctrlKey) parts.push('Ctrl');
   if (shortcut.altKey) parts.push('Alt');
   if (shortcut.shiftKey) parts.push('Shift');
   if (shortcut.metaKey) parts.push('Meta');
-  
+
   // Format special keys for better readability
   let key = shortcut.key;
   switch (key) {
@@ -212,9 +213,9 @@ export const formatShortcut = (shortcut: KeyboardShortcut): string => {
     case 'Escape': key = 'Esc'; break;
     default: break;
   }
-  
+
   parts.push(key);
-  
+
   return parts.join(' + ');
 };
 
@@ -223,7 +224,7 @@ export const formatShortcut = (shortcut: KeyboardShortcut): string => {
  */
 export const getShortcutsByGroup = (shortcuts: KeyboardShortcutsMap): Record<string, KeyboardShortcut[]> => {
   const groups: Record<string, KeyboardShortcut[]> = {};
-  
+
   Object.entries(shortcuts).forEach(([action, shortcut]) => {
     const group = shortcut.group || 'Other';
     if (!groups[group]) {
@@ -231,7 +232,7 @@ export const getShortcutsByGroup = (shortcuts: KeyboardShortcutsMap): Record<str
     }
     groups[group].push({ ...shortcut, action });
   });
-  
+
   return groups;
 };
 
@@ -245,17 +246,17 @@ export const createKeyboardHandler = (
 ) => {
   return (event: KeyboardEvent) => {
     if (!isEnabled) return;
-    
+
     // Check if the event target is an input element
     const target = event.target as HTMLElement;
-    const isInputElement = 
-      target.tagName === 'INPUT' || 
-      target.tagName === 'TEXTAREA' || 
+    const isInputElement =
+      target.tagName === 'INPUT' ||
+      target.tagName === 'TEXTAREA' ||
       target.isContentEditable;
-    
+
     // Skip handling if the event is from an input element (unless it's Escape)
     if (isInputElement && event.key !== 'Escape') return;
-    
+
     // Check each shortcut
     for (const [action, shortcut] of Object.entries(shortcuts)) {
       if (matchesShortcut(event, shortcut)) {
@@ -263,12 +264,12 @@ export const createKeyboardHandler = (
         if (shortcut.preventDefault) {
           event.preventDefault();
         }
-        
+
         // Stop event propagation if specified
         if (shortcut.stopPropagation) {
           event.stopPropagation();
         }
-        
+
         // Call the handler if it exists
         if (handlers[action]) {
           handlers[action]();

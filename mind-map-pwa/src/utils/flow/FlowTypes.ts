@@ -1,5 +1,5 @@
 // src/utils/flow/FlowTypes.ts
-import { Node, Edge, Viewport } from 'reactflow';
+import { Node, Viewport } from 'reactflow';
 
 /**
  * Versioned Node extends ReactFlow Node with version tracking
@@ -13,7 +13,12 @@ export interface VersionedNode extends Node {
 /**
  * Versioned Edge extends ReactFlow Edge with version tracking
  */
-export interface VersionedEdge extends Edge {
+export interface VersionedEdge {
+  id: string;
+  source: string;
+  target: string;
+  type?: string;
+  data?: Record<string, unknown>;
   version: number;
   lastModified: string;
   createdBy: string;
@@ -26,8 +31,13 @@ export interface FlowState {
   nodes: VersionedNode[];
   edges: VersionedEdge[];
   viewport: Viewport;
-  versionVector: Map<string, number>;
+  versionVector: Record<string, number>;
 }
+
+/**
+ * Version Vector type
+ */
+export type VersionVector = Record<string, number>;
 
 /**
  * Operation Priority for offline queue
@@ -57,10 +67,10 @@ export enum OperationType {
 export interface QueuedOperation {
   id: string;
   type: OperationType;
-  payload: any;
+  payload: Record<string, unknown>;
   priority: OperationPriority;
   timestamp: number;
-  versionVector: Map<string, number>;
+  versionVector: Record<string, number>;
 }
 
 /**
