@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Build</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #2196f3;
+    }
+    button {
+      background-color: #2196f3;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #1976d2;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Build Test Page</h1>
+    <p>This page is used to test if the build files are working correctly.</p>
+    <p>If you can see this page, the HTML file is loading correctly.</p>
+    <p>Click the button below to test loading the JavaScript files:</p>
+    <button id="testButton">Test JavaScript</button>
+    <div id="result" style="margin-top: 20px;"></div>
+  </div>
+
+  <script>
+    document.getElementById('testButton').addEventListener('click', function() {
+      const resultDiv = document.getElementById('result');
+      resultDiv.innerHTML = '<p>JavaScript is working correctly!</p>';
+      
+      // Try to load one of the build files
+      const script = document.createElement('script');
+      script.src = 'dist/assets/index-B0i3EnbD.js';
+      script.onload = function() {
+        resultDiv.innerHTML += '<p>Successfully loaded a build file!</p>';
+      };
+      script.onerror = function() {
+        resultDiv.innerHTML += '<p>Failed to load the build file. Check the console for errors.</p>';
+      };
+      document.body.appendChild(script);
+    });
+  </script>
+</body>
+</html>

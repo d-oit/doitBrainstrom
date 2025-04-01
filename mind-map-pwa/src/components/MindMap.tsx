@@ -1,6 +1,6 @@
 // src/components/MindMap.tsx
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Box, Paper, TextField, Button, useTheme } from '@mui/material';
+import { Box, Paper, TextField, Button } from '@mui/material';
 import MindMapCard from './MindMapCard';
 import MapControls from './mindmap/MapControls';
 import { useMindMap } from '../contexts/MindMapContext';
@@ -17,7 +17,6 @@ const MindMap: React.FC = () => {
     updateNodePosition
   } = useMindMap();
   const { t, dir } = useI18n();
-  const theme = useTheme();
   const {
     viewport,
     shouldReduceAnimations
@@ -70,8 +69,8 @@ const MindMap: React.FC = () => {
   };
 
   // Undo/Redo state (placeholder for actual implementation)
-  const [canUndo, setCanUndo] = useState(false);
-  const [canRedo, setCanRedo] = useState(false);
+  const [canUndo] = useState(false);
+  const [canRedo] = useState(false);
 
   const handleUndo = () => {
     // Implement undo functionality

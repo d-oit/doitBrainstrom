@@ -1,22 +1,21 @@
 // src/components/sync/ConflictResolution.tsx
 import React from 'react';
 import { styled } from '@mui/material/styles';
-import { 
-  Dialog, 
-  AppBar, 
-  Toolbar, 
-  Typography, 
-  List, 
-  ListItem, 
-  ListItemText, 
-  IconButton, 
-  Grid, 
-  Paper, 
-  Box, 
+import {
+  Dialog,
+  AppBar,
+  Toolbar,
+  Typography,
+  List,
+  ListItem,
+  ListItemText,
+  IconButton,
+  Paper,
+  Box,
   Button,
   Divider
 } from '@mui/material';
-import { Close, ArrowForward, CompareArrows } from '@mui/icons-material';
+import { Close, CompareArrows } from '@mui/icons-material';
 import { useResponsive } from '../../contexts/ResponsiveContext';
 import { useI18n } from '../../contexts/I18nContext';
 
@@ -37,7 +36,7 @@ interface ConflictItemProps {
 // Mobile conflict item component
 const ConflictItem: React.FC<ConflictItemProps> = ({ conflict, onResolve }) => {
   const { t } = useI18n();
-  
+
   return (
     <ListItem divider>
       <ListItemText
@@ -45,16 +44,16 @@ const ConflictItem: React.FC<ConflictItemProps> = ({ conflict, onResolve }) => {
         secondary={`${t('sync.modified')}: ${conflict.timestamp}`}
       />
       <Box sx={{ display: 'flex', gap: 1 }}>
-        <Button 
-          size="small" 
-          variant="outlined" 
+        <Button
+          size="small"
+          variant="outlined"
           onClick={() => onResolve(conflict.id, 'local')}
         >
           {t('sync.keepLocal')}
         </Button>
-        <Button 
-          size="small" 
-          variant="outlined" 
+        <Button
+          size="small"
+          variant="outlined"
           onClick={() => onResolve(conflict.id, 'remote')}
         >
           {t('sync.keepRemote')}
@@ -151,53 +150,57 @@ export const ConflictResolution: React.FC<ConflictResolutionProps> = ({
             </IconButton>
           </Toolbar>
         </AppBar>
-        
+
         <Box sx={{ p: 2 }}>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={4}>
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 2fr' }, gap: 2 }}>
+            <Box>
               <Paper variant="outlined" sx={{ height: '100%', overflow: 'auto' }}>
                 <List dense>
                   {conflicts.map(conflict => (
-                    <ListItem 
-                      key={conflict.id} 
-                      button
-                      selected={selectedConflict?.id === conflict.id}
+                    <ListItem
+                      key={conflict.id}
+                      disablePadding
+                      sx={{
+                        cursor: 'pointer',
+                        bgcolor: selectedConflict?.id === conflict.id ? 'action.selected' : 'transparent'
+                      }}
                       onClick={() => setSelectedConflict(conflict)}
                     >
                       <ListItemText
                         primary={conflict.path}
                         secondary={conflict.timestamp}
+                        sx={{ p: 1 }}
                       />
                     </ListItem>
                   ))}
                 </List>
               </Paper>
-            </Grid>
-            
+            </Box>
+
             {selectedConflict && (
-              <Grid item xs={12} sm={8}>
+              <Box>
                 <Paper variant="outlined" sx={{ p: 2 }}>
                   <Typography variant="subtitle1">
                     {selectedConflict.path}
                   </Typography>
                   <Divider sx={{ my: 1 }} />
-                  
+
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-                    <Button 
-                      variant="contained" 
+                    <Button
+                      variant="contained"
                       color="primary"
                       onClick={() => onResolve(selectedConflict.id, 'local')}
                     >
                       {t('sync.keepLocal')}
                     </Button>
-                    <Button 
-                      variant="contained" 
+                    <Button
+                      variant="contained"
                       color="secondary"
                       onClick={() => onResolve(selectedConflict.id, 'remote')}
                     >
                       {t('sync.keepRemote')}
                     </Button>
-                    <Button 
+                    <Button
                       variant="outlined"
                       startIcon={<CompareArrows />}
                       onClick={() => onResolve(selectedConflict.id, 'merge')}
@@ -206,9 +209,9 @@ export const ConflictResolution: React.FC<ConflictResolutionProps> = ({
                     </Button>
                   </Box>
                 </Paper>
-              </Grid>
+              </Box>
             )}
-          </Grid>
+          </Box>
         </Box>
       </Dialog>
     );
@@ -233,63 +236,67 @@ export const ConflictResolution: React.FC<ConflictResolutionProps> = ({
           </IconButton>
         </Toolbar>
       </AppBar>
-      
+
       <Box sx={{ display: 'flex', height: 'calc(100% - 64px)' }}>
         <Box sx={{ width: 250, borderRight: 1, borderColor: 'divider', overflow: 'auto' }}>
           <List dense>
             {conflicts.map(conflict => (
-              <ListItem 
-                key={conflict.id} 
-                button
-                selected={selectedConflict?.id === conflict.id}
+              <ListItem
+                key={conflict.id}
+                disablePadding
+                sx={{
+                  cursor: 'pointer',
+                  bgcolor: selectedConflict?.id === conflict.id ? 'action.selected' : 'transparent'
+                }}
                 onClick={() => setSelectedConflict(conflict)}
               >
                 <ListItemText
                   primary={conflict.path}
                   secondary={conflict.timestamp}
+                  sx={{ p: 1 }}
                 />
               </ListItem>
             ))}
           </List>
         </Box>
-        
+
         {selectedConflict && (
           <Box sx={{ flex: 1, p: 2, display: 'flex', flexDirection: 'column' }}>
             <Typography variant="h6" gutterBottom>
               {selectedConflict.path}
             </Typography>
-            
-            <Grid container spacing={2} sx={{ flex: 1 }}>
-              <Grid item xs={6}>
+
+            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, flex: 1 }}>
+              <Box>
                 <Typography variant="subtitle1">{t('sync.localChanges')}</Typography>
                 <MindMapPreview>
                   <pre>{JSON.stringify(selectedConflict.localVersion, null, 2)}</pre>
                 </MindMapPreview>
-              </Grid>
-              <Grid item xs={6}>
+              </Box>
+              <Box>
                 <Typography variant="subtitle1">{t('sync.remoteChanges')}</Typography>
                 <MindMapPreview>
                   <pre>{JSON.stringify(selectedConflict.remoteVersion, null, 2)}</pre>
                 </MindMapPreview>
-              </Grid>
-            </Grid>
-            
+              </Box>
+            </Box>
+
             <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 2 }}>
-              <Button 
-                variant="contained" 
+              <Button
+                variant="contained"
                 color="primary"
                 onClick={() => onResolve(selectedConflict.id, 'local')}
               >
                 {t('sync.keepLocal')}
               </Button>
-              <Button 
-                variant="contained" 
+              <Button
+                variant="contained"
                 color="secondary"
                 onClick={() => onResolve(selectedConflict.id, 'remote')}
               >
                 {t('sync.keepRemote')}
               </Button>
-              <Button 
+              <Button
                 variant="outlined"
                 startIcon={<CompareArrows />}
                 onClick={() => onResolve(selectedConflict.id, 'merge')}

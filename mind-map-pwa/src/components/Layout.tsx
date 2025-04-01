@@ -1,6 +1,6 @@
 // src/components/Layout.tsx
 import React from 'react';
-import { AppBar, Toolbar, Typography, Container, Box, Stack, Divider, useTheme as useMuiTheme } from '@mui/material';
+import { AppBar, Toolbar, Typography, Container, Box, Stack, Divider } from '@mui/material';
 import ThemeSwitcher from './ThemeSwitcher';
 import LocaleSwitcher from './LocaleSwitcher';
 import SyncStatusPanel from './sync/SyncStatusPanel';
@@ -18,7 +18,6 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { t, dir } = useI18n();
   const { viewport } = useResponsive();
-  const muiTheme = useMuiTheme();
 
   // Sanitize any text that might come from translations
   const appTitle = sanitizeTextInput(t('app.title'));

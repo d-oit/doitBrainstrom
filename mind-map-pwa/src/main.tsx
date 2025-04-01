@@ -3,6 +3,7 @@ import './utils/globalPolyfill';
 
 import React from 'react'
 import ReactDOM from 'react-dom/client'
+import { CacheProvider } from '@emotion/react'
 import App from './App'
 import './styles/index.css'
 import './styles/responsive.css'
@@ -15,6 +16,7 @@ import { ResponsiveContextProvider } from './contexts/ResponsiveContext'
 import { register as registerServiceWorker } from './serviceWorker'
 import { setupGlobalErrorHandler } from './utils/errorHandler'
 import { initLogger } from './utils/logger'
+import createEmotionCache from './utils/createEmotionCache'
 
 // Initialize logger
 initLogger();
@@ -25,18 +27,23 @@ setupGlobalErrorHandler();
 // Register service worker for offline capabilities
 registerServiceWorker();
 
+// Create Emotion cache
+const emotionCache = createEmotionCache();
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <I18nContextProvider>
-      <ErrorNotificationContextProvider>
-        <ThemeContextProvider>
-          <ResponsiveContextProvider>
-            <MindMapContextProvider>
-              <App />
-            </MindMapContextProvider>
-          </ResponsiveContextProvider>
-        </ThemeContextProvider>
-      </ErrorNotificationContextProvider>
-    </I18nContextProvider>
+    <CacheProvider value={emotionCache}>
+      <I18nContextProvider>
+        <ErrorNotificationContextProvider>
+          <ThemeContextProvider>
+            <ResponsiveContextProvider>
+              <MindMapContextProvider>
+                <App />
+              </MindMapContextProvider>
+            </ResponsiveContextProvider>
+          </ThemeContextProvider>
+        </ErrorNotificationContextProvider>
+      </I18nContextProvider>
+    </CacheProvider>
   </React.StrictMode>,
 )

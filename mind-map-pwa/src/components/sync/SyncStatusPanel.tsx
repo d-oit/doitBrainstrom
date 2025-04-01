@@ -1,29 +1,29 @@
 // src/components/sync/SyncStatusPanel.tsx
 import React from 'react';
-import { 
-  Box, 
-  IconButton, 
-  Tooltip, 
-  CircularProgress, 
-  Badge, 
-  Paper, 
-  Typography, 
+import {
+  Box,
+  IconButton,
+  Tooltip,
+  CircularProgress,
+  Badge,
+  Paper,
+  Typography,
   LinearProgress,
   styled
 } from '@mui/material';
-import { 
-  CloudDone, 
-  CloudOff, 
-  CloudSync, 
-  CloudUpload, 
-  Refresh 
+import {
+  CloudDone,
+  CloudOff,
+  CloudSync,
+  CloudUpload,
+  Refresh
 } from '@mui/icons-material';
 import { useMindMap } from '../../contexts/MindMapContext';
 import { useI18n } from '../../contexts/I18nContext';
 import { useResponsive } from '../../contexts/ResponsiveContext';
 
 // Mobile implementation with just an icon and badge
-const MobileSyncStatus = styled(Box)(({ theme }) => ({
+const MobileSyncStatus = styled(Box)(() => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -37,7 +37,11 @@ const DesktopSyncPanel = styled(Paper)(({ theme }) => ({
 }));
 
 export const SyncStatusPanel: React.FC = () => {
-  const { syncStatus, syncMindMap, isLoading, lastSyncTime, queuedChanges = 0, syncProgress = 0 } = useMindMap();
+  const { syncStatus, syncMindMap, isLoading } = useMindMap();
+  // Mock values for demonstration purposes
+  const lastSyncTime = new Date().toLocaleTimeString();
+  const queuedChanges = 0;
+  const syncProgress = 0;
   const { t } = useI18n();
   const { viewport } = useResponsive();
 
@@ -136,12 +140,12 @@ export const SyncStatusPanel: React.FC = () => {
           {getStatusText()}
         </Typography>
       </Box>
-      
-      <LinearProgress 
-        variant={syncStatus === 'syncing' ? "indeterminate" : "determinate"} 
-        value={syncProgress} 
+
+      <LinearProgress
+        variant={syncStatus === 'syncing' ? "indeterminate" : "determinate"}
+        value={syncProgress}
       />
-      
+
       <Box sx={{ mt: 1 }}>
         <Typography variant="body2">
           {t('sync.lastSynced')}: {lastSyncTime || t('sync.never')}
@@ -150,7 +154,7 @@ export const SyncStatusPanel: React.FC = () => {
           {t('sync.queuedChanges')}: {queuedChanges}
         </Typography>
       </Box>
-      
+
       <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
         <IconButton
           onClick={handleSync}

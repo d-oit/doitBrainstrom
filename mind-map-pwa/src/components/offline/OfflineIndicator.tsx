@@ -1,7 +1,7 @@
 // src/components/offline/OfflineIndicator.tsx
 import React from 'react';
 import { styled } from '@mui/material/styles';
-import { Box, AppBar, Typography, Slide, useTheme } from '@mui/material';
+import { Box, AppBar, Typography, Slide } from '@mui/material';
 import { WifiOff as WifiOffIcon } from '@mui/icons-material';
 import { useResponsive } from '../../contexts/ResponsiveContext';
 import { useI18n } from '../../contexts/I18nContext';
@@ -61,7 +61,6 @@ const DesktopOfflineStatusBar = styled(Box)(({ theme }) => ({
 export const OfflineIndicator: React.FC = () => {
   const { network, viewport } = useResponsive();
   const { t } = useI18n();
-  const theme = useTheme();
 
   // Don't show anything if online
   if (network.online) {

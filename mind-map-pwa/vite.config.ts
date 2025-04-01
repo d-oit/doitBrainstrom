@@ -8,7 +8,12 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
 
   return {
-  plugins: [react()],
+  plugins: [react({
+    jsxImportSource: '@emotion/react',
+    babel: {
+      plugins: ['@emotion/babel-plugin']
+    }
+  })],
   define: {
     // S3 Configuration
     'import.meta.env.VITE_S3_ENDPOINT': JSON.stringify(env.VITE_S3_ENDPOINT),
