@@ -1,8 +1,7 @@
 // src/utils/migrationUtils.ts
 import { logInfo, logError, logWarn } from './logger';
-import { saveSettings, getSettings, saveAppState } from './indexedDB/dbService';
+import { saveSettings, saveAppState } from './indexedDB/dbService';
 import { SettingsRecord, AppStateRecord } from './indexedDB/config';
-import { generateId } from './MindMapDataModel';
 
 // Flag to track if migration has been performed
 const MIGRATION_FLAG_KEY = 'indexedDB_migration_completed';

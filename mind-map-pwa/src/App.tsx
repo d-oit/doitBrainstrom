@@ -7,6 +7,8 @@ import { useI18n } from './contexts/I18nContext'
 import { ChatContextProvider } from './contexts/ChatContext'
 import FloatingChatButton from './components/Chat/FloatingChatButton'
 import { ResponsiveGrid, ResponsiveGridItem } from './components/layout/ResponsiveGrid'
+import { getTabStateAsync, setTabState } from './services/navigationStorageService'
+import { runAllMigrations } from './utils/migrationUtils'
 
 // Lazy load components
 const MindMapCard = lazy(() => import('./components/MindMapCard'))
@@ -44,6 +46,25 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [tabValue, setTabValue] = useState(0);
   const { t } = useI18n();
+
+  // Initialize app state from IndexedDB
+  useEffect(() => {
+    const initializeAppState = async () => {
+      try {
+        // Run migrations from localStorage to IndexedDB
+        await runAllMigrations();
+
+        // Load tab state from IndexedDB
+        const savedTabValue = await getTabStateAsync();
+        setTabValue(savedTabValue);
+      } catch (error) {
+        console.error('Failed to initialize app state from IndexedDB:', error);
+        // Already using default tab value as fallback
+      }
+    };
+
+    initializeAppState();
+  }, []);
 
   useEffect(() => {
     const fetchBuckets = async () => {
@@ -85,6 +106,9 @@ function App() {
 
   const handleTabChange = (newValue: number) => {
     setTabValue(newValue);
+
+    // Save tab state to IndexedDB
+    setTabState(newValue);
   };
 
   return (

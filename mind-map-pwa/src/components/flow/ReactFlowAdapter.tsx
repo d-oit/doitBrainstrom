@@ -51,8 +51,8 @@ const ReactFlowAdapter: React.FC<ReactFlowAdapterProps> = ({
   onViewportChange
 }) => {
   const { t } = useI18n();
-  // Use the accessibility context without destructuring since we're not using specific properties yet
-  const accessibilityContext = useAccessibility();
+  // Import accessibility context hook for future use
+  useAccessibility();
   const theme = useTheme();
   const [isLoading, setIsLoading] = useState<boolean>(true);
 

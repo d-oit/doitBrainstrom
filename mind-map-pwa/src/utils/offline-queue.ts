@@ -2,7 +2,6 @@
 import { logInfo, logError, logWarn } from './logger';
 import { StorageError } from './errorHandler';
 import { initDB } from './indexedDB/dbService';
-import { DB_CONFIG } from './indexedDB/config';
 
 // Operation types
 export enum OperationType {

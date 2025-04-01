@@ -21,6 +21,7 @@ const NavigationLink: React.FC<NavigationLinkProps> = ({
       className={`drawer-nav-link ${active ? 'active' : ''}`}
       onClick={onClick}
       aria-current={active ? "page" : undefined}
+      {...(ariaControls ? { 'aria-controls': ariaControls } : {})}
       type="button"
     >
       <span className="drawer-nav-icon">{icon}</span>

@@ -353,27 +353,8 @@ export const watchSystemPreference = (callback: (preference: 'light' | 'dark') =
   return () => {};
 };
 
-// Load theme settings from localStorage
-export const loadThemeSettings = (): ThemeSettings => {
-  if (typeof window === 'undefined') {
-    return {
-      mode: 'system',
-      useCssVars: true,
-      animations: true,
-      reducedMotion: false,
-      colorScheme: 'default',
-    };
-  }
-
-  try {
-    const savedSettings = localStorage.getItem('theme-settings');
-    if (savedSettings) {
-      return JSON.parse(savedSettings);
-    }
-  } catch (error) {
-    console.error('Failed to load theme settings from localStorage:', error);
-  }
-
+// Default theme settings
+export const getDefaultThemeSettings = (): ThemeSettings => {
   return {
     mode: 'system',
     useCssVars: true,
@@ -383,13 +364,37 @@ export const loadThemeSettings = (): ThemeSettings => {
   };
 };
 
-// Save theme settings to localStorage
+// Load theme settings - this is now just a synchronous wrapper for backward compatibility
+// The actual loading is done in settingsService.ts
+export const loadThemeSettings = (): ThemeSettings => {
+  if (typeof window === 'undefined') {
+    return getDefaultThemeSettings();
+  }
+
+  try {
+    // For backward compatibility, still try localStorage first
+    const savedSettings = localStorage.getItem('theme-settings');
+    if (savedSettings) {
+      return JSON.parse(savedSettings);
+    }
+  } catch (error) {
+    console.error('Failed to load theme settings from localStorage:', error);
+  }
+
+  return getDefaultThemeSettings();
+};
+
+// Save theme settings - this is now just a synchronous wrapper for backward compatibility
+// The actual saving is done in settingsService.ts
 export const saveThemeSettings = (settings: ThemeSettings): void => {
   if (typeof window === 'undefined') return;
 
   try {
+    // For backward compatibility, still save to localStorage
     localStorage.setItem('theme-settings', JSON.stringify(settings));
   } catch (error) {
     console.error('Failed to save theme settings to localStorage:', error);
   }
+
+  // The actual IndexedDB saving is handled by the ThemeContext
 };

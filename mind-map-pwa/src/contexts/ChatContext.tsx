@@ -2,6 +2,14 @@ import React, { createContext, useContext, useState, useCallback, useEffect } fr
 import { openRouterService } from '../services/llm/openRouterService';
 import { ChatMessage, ChatOptions, ChatSession } from '../services/llm/types';
 import { logError, logInfo } from '../utils/logger';
+import {
+  createNewConversation,
+  getChatHistory,
+  addUserMessage,
+  addAssistantMessage,
+  addSystemMessage
+} from '../services/chatHistoryService';
+import { runAllMigrations } from '../utils/migrationUtils';
 
 interface ChatContextProps {
   messages: ChatMessage[];
@@ -26,41 +34,69 @@ export const ChatContextProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
 
-  // Load sessions from localStorage on mount
+  // Initialize and load sessions
   useEffect(() => {
-    const loadSessions = () => {
+    const initializeChat = async () => {
       try {
-        const savedSessions = localStorage.getItem('chat-sessions');
-        if (savedSessions) {
-          const parsedSessions = JSON.parse(savedSessions) as ChatSession[];
-          setSessions(parsedSessions);
+        // Run migrations from localStorage to IndexedDB
+        await runAllMigrations();
 
-          // Load last active session if available
-          const lastSessionId = localStorage.getItem('last-chat-session');
-          if (lastSessionId) {
-            const session = parsedSessions.find(s => s.id === lastSessionId);
-            if (session) {
-              setCurrentSessionId(session.id);
-              setMessages(session.messages);
+        // For backward compatibility, still try localStorage first
+        try {
+          const savedSessions = localStorage.getItem('chat-sessions');
+          if (savedSessions) {
+            const parsedSessions = JSON.parse(savedSessions) as ChatSession[];
+            setSessions(parsedSessions);
+
+            // Load last active session if available
+            const lastSessionId = localStorage.getItem('last-chat-session');
+            if (lastSessionId) {
+              const session = parsedSessions.find(s => s.id === lastSessionId);
+              if (session) {
+                setCurrentSessionId(session.id);
+
+                // Try to load messages from IndexedDB first
+                try {
+                  const chatHistory = await getChatHistory(session.id);
+                  if (chatHistory && chatHistory.length > 0) {
+                    // Convert IndexedDB format to ChatMessage format
+                    const convertedMessages: ChatMessage[] = chatHistory.map(msg => ({
+                      role: msg.role,
+                      content: msg.content,
+                      timestamp: new Date(msg.timestamp).getTime()
+                    }));
+                    setMessages(convertedMessages);
+                  } else {
+                    // Fall back to session messages if no IndexedDB history
+                    setMessages(session.messages);
+                  }
+                } catch (dbError) {
+                  logError('Error loading chat history from IndexedDB:', dbError);
+                  // Fall back to session messages
+                  setMessages(session.messages);
+                }
+              }
             }
           }
+        } catch (localStorageError) {
+          logError('Error loading chat sessions from localStorage:', localStorageError);
         }
       } catch (error) {
-        logError('Error loading chat sessions:', error);
+        logError('Error initializing chat:', error);
       }
     };
 
-    loadSessions();
+    initializeChat();
   }, []);
 
-  // Save sessions to localStorage when they change
+  // Save sessions to localStorage for backward compatibility
   useEffect(() => {
     if (sessions.length > 0) {
       localStorage.setItem('chat-sessions', JSON.stringify(sessions));
     }
   }, [sessions]);
 
-  // Save current session ID to localStorage when it changes
+  // Save current session ID to localStorage for backward compatibility
   useEffect(() => {
     if (currentSessionId) {
       localStorage.setItem('last-chat-session', currentSessionId);
@@ -90,6 +126,12 @@ export const ChatContextProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const sendMessage = useCallback(async (content: string, options?: ChatOptions) => {
     if (!content.trim()) return;
 
+    // Ensure we have a session ID
+    if (!currentSessionId) {
+      createSession();
+      return;
+    }
+
     // Create user message
     const userMessage: ChatMessage = {
       role: 'user',
@@ -101,6 +143,11 @@ export const ChatContextProvider: React.FC<{ children: React.ReactNode }> = ({ c
     setMessages(prev => [...prev, userMessage]);
     setIsLoading(true);
     setError(null);
+
+    // Save user message to IndexedDB
+    await addUserMessage(currentSessionId, content).catch(error => {
+      logError('Error saving user message to IndexedDB:', error);
+    });
 
     try {
       // Create message history for the API request
@@ -134,6 +181,11 @@ export const ChatContextProvider: React.FC<{ children: React.ReactNode }> = ({ c
       // Add assistant response to state
       if (response && response.message) {
         setMessages(prev => [...prev, response.message]);
+
+        // Save assistant message to IndexedDB
+        await addAssistantMessage(currentSessionId, response.message.content).catch(error => {
+          logError('Error saving assistant message to IndexedDB:', error);
+        });
       }
     } catch (error) {
       logError('Error sending message:', error);
@@ -141,7 +193,7 @@ export const ChatContextProvider: React.FC<{ children: React.ReactNode }> = ({ c
     } finally {
       setIsLoading(false);
     }
-  }, [messages]);
+  }, [messages, currentSessionId, createSession]);
 
   // Clear all messages in the current session
   const clearMessages = useCallback(() => {
@@ -172,7 +224,9 @@ export const ChatContextProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
   // Create a new chat session
   const createSession = useCallback(() => {
-    const newSessionId = `session-${Date.now()}`;
+    // Use our chatHistoryService to create a new conversation ID
+    const newSessionId = createNewConversation();
+
     const newSession: ChatSession = {
       id: newSessionId,
       messages: [],
@@ -185,16 +239,56 @@ export const ChatContextProvider: React.FC<{ children: React.ReactNode }> = ({ c
     setCurrentSessionId(newSessionId);
     setMessages([]);
 
+    // Add initial system message to IndexedDB
+    addSystemMessage(newSessionId, 'You are a helpful assistant for a mind mapping application. Provide concise, clear responses.')
+      .catch(error => logError('Error saving system message to IndexedDB:', error));
+
     logInfo('Created new chat session:', newSessionId);
     return newSessionId;
   }, []);
 
   // Load an existing session
-  const loadSession = useCallback((sessionId: string) => {
+  const loadSession = useCallback(async (sessionId: string) => {
     const session = sessions.find(s => s.id === sessionId);
     if (session) {
       setCurrentSessionId(sessionId);
-      setMessages(session.messages);
+
+      try {
+        // Try to load messages from IndexedDB first
+        const chatHistory = await getChatHistory(sessionId);
+        if (chatHistory && chatHistory.length > 0) {
+          // Convert IndexedDB format to ChatMessage format
+          const convertedMessages: ChatMessage[] = chatHistory.map(msg => ({
+            role: msg.role,
+            content: msg.content,
+            timestamp: new Date(msg.timestamp).getTime()
+          }));
+          setMessages(convertedMessages);
+        } else {
+          // Fall back to session messages if no IndexedDB history
+          setMessages(session.messages);
+
+          // If we have messages in the session but not in IndexedDB, save them to IndexedDB
+          if (session.messages.length > 0) {
+            // Add system message first
+            await addSystemMessage(sessionId, 'You are a helpful assistant for a mind mapping application. Provide concise, clear responses.');
+
+            // Add all other messages
+            for (const msg of session.messages) {
+              if (msg.role === 'user') {
+                await addUserMessage(sessionId, msg.content);
+              } else if (msg.role === 'assistant') {
+                await addAssistantMessage(sessionId, msg.content);
+              }
+            }
+          }
+        }
+      } catch (error) {
+        logError('Error loading chat history from IndexedDB:', error);
+        // Fall back to session messages
+        setMessages(session.messages);
+      }
+
       logInfo('Loaded chat session:', sessionId);
     } else {
       logError('Session not found:', sessionId);

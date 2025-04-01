@@ -9,18 +9,45 @@ import {
   detectSystemPreference,
   watchSystemPreference,
   loadThemeSettings,
-  saveThemeSettings
+  saveThemeSettings,
+  getDefaultThemeSettings
 } from '../styles/theme-engine';
+import { saveThemeSettings as saveThemeSettingsToIndexedDB, loadThemeSettings as loadThemeSettingsFromIndexedDB } from '../services/settingsService';
+import { runAllMigrations } from '../utils/migrationUtils';
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeContextProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Load theme settings from localStorage
+  // Load theme settings from localStorage initially, will be updated from IndexedDB
   const [settings, setSettings] = useState<ThemeSettings>(loadThemeSettings());
   const [systemPreference, setSystemPreference] = useState<'light' | 'dark'>(detectSystemPreference());
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
 
   // Destructure settings for easier access
   const { mode, useCssVars } = settings;
+
+  // Initialize settings from IndexedDB
+  useEffect(() => {
+    const initializeSettings = async () => {
+      try {
+        // Run migrations from localStorage to IndexedDB
+        await runAllMigrations();
+
+        // Load settings from IndexedDB
+        const indexedDBSettings = await loadThemeSettingsFromIndexedDB();
+        if (indexedDBSettings) {
+          setSettings(indexedDBSettings);
+        }
+      } catch (error) {
+        console.error('Failed to initialize settings from IndexedDB:', error);
+        // Already using localStorage settings as fallback
+      } finally {
+        setIsInitialized(true);
+      }
+    };
+
+    initializeSettings();
+  }, []);
 
   // Watch for system preference changes
   useEffect(() => {
@@ -43,7 +70,14 @@ export const ThemeContextProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const updateSettings = (newSettings: Partial<ThemeSettings>) => {
     const updatedSettings = { ...settings, ...newSettings };
     setSettings(updatedSettings);
+
+    // Save to localStorage for backward compatibility
     saveThemeSettings(updatedSettings);
+
+    // Save to IndexedDB
+    saveThemeSettingsToIndexedDB(updatedSettings).catch(error => {
+      console.error('Failed to save theme settings to IndexedDB:', error);
+    });
   };
 
   // Determine if high contrast mode is active

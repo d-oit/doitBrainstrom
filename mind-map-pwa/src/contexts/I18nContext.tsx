@@ -1,5 +1,7 @@
 // src/contexts/I18nContext.tsx
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import { saveLocaleSettings, loadLocaleSettings } from '../services/settingsService';
+import { runAllMigrations } from '../utils/migrationUtils';
 
 // Define supported locales
 export const SUPPORTED_LOCALES = [
@@ -59,23 +61,61 @@ export const I18nContextProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
   // Initialize with browser language if available
   useEffect(() => {
-    const browserLang = navigator.language.split('-')[0];
-    const isSupported = SUPPORTED_LOCALES.some(l => l.code === browserLang);
+    const initializeLocale = async () => {
+      try {
+        // Run migrations from localStorage to IndexedDB
+        await runAllMigrations();
 
-    if (isSupported) {
-      setLocale(browserLang);
-    }
+        // Try to load locale from IndexedDB
+        const storedLocale = await loadLocaleSettings();
+        if (storedLocale) {
+          setLocale(storedLocale);
+          return;
+        }
 
-    // Check for stored preference
-    const storedLocale = localStorage.getItem('locale');
-    if (storedLocale) {
-      setLocale(storedLocale);
-    }
+        // If not in IndexedDB, try localStorage for backward compatibility
+        const localStorageLocale = localStorage.getItem('locale');
+        if (localStorageLocale) {
+          setLocale(localStorageLocale);
+          return;
+        }
+
+        // If no stored preference, use browser language if supported
+        const browserLang = navigator.language.split('-')[0];
+        const isSupported = SUPPORTED_LOCALES.some(l => l.code === browserLang);
+        if (isSupported) {
+          setLocale(browserLang);
+        }
+      } catch (error) {
+        console.error('Failed to initialize locale from IndexedDB:', error);
+
+        // Fallback to localStorage
+        const localStorageLocale = localStorage.getItem('locale');
+        if (localStorageLocale) {
+          setLocale(localStorageLocale);
+        } else {
+          // If no stored preference, use browser language if supported
+          const browserLang = navigator.language.split('-')[0];
+          const isSupported = SUPPORTED_LOCALES.some(l => l.code === browserLang);
+          if (isSupported) {
+            setLocale(browserLang);
+          }
+        }
+      }
+    };
+
+    initializeLocale();
   }, []);
 
   // Save locale preference
   useEffect(() => {
+    // Save to localStorage for backward compatibility
     localStorage.setItem('locale', locale);
+
+    // Save to IndexedDB
+    saveLocaleSettings(locale).catch(error => {
+      console.error('Failed to save locale to IndexedDB:', error);
+    });
   }, [locale]);
 
   // Translation function
