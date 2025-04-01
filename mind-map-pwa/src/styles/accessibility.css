@@ -1,0 +1,280 @@
+/* src/styles/accessibility.css */
+
+/* 
+ * Accessibility Styles
+ * Global styles for improving accessibility
+ */
+
+/* Skip links */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  padding: 8px 16px;
+  background-color: var(--color-primary);
+  color: #fff;
+  z-index: 9999;
+  text-decoration: none;
+  transition: top 0.2s ease-in-out;
+  border-radius: 0 0 4px 0;
+  font-weight: 500;
+}
+
+.skip-link:focus {
+  top: 0;
+  outline: 3px solid var(--color-secondary);
+}
+
+/* Focus styles */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* High contrast focus styles */
+.high-contrast-theme :focus-visible {
+  outline: 3px solid var(--focus-outline-color, #ffff00);
+  outline-offset: 3px;
+}
+
+/* Keyboard focus indicator */
+.keyboard-focus-indicator {
+  position: absolute;
+  pointer-events: none;
+  z-index: 9999;
+  border-radius: 4px;
+  transition: all 0.15s ease-out;
+  box-shadow: 0 0 0 2px var(--color-primary);
+}
+
+.high-contrast-theme .keyboard-focus-indicator {
+  box-shadow: 0 0 0 3px var(--color-secondary), 0 0 0 6px var(--color-primary);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce), 
+       (prefers-reduced-motion: reduce) and (forced-colors: active) {
+  *, ::before, ::after {
+    animation-duration: 0.001s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001s !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.reduced-motion *, 
+.reduced-motion ::before, 
+.reduced-motion ::after {
+  animation-duration: 0.001s !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001s !important;
+  scroll-behavior: auto !important;
+}
+
+/* Large text */
+.large-text {
+  font-size: 1.25em !important;
+}
+
+.large-text h1 {
+  font-size: 2.5em !important;
+}
+
+.large-text h2 {
+  font-size: 2em !important;
+}
+
+.large-text h3 {
+  font-size: 1.75em !important;
+}
+
+.large-text h4 {
+  font-size: 1.5em !important;
+}
+
+.large-text h5 {
+  font-size: 1.25em !important;
+}
+
+.large-text h6 {
+  font-size: 1.1em !important;
+}
+
+.large-text button,
+.large-text .MuiButton-root {
+  font-size: 1.1em !important;
+}
+
+/* Visually hidden but accessible to screen readers */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Live regions for screen reader announcements */
+.sr-live-region {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Color blindness support */
+.protanopia {
+  filter: url('#protanopia-filter');
+}
+
+.deuteranopia {
+  filter: url('#deuteranopia-filter');
+}
+
+.tritanopia {
+  filter: url('#tritanopia-filter');
+}
+
+.achromatopsia {
+  filter: url('#achromatopsia-filter');
+}
+
+/* SVG filters for color blindness simulation */
+.color-blindness-filters {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+/* Improved contrast for text */
+.high-contrast-theme {
+  --text-contrast-ratio: 7;
+}
+
+.high-contrast-theme p,
+.high-contrast-theme span,
+.high-contrast-theme div,
+.high-contrast-theme li {
+  font-weight: 500;
+}
+
+/* Improved focus indication for interactive elements */
+.high-contrast-theme button:focus-visible,
+.high-contrast-theme [role="button"]:focus-visible,
+.high-contrast-theme a:focus-visible,
+.high-contrast-theme input:focus-visible,
+.high-contrast-theme select:focus-visible,
+.high-contrast-theme textarea:focus-visible {
+  outline: 3px solid var(--focus-outline-color, #ffff00);
+  outline-offset: 3px;
+}
+
+/* Ensure sufficient touch target size */
+@media (pointer: coarse) {
+  button,
+  [role="button"],
+  a,
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"],
+  input[type="checkbox"],
+  input[type="radio"],
+  select,
+  .interactive {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Keyboard shortcuts help dialog */
+.keyboard-shortcut {
+  display: inline-block;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+  padding: 2px 6px;
+  margin: 0 2px;
+  font-family: monospace;
+  font-size: 0.9em;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.dark-theme .keyboard-shortcut {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.high-contrast-theme .keyboard-shortcut {
+  background-color: #000;
+  color: #fff;
+  border-color: #fff;
+  font-weight: bold;
+}
+
+/* Accessibility menu */
+.accessibility-menu-button {
+  position: relative;
+}
+
+.accessibility-menu-button::after {
+  content: attr(data-active-features);
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: var(--color-secondary);
+  color: #fff;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translate(50%, -50%);
+}
+
+/* Ensure proper contrast for disabled elements */
+.high-contrast-theme button:disabled,
+.high-contrast-theme [role="button"][aria-disabled="true"],
+.high-contrast-theme input:disabled,
+.high-contrast-theme select:disabled,
+.high-contrast-theme textarea:disabled {
+  opacity: 0.5;
+  border: 1px dashed currentColor;
+}
+
+/* Ensure proper contrast for error states */
+.high-contrast-theme .Mui-error {
+  color: #ff6b6b !important;
+}
+
+.high-contrast-theme .MuiFormHelperText-root.Mui-error {
+  color: #ff6b6b !important;
+  font-weight: bold;
+}
+
+/* Ensure proper contrast for success states */
+.high-contrast-theme .Mui-success {
+  color: #00e676 !important;
+}
+
+/* Ensure proper contrast for warning states */
+.high-contrast-theme .MuiAlert-standardWarning {
+  background-color: #332700 !important;
+  color: #ffd600 !important;
+}
+
+/* Ensure proper contrast for info states */
+.high-contrast-theme .MuiAlert-standardInfo {
+  background-color: #002f42 !important;
+  color: #40c4ff !important;
+}

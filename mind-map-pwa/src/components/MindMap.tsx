@@ -1,11 +1,12 @@
 // src/components/MindMap.tsx
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Box, Paper, TextField, Button } from '@mui/material';
+import { Box, Paper, TextField, Button, Typography, VisuallyHidden } from '@mui/material';
 import MindMapCard from './MindMapCard';
 import MapControls from './mindmap/MapControls';
 import { useMindMap } from '../contexts/MindMapContext';
 import { useI18n } from '../contexts/I18nContext';
 import { useResponsive } from '../contexts/ResponsiveContext';
+import { useAccessibility } from '../contexts/AccessibilityContext';
 import { loadPriority } from '../utils/performanceConfig';
 import GestureHandler from './touch/GestureHandler';
 import ContainerQuery from './layout/ContainerQuery';
@@ -26,6 +27,7 @@ const MindMap: React.FC = () => {
     viewport,
     shouldReduceAnimations
   } = useResponsive();
+  const { announceToScreenReader } = useAccessibility();
 
   // Get device-specific loading configuration
   const deviceLoadConfig = loadPriority[viewport.deviceCategory];
@@ -106,13 +108,30 @@ const MindMap: React.FC = () => {
     if (selectedNodeId === null) {
       // First node selection
       setSelectedNodeId(nodeId);
+
+      // Announce selection to screen readers
+      const node = mindMapData.nodes.find(n => n.id === nodeId);
+      if (node) {
+        announceToScreenReader(t('accessibility.nodeSelected', { text: node.text }));
+      }
     } else if (selectedNodeId !== nodeId) {
       // Second node selection - create link
       linkNodes(selectedNodeId, nodeId);
+
+      // Announce link creation to screen readers
+      const sourceNode = mindMapData.nodes.find(n => n.id === selectedNodeId);
+      const targetNode = mindMapData.nodes.find(n => n.id === nodeId);
+      if (sourceNode && targetNode) {
+        announceToScreenReader(t('accessibility.nodesLinked', { source: sourceNode.text, target: targetNode.text }));
+      }
+
       setSelectedNodeId(null);
     } else {
       // Deselect if clicking the same node
       setSelectedNodeId(null);
+
+      // Announce deselection to screen readers
+      announceToScreenReader(t('accessibility.nodeDeselected'));
     }
   };
 
@@ -331,6 +350,13 @@ const MindMap: React.FC = () => {
       )}
 
       <Box sx={{ position: 'relative', flexGrow: 1 }}>
+        {/* Accessibility description of the mind map */}
+        <VisuallyHidden>
+          <Typography id="mind-map-description">
+            {t('accessibility.mindMapDescription')}
+          </Typography>
+        </VisuallyHidden>
+
         <ContainerQuery type="component">
           <GestureHandler
             onPan={handlePan}
@@ -343,6 +369,9 @@ const MindMap: React.FC = () => {
             <Paper
               ref={containerRef}
               className="mind-map-container"
+              aria-label={t('accessibility.mindMap')}
+              aria-describedby="mind-map-description"
+              role="application"
               sx={{
                 flexGrow: 1,
                 position: 'relative',
@@ -367,6 +396,11 @@ const MindMap: React.FC = () => {
           {mindMapData.nodes.map(node => (
             <Box
               key={node.id}
+              role="button"
+              tabIndex={0}
+              aria-label={t('accessibility.node', { text: node.text })}
+              aria-selected={selectedNodeId === node.id}
+              aria-grabbed={draggingNodeId === node.id}
               sx={{
                 position: 'absolute',
                 top: node.y,
@@ -381,6 +415,16 @@ const MindMap: React.FC = () => {
               onTouchStart={(e) => handleTouchStart(e, node.id)}
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
+              onKeyDown={(e) => {
+                // Handle keyboard interaction
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleNodeClick(node.id);
+                } else if (e.key === 'Delete' || e.key === 'Backspace') {
+                  e.preventDefault();
+                  // Handle node deletion if implemented
+                }
+              }}
             >
               <MindMapCard
                 title={node.text}

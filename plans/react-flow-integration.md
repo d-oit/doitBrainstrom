@@ -6,6 +6,12 @@ Offline-first PWA implementation of react-flow diagramming with IndexedDB synchr
 read for implementation: 
 https://github.com/xyflow/xyflow
 
+Always read the codebase first and change the md file if necessary. Use the bash for npm test to verify the implantation after every step.
+
+Add or update the existing vitest and playwright (e2e) tests.
+
+The implementation should prioritize user-friendliness, full responsiveness, robust error handling, security, optimal performance, accessibility, and adherence to best practices. Ensure that the solution is scalable, maintainable, and provides an intuitive user experience.
+
 ## Architecture Diagram
 ```mermaid
 %%{init: {'theme':'neutral'}}%%

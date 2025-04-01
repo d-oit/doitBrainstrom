@@ -15,6 +15,9 @@ import { ResponsiveGrid, ResponsiveGridItem } from './layout/ResponsiveGrid';
 import ContainerQuery from './layout/ContainerQuery';
 import { Heading1, Paragraph } from './typography/FluidTypography';
 import TouchFriendly from './touch/TouchFriendly';
+// Import accessibility components
+import AccessibilityMenu from './accessibility/AccessibilityMenu';
+import SkipLinks from './accessibility/SkipLinks';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -29,8 +32,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <Box sx={{ direction: dir }} className="app-container">
+      {/* Skip links for keyboard navigation */}
+      <SkipLinks links={[
+        { id: 'main-content', label: t('accessibility.skipToMainContent') },
+        { id: 'navigation', label: t('accessibility.skipToNavigation') }
+      ]} />
+
       {/* Use semantic header element with safe area padding */}
-      <header className="safe-area-top">
+      <header className="safe-area-top" role="banner">
         {/* Show offline banner for tablet view */}
         {viewport.isTablet && <OfflineIndicator />}
 
@@ -74,6 +83,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <TouchFriendly>
                 <ThemeSwitcher />
               </TouchFriendly>
+              <TouchFriendly>
+                <AccessibilityMenu />
+              </TouchFriendly>
             </Stack>
           </Toolbar>
         </AppBar>
@@ -83,7 +95,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {(viewport.isMobile || viewport.isDesktop || viewport.isWidescreen) && <OfflineIndicator />}
 
       {/* Use semantic main element with responsive padding */}
-      <main id="main-content" tabIndex={-1}>
+      <main id="main-content" tabIndex={-1} role="main" aria-label={t('accessibility.mainContent')}>
         <ResponsiveGrid
           container
           fluid={false}
@@ -102,7 +114,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </main>
 
       {/* Add semantic footer with safe area padding */}
-      <footer className="safe-area-bottom">
+      <footer className="safe-area-bottom" role="contentinfo" aria-label={t('accessibility.footerInfo')}>
         <ResponsiveGrid container fluid={false} gap="md">
           <ResponsiveGridItem xs={12}>
             <Box sx={{
@@ -113,6 +125,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <Paragraph className="text-sm">
                 © {new Date().getFullYear()} d.o. Brainstroming
               </Paragraph>
+              <Box className="sr-only" aria-live="polite" id="screen-reader-announcements"></Box>
             </Box>
           </ResponsiveGridItem>
         </ResponsiveGrid>

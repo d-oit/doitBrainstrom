@@ -221,16 +221,25 @@ try {
 - Use the useResponsive hook to access viewport information
 
 ### Accessibility
-- Use semantic HTML elements
-- Implement ARIA attributes for dynamic content
-- Ensure keyboard navigation works properly
-- Test with screen readers
+- Use semantic HTML elements with appropriate ARIA landmarks (main, nav, banner, etc.)
+- Use the AccessibilityContext for screen reader announcements and keyboard shortcuts
+- Implement ARIA attributes for dynamic content and state changes
+- Use SkipLinks for keyboard navigation between major sections
+- Use FocusIndicator for visible focus indication
+- Ensure all interactive elements are keyboard accessible
+- Provide keyboard shortcuts for common actions
+- Test with screen readers (NVDA, JAWS, VoiceOver)
 - Follow WCAG 2.2 Level AA guidelines
-- Support high contrast mode
-- Implement reduced motion preferences
-- Provide color blindness accommodations
-- Ensure proper focus management
-- Ensure touch targets are at least 44x44px
+- Support high contrast mode using the theme system
+- Implement reduced motion preferences using the AccessibilityContext
+- Provide color blindness accommodations with ColorBlindnessFilters
+- Ensure proper focus management with the focusManager utilities
+- Ensure touch targets are at least 44x44px using TouchFriendly
+- Use live regions for important announcements
+- Provide text alternatives for non-text content
+- Ensure sufficient color contrast (4.5:1 for normal text, 3:1 for large text)
+- Make error messages accessible to screen readers
+- Test keyboard navigation with the tab key and arrow keys
 
 ## 6. State Management Guidelines
 

@@ -13,11 +13,13 @@ import './styles/grid-system.css'
 import './styles/fluid-typography.css'
 import './styles/container-queries.css'
 import './styles/touch-interactions.css'
+import './styles/accessibility.css'
 import { ThemeContextProvider } from './contexts/ThemeContext'
 import { MindMapContextProvider } from './contexts/MindMapContext'
 import { I18nContextProvider } from './contexts/I18nContext'
 import { ErrorNotificationContextProvider } from './contexts/ErrorNotificationContext'
 import { ResponsiveContextProvider } from './contexts/ResponsiveContext'
+import AccessibilityProvider from './components/accessibility/AccessibilityProvider'
 import { register as registerServiceWorker } from './serviceWorker'
 import { setupGlobalErrorHandler } from './utils/errorHandler'
 import { initLogger } from './utils/logger'
@@ -42,9 +44,11 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <ErrorNotificationContextProvider>
           <ThemeContextProvider>
             <ResponsiveContextProvider>
-              <MindMapContextProvider>
-                <App />
-              </MindMapContextProvider>
+              <AccessibilityProvider>
+                <MindMapContextProvider>
+                  <App />
+                </MindMapContextProvider>
+              </AccessibilityProvider>
             </ResponsiveContextProvider>
           </ThemeContextProvider>
         </ErrorNotificationContextProvider>
