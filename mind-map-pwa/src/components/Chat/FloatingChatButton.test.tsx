@@ -28,17 +28,17 @@ vi.mock('@mui/material', () => ({
     </div>
   ),
   Box: ({ children, sx, ...props }: any) => {
-    // Convert sx object to style string
-    let styleString = '';
+    // Convert sx object to style object
+    let styleObj: Record<string, any> = {};
     if (sx) {
-      if (sx.position) styleString += `position: ${sx.position};`;
-      if (sx.zIndex) styleString += `z-index: ${sx.zIndex};`;
-      if (sx.bottom) styleString += `bottom: ${sx.bottom}px;`;
-      if (sx.right) styleString += `right: ${sx.right}px;`;
-      if (sx.left) styleString += `left: ${sx.left}px;`;
-      if (sx.top) styleString += `top: ${sx.top}px;`;
+      if (sx.position) styleObj.position = sx.position;
+      if (sx.zIndex) styleObj.zIndex = sx.zIndex;
+      if (sx.bottom) styleObj.bottom = `${sx.bottom}px`;
+      if (sx.right) styleObj.right = `${sx.right}px`;
+      if (sx.left) styleObj.left = `${sx.left}px`;
+      if (sx.top) styleObj.top = `${sx.top}px`;
     }
-    return <div data-testid="box" style={styleString ? styleString : undefined} {...props}>{children}</div>;
+    return <div data-testid="box" style={Object.keys(styleObj).length > 0 ? styleObj : undefined} {...props}>{children}</div>;
   },
   Tooltip: ({ children, ...props }: any) => <div data-testid="tooltip" {...props}>{children}</div>
 }));

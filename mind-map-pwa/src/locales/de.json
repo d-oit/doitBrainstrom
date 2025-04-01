@@ -1,4 +1,8 @@
 {
+  "app": {
+    "title": "d.o. Brainstroming",
+    "subtitle": "Eine benutzerfreundliche Mind-Mapping-App mit Echtzeit-Zusammenarbeit"
+  },
   "greeting": "Hallo",
   "welcome": "Willkommen",
   "logout": "Abmelden",
@@ -31,7 +35,7 @@
   "network_error": "Netzwerkfehler",
   "server_error": "Serverfehler",
   "unknown_error": "Unbekannter Fehler",
-  "mind_map": "Mind Map",
+  "mind_map": "Brainstorm-Karte",
   "create_map": "Karte erstellen",
   "edit_map": "Karte bearbeiten",
   "delete_map": "Karte löschen",

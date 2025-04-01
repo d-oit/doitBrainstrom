@@ -1,4 +1,4 @@
-# Coding Guide for Mind Map PWA Project
+# Coding Guide for d.o. Brainstroming Project
 
 ## Table of Contents
 1. Introduction
@@ -15,7 +15,7 @@
 12. Contribution Guidelines
 
 ## 1. Introduction
-This coding guide provides standards and best practices for developing the Mind Map PWA project. 
+This coding guide provides standards and best practices for developing the d.o. Brainstroming project.
 Adhering to these guidelines will ensure code consistency, maintainability, and scalability.
 
 ## 2. Project Structure

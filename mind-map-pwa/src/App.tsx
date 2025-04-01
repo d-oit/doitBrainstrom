@@ -1,6 +1,6 @@
 import { useState, useEffect, lazy, Suspense } from 'react'
 import './styles/App.css'
-import { listBuckets } from './services/s3Service'
+// s3Service will be imported dynamically
 import Layout from './components/Layout'
 import { Box, Grid, Typography, Alert, Paper, Tabs, Tab, CircularProgress } from '@mui/material'
 import { useI18n } from './contexts/I18nContext'
@@ -51,6 +51,8 @@ function App() {
       setError(null);
 
       try {
+        // Dynamically import the s3Service only when needed
+        const { listBuckets } = await import('./services/s3Service');
         const result = await listBuckets();
 
         // Always check for error first

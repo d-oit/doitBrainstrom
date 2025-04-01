@@ -1,12 +1,12 @@
-# Deployment Guide - Mind Map PWA
+# Deployment Guide - d.o. Brainstroming
 
-**Project:** Mind Map PWA
+**Project:** d.o. Brainstroming
 **Phase:** Phase 10: Deployment and Maintenance (DEPLOY-011)
 **Date:** May 2023
-**Prepared by:** Mind Map PWA Team
+**Prepared by:** d.o. Brainstroming Team
 
 ## 1. Introduction
-This document provides a step-by-step guide for deploying the Mind Map PWA application to a static hosting service.
+This document provides a step-by-step guide for deploying the d.o. Brainstroming application to a static hosting service.
 
 ## 2. Prerequisites
 - Static hosting account (e.g., Netlify, Vercel, AWS S3)

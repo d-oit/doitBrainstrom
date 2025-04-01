@@ -28,10 +28,10 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ messages, isLoading, error })
         }}
       >
         <Typography variant="h6" gutterBottom>
-          Welcome to Mind Map Assistant
+          Welcome to Brainstorm Map Assistant
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          Ask me anything about mind mapping, brainstorming, or how to use this application.
+          Ask me anything about brainstorm mapping, brainstorming, or how to use this application.
         </Typography>
       </Box>
     );

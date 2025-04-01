@@ -1,10 +1,10 @@
 {
   "app": {
-    "title": "Mapa Mental PWA",
-    "subtitle": "Una aplicación web progresiva para crear mapas mentales"
+    "title": "d.o. Brainstroming",
+    "subtitle": "Una aplicación elegante y fácil de usar para mapas mentales con colaboración en tiempo real"
   },
   "tabs": {
-    "mindMap": "Mapa Mental",
+    "mindMap": "Mapa de Brainstorming",
     "s3Connection": "Conexión S3",
     "sampleCards": "Tarjetas de Ejemplo"
   },

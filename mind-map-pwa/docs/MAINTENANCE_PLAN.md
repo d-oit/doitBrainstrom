@@ -1,12 +1,12 @@
-# Maintenance Plan - Mind Map PWA
+# Maintenance Plan - d.o. Brainstroming
 
-**Project:** Mind Map PWA
+**Project:** d.o. Brainstroming
 **Phase:** Phase 10: Deployment and Maintenance (DEPLOY-011)
 **Date:** May 2023
-**Prepared by:** Mind Map PWA Team
+**Prepared by:** d.o. Brainstroming Team
 
 ## 1. Introduction
-This maintenance plan outlines the procedures for ongoing maintenance of the Mind Map PWA application after deployment. It covers key maintenance activities, schedules, and responsibilities.
+This maintenance plan outlines the procedures for ongoing maintenance of the d.o. Brainstroming application after deployment. It covers key maintenance activities, schedules, and responsibilities.
 
 ## 2. Maintenance Activities
 - **2.1 Regular Updates:**

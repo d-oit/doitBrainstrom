@@ -108,9 +108,9 @@ import { listBuckets } from './services/s3Service';
 const MockI18nProvider = ({ children }: { children: React.ReactNode }) => {
   const mockT = (key: string) => {
     const translations: Record<string, string> = {
-      'app.title': 'Mind Map PWA',
-      'app.subtitle': 'Create and organize your ideas',
-      'tabs.mindMap': 'Mind Map',
+      'app.title': 'd.o. Brainstroming',
+      'app.subtitle': 'A sleek, user-friendly mind mapping app with real-time collaboration',
+      'tabs.mindMap': 'Brainstorm Map',
       'tabs.s3Connection': 'S3 Connection',
       'tabs.sampleCards': 'Sample Cards',
       's3.connectionTest': 'S3 Connection Test',
@@ -157,15 +157,15 @@ describe('App Integration', () => {
     );
 
     // Check for main title
-    expect(screen.getByText('Mind Map PWA')).toBeInTheDocument();
+    expect(screen.getByText('d.o. Brainstroming')).toBeInTheDocument();
 
     // Check for tabs
-    expect(screen.getByRole('tab', { name: /Mind Map/i })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /Brainstorm Map/i })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /S3 Connection/i })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /Sample Cards/i })).toBeInTheDocument();
 
     // Mind Map tab should be active by default
-    const mindMapTab = screen.getByRole('tab', { name: /Mind Map/i });
+    const mindMapTab = screen.getByRole('tab', { name: /Brainstorm Map/i });
     expect(mindMapTab.getAttribute('aria-selected')).toBe('true');
 
     // Mind Map component should be rendered (via Suspense)

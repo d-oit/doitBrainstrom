@@ -1,4 +1,4 @@
-# Mind Map PWA Project Documentation
+# d.o. Brainstroming Project Documentation
 
 ## Table of Contents
 1. Project Overview
@@ -11,7 +11,7 @@
 8. Future Enhancements
 
 ## 1. Project Overview
-The Mind Map PWA is a Progressive Web Application designed for brainstorming and idea organization using a mind map interface. It is built with React 18, TypeScript, and Vite, and features offline capabilities and data synchronization with AWS S3. The application aims to be fully responsive, accessible, performant, and secure, adhering to GDPR guidelines.
+d.o. Brainstroming is a sleek, user-friendly mind mapping app with real-time collaboration. It is built with React 18, TypeScript, and Vite, and features offline capabilities and data synchronization with AWS S3. The application aims to be fully responsive, accessible, performant, and secure, adhering to GDPR guidelines.
 
 ### Key Features
 - Interactive mind map creation and editing

@@ -1,10 +1,10 @@
 {
   "app": {
-    "title": "Mind Map PWA",
-    "subtitle": "A Progressive Web App for creating mind maps"
+    "title": "d.o. Brainstroming",
+    "subtitle": "A sleek, user-friendly mind mapping app with real-time collaboration"
   },
   "tabs": {
-    "mindMap": "Mind Map",
+    "mindMap": "Brainstorm Map",
     "s3Connection": "S3 Connection",
     "sampleCards": "Sample Cards"
   },

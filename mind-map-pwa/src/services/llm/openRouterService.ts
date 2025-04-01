@@ -29,7 +29,7 @@ export class OpenRouterService {
 
   constructor(config: Partial<OpenRouterConfig> = {}) {
     this.config = { ...defaultConfig, ...config };
-    
+
     if (!this.config.apiKey) {
       logError('OpenRouter API key is not configured');
     }
@@ -72,7 +72,7 @@ export class OpenRouterService {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${this.config.apiKey}`,
           'HTTP-Referer': window.location.origin,
-          'X-Title': 'Mind Map PWA'
+          'X-Title': 'd.o. Brainstroming'
         },
         body: JSON.stringify(payload),
         signal
@@ -91,7 +91,7 @@ export class OpenRouterService {
 
       // Handle successful response
       const data = await response.json();
-      
+
       // Format response
       const chatResponse: ChatResponse = {
         message: {
@@ -158,7 +158,7 @@ export class OpenRouterService {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${this.config.apiKey}`,
           'HTTP-Referer': window.location.origin,
-          'X-Title': 'Mind Map PWA'
+          'X-Title': 'd.o. Brainstroming'
         },
         body: JSON.stringify(payload),
         signal
@@ -195,7 +195,7 @@ export class OpenRouterService {
 
         // Decode the chunk
         const chunk = decoder.decode(value, { stream: true });
-        
+
         // Process the chunk
         const lines = chunk
           .split('\n')
@@ -208,10 +208,10 @@ export class OpenRouterService {
             if (!jsonStr) continue;
 
             const json = JSON.parse(jsonStr) as StreamingChunk;
-            
+
             // Extract content from the chunk
             const content = json.choices[0]?.delta?.content || '';
-            
+
             // Send content to callback
             if (content) {
               callback(content, false);

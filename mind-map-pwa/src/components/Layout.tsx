@@ -90,7 +90,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             mb: viewport.safeAreaInsets.bottom > 0 ? 0 : undefined
           }}>
             <Typography variant="body2" color="text.secondary">
-              © {new Date().getFullYear()} Mind Map PWA
+              © {new Date().getFullYear()} d.o. Brainstroming
             </Typography>
           </Box>
         </Container>

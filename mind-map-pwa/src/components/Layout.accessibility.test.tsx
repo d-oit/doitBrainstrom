@@ -151,7 +151,7 @@ vi.mock('../utils/inputSanitization', () => ({
 const MockI18nProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <I18nContext.Provider value={{
-      t: (key: string) => key === 'app.title' ? 'Mind Map PWA' : key,
+      t: (key: string) => key === 'app.title' ? 'd.o. Brainstroming' : key,
       locale: 'en',
       setLocale: vi.fn(),
       dir: 'ltr',

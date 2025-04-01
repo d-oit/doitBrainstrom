@@ -1,7 +1,7 @@
-# Mind Map PWA
+# d.o. Brainstroming
 
 ## Project Overview
-A Progressive Web Application for brainstorming and mind mapping, built with React 18, TypeScript, and Vite. Features offline capabilities, S3 data sync, responsive design, accessibility, and security.
+A sleek, user-friendly mind mapping app with real-time collaboration, built with React 18, TypeScript, and Vite. Features offline capabilities, S3 data sync, responsive design, accessibility, and security.
 
 ## Key Features
 - Interactive mind map creation and editing

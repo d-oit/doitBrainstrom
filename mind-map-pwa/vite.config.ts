@@ -37,6 +37,10 @@ export default defineConfig(({ mode }) => {
             if (id.includes('react') || id.includes('react-dom')) {
               return 'vendor-react';
             }
+            // Separate chunk for AWS SDK
+            if (id.includes('aws-sdk')) {
+              return 'vendor-aws-sdk';
+            }
             // Other dependencies in a separate chunk
             return 'vendor';
           }
