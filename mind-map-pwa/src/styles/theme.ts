@@ -1,4 +1,4 @@
-import { createTheme, ThemeOptions } from '@mui/material/styles';
+import { createTheme, ThemeOptions, experimental_extendTheme as extendTheme } from '@mui/material/styles';
 import { breakpoints } from './breakpoints';
 
 // Define common theme options
@@ -159,8 +159,70 @@ export const getSystemTheme = (): typeof lightTheme | typeof darkTheme => {
   return lightTheme;
 };
 
+// CSS variables theme (new in Material UI v7)
+export const lightThemeCssVars = extendTheme({
+  cssVarPrefix: 'mind-map',
+  colorSchemes: {
+    light: {
+      palette: {
+        primary: {
+          main: '#2196f3',
+          light: '#64b5f6',
+          dark: '#1976d2',
+          contrastText: '#ffffff',
+        },
+        secondary: {
+          main: '#f50057',
+          light: '#ff4081',
+          dark: '#c51162',
+          contrastText: '#ffffff',
+        },
+        background: {
+          default: '#f5f5f5',
+          paper: '#ffffff',
+        },
+        text: {
+          primary: 'rgba(0, 0, 0, 0.87)',
+          secondary: 'rgba(0, 0, 0, 0.6)',
+          disabled: 'rgba(0, 0, 0, 0.38)',
+        },
+      },
+    },
+    dark: {
+      palette: {
+        primary: {
+          main: '#90caf9',
+          light: '#e3f2fd',
+          dark: '#42a5f5',
+          contrastText: 'rgba(0, 0, 0, 0.87)',
+        },
+        secondary: {
+          main: '#f48fb1',
+          light: '#fce4ec',
+          dark: '#f06292',
+          contrastText: 'rgba(0, 0, 0, 0.87)',
+        },
+        background: {
+          default: '#121212',
+          paper: '#1e1e1e',
+        },
+        text: {
+          primary: '#ffffff',
+          secondary: 'rgba(255, 255, 255, 0.7)',
+          disabled: 'rgba(255, 255, 255, 0.5)',
+        },
+      },
+    },
+  },
+  // Add the same component customizations
+  components: commonThemeOptions.components,
+  typography: commonThemeOptions.typography,
+  breakpoints: commonThemeOptions.breakpoints,
+});
+
 export default {
   light: lightTheme,
   dark: darkTheme,
   system: getSystemTheme(),
+  cssVars: lightThemeCssVars,
 };

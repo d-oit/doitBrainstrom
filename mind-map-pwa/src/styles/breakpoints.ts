@@ -1,6 +1,6 @@
 /**
  * Breakpoints configuration for responsive design
- * Based on Material UI v6 breakpoint system
+ * Based on Material UI v7 breakpoint system
  */
 
 export const breakpoints = {
@@ -63,6 +63,6 @@ export const fluidTypography = (
 ): string => {
   const slope = (maxSize - minSize) / (maxWidth - minWidth);
   const yAxisIntersection = -minWidth * slope + minSize;
-  
+
   return `clamp(${minSize}px, ${yAxisIntersection.toFixed(2)}px + ${(slope * 100).toFixed(2)}vw, ${maxSize}px)`;
 };

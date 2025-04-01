@@ -1,19 +1,21 @@
-# Material UI v6 Migration & OpenRouter Integration Architecture
+# Material UI v7 Migration & OpenRouter Integration Architecture
 
 ## 1. Technical Stack Updates
 
-### Material UI v6 Migration
+### Material UI v7 Migration
 - Update dependencies:
   ```json
   {
-    "@mui/material": "^6.0.0",
-    "@mui/icons-material": "^6.0.0",
-    "@emotion/react": "^12.0.0",
-    "@emotion/styled": "^12.0.0"
+    "@mui/material": "^7.0.1",
+    "@mui/icons-material": "^7.0.1",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0"
   }
   ```
+- Implement CSS variables theme using the new extendTheme API
 - Implement new breakpoint system for responsive design
 - Update component variants and styling API usage
+- Utilize the new CssVarsProvider for theme management
 
 ### Development Tools
 - Vite v6.2.4 (current)
@@ -24,6 +26,68 @@
 
 ## 2. Responsive Design Architecture
 
+### CSS Variables Theme
+```typescript
+import { experimental_extendTheme as extendTheme } from '@mui/material/styles';
+
+const theme = extendTheme({
+  cssVarPrefix: 'mind-map',
+  colorSchemes: {
+    light: {
+      palette: {
+        primary: {
+          main: '#2196f3',
+          light: '#64b5f6',
+          dark: '#1976d2',
+        },
+        // Other palette colors...
+      },
+    },
+    dark: {
+      palette: {
+        primary: {
+          main: '#90caf9',
+          light: '#e3f2fd',
+          dark: '#42a5f5',
+        },
+        // Other palette colors...
+      },
+    },
+  },
+});
+```
+
+### CSS Variables Theme
+```typescript
+import { experimental_extendTheme as extendTheme } from '@mui/material/styles';
+
+const theme = extendTheme({
+  cssVarPrefix: 'mind-map',
+  colorSchemes: {
+    light: {
+      palette: {
+        primary: {
+          main: '#2196f3',
+          light: '#64b5f6',
+          dark: '#1976d2',
+        },
+        // Other palette colors...
+      },
+    },
+    dark: {
+      palette: {
+        primary: {
+          main: '#90caf9',
+          light: '#e3f2fd',
+          dark: '#42a5f5',
+        },
+        // Other palette colors...
+      },
+    },
+  },
+});
+```
+
 ### Breakpoint System
 ```typescript
 const breakpoints = {
@@ -33,6 +97,21 @@ const breakpoints = {
   lg: 1200,
   xl: 1536
 };
+```
+
+### Theme Provider Implementation
+```tsx
+import { Experimental_CssVarsProvider as CssVarsProvider } from '@mui/material/styles';
+
+// Using CSS Variables Theme Provider
+<CssVarsProvider
+  theme={theme}
+  defaultMode="system"
+  modeStorageKey="mind-map-theme-mode"
+>
+  <CssBaseline />
+  {children}
+</CssVarsProvider>
 ```
 
 ### Component Layout Strategy
@@ -151,8 +230,9 @@ describe('ChatWindow Integration', () => {
 
 ## 7. Development Timeline
 
-### Phase 1: Material UI Migration (1 week)
-- [ ] Dependency updates
+### Phase 1: Material UI v7 Migration (1 week)
+- [x] Dependency updates
+- [x] CSS variables theme implementation
 - [ ] Component migration
 - [ ] Style system updates
 - [ ] Responsive design implementation
@@ -191,8 +271,10 @@ describe('ChatWindow Integration', () => {
 
 ## Next Steps
 
-1. Create Material UI v6 migration branch
-2. Set up OpenRouter API credentials
-3. Implement chat service prototype
-4. Begin component development
-5. Set up testing infrastructure
+1. ✅ Update Material UI to v7.0.1
+2. ✅ Implement CSS variables theme
+3. Continue responsive design implementation
+4. Set up OpenRouter API credentials
+5. Implement chat service prototype
+6. Begin component development
+7. Set up testing infrastructure

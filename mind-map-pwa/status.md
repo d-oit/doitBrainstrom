@@ -6,8 +6,10 @@ This document tracks the implementation status of features and specifications fo
 
 | Date | Feature | Changes |
 |------|---------|---------|
-| 2025-04-01 | Material UI v6 Migration | Updated Material UI dependencies to v6 |
-| 2025-04-01 | Responsive Design | Implemented new breakpoint system based on Material UI v6 |
+| 2025-04-01 | Material UI v7 Migration | Updated Material UI dependencies to v7.0.1 and Emotion to v11.14.0 |
+| 2025-04-01 | Material UI v7 Migration | Implemented CSS variables theme using the new extendTheme API |
+| 2025-04-01 | Testing Updates | Removed @testing-library/react-hooks dependency in favor of renderHook from @testing-library/react |
+| 2025-04-01 | Responsive Design | Implemented new breakpoint system based on Material UI v7 |
 | 2025-04-01 | Responsive Design | Created fluid typography and responsive layout components |
 | 2025-04-01 | Responsive Design | Added safe area insets handling for modern devices |
 | 2025-04-01 | Responsive Design | Updated Layout and MindMapCard components to use responsive design |

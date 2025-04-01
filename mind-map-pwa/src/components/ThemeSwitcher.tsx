@@ -1,12 +1,12 @@
 // src/components/ThemeSwitcher.tsx
 import React from 'react';
-import { IconButton, Menu, MenuItem } from '@mui/material';
+import { IconButton, Menu, MenuItem, Divider, Switch, FormControlLabel } from '@mui/material';
 import { Brightness4, Brightness7, SettingsBrightness } from '@mui/icons-material';
 import { useTheme } from '../contexts/ThemeContext';
 import { useI18n } from '../contexts/I18nContext';
 
 const ThemeSwitcher: React.FC = () => {
-  const { mode, setMode } = useTheme();
+  const { mode, setMode, useCssVars, setUseCssVars } = useTheme();
   const { t } = useI18n();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -48,6 +48,19 @@ const ThemeSwitcher: React.FC = () => {
         <MenuItem onClick={() => handleThemeChange('system')}>{t('theme.system')}</MenuItem>
         <MenuItem onClick={() => handleThemeChange('light')}>{t('theme.light')}</MenuItem>
         <MenuItem onClick={() => handleThemeChange('dark')}>{t('theme.dark')}</MenuItem>
+        <Divider />
+        <MenuItem>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={useCssVars}
+                onChange={(e) => setUseCssVars(e.target.checked)}
+                color="primary"
+              />
+            }
+            label="Use CSS Variables"
+          />
+        </MenuItem>
       </Menu>
     </div>
   );

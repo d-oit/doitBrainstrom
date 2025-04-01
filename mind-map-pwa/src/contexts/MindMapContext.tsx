@@ -2,7 +2,6 @@
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { initializeMindMapData, saveMindMapLocally, S3ErrorType } from '../services/s3SyncService';
 import { MindMapData, MindMapNode, MindMapLink, generateId } from '../utils/MindMapDataModel';
-import { S3Error } from '../utils/errorHandler';
 
 interface MindMapContextProps {
   mindMapData: MindMapData;
@@ -31,41 +30,40 @@ export const MindMapContextProvider: React.FC<{ children: React.ReactNode }> = (
       setIsLoading(true);
       try {
         const result = await initializeMindMapData();
+        setMindMapData(result.data);
 
+        // Handle S3 errors and set appropriate status
         if (result.error) {
-          setSyncStatus('error');
           let errorMessage = 'Error connecting to S3. Changes will be saved locally.';
           
           switch (result.error) {
             case S3ErrorType.ACCESS_DENIED:
               errorMessage = 'Access denied to S3 storage. Check your permissions.';
+              setSyncStatus('error');
               break;
             case S3ErrorType.NOT_CONFIGURED:
               errorMessage = 'S3 storage is not configured. Using local storage.';
-              setSyncStatus('idle'); // Not an error, just using local storage
+              setSyncStatus('idle');
               break;
             case S3ErrorType.NETWORK_ERROR:
               errorMessage = 'Network error connecting to S3. Using local storage.';
+              setSyncStatus('error');
               break;
+            default:
+              setSyncStatus('error');
           }
-          
-          if (window.ErrorNotificationContext?.showError) {
-            window.ErrorNotificationContext.showError(errorMessage);
-          }
-          
+
           if (window.ErrorNotificationContext?.showError) {
             window.ErrorNotificationContext.showError(errorMessage);
           }
           return;
         }
-        
-        setMindMapData(result.data);
-        // Only set success if data came from S3
+
+        // Set status based on data source
         setSyncStatus(result.source === 's3' ? 'success' : 'idle');
       } catch (error) {
         console.error('Error loading mind map data:', error);
         setSyncStatus('error');
-        
         if (window.ErrorNotificationContext?.showError) {
           window.ErrorNotificationContext.showError(
             'Failed to load mind map data. Using empty map.'
@@ -84,29 +82,49 @@ export const MindMapContextProvider: React.FC<{ children: React.ReactNode }> = (
     if (!isLoading) {
       saveMindMapLocally(mindMapData).catch(error => {
         console.error('Error saving mind map data:', error);
+        if (window.ErrorNotificationContext?.showError) {
+          window.ErrorNotificationContext.showError(
+            'Failed to save changes. Please try again.'
+          );
+        }
       });
     }
   }, [mindMapData, isLoading]);
 
-  // Function to manually trigger synchronization - using useCallback to avoid dependency issues
+  // Function to manually trigger synchronization
   const syncMindMap = useCallback(async (): Promise<boolean> => {
     if (navigator.onLine) {
       setSyncStatus('syncing');
       try {
-        const { success, error } = await saveMindMapLocally(mindMapData);
+        const result = await saveMindMapLocally(mindMapData);
         
-        if (error === S3ErrorType.ACCESS_DENIED) {
+        if (result.error) {
+          let errorMessage = 'Error syncing to S3. Changes saved locally.';
+          
+          switch (result.error) {
+            case S3ErrorType.ACCESS_DENIED:
+              errorMessage = 'Access denied to S3 storage. Changes saved locally only.';
+              break;
+            case S3ErrorType.NETWORK_ERROR:
+              errorMessage = 'Network error while syncing. Changes saved locally only.';
+              break;
+          }
+
           if (window.ErrorNotificationContext?.showError) {
-            window.ErrorNotificationContext.showError(
-              'Access denied to S3 storage. Changes saved locally only.'
-            );
+            window.ErrorNotificationContext.showError(errorMessage);
           }
         }
-        setSyncStatus(success ? 'success' : 'error');
-        return success;
+
+        setSyncStatus(result.success ? 'success' : 'error');
+        return result.success;
       } catch (error) {
         console.error('Error syncing mind map:', error);
         setSyncStatus('error');
+        if (window.ErrorNotificationContext?.showError) {
+          window.ErrorNotificationContext.showError(
+            'Failed to sync changes. Will try again later.'
+          );
+        }
         return false;
       }
     } else {
@@ -128,16 +146,17 @@ export const MindMapContextProvider: React.FC<{ children: React.ReactNode }> = (
     return () => {
       window.removeEventListener('online', handleOnline);
     };
-  }, [syncMindMap]); // Added syncMindMap as a dependency
+  }, [syncMindMap]);
 
+  // Mind map operations
   const createNode = (text: string, x: number, y: number): MindMapNode => {
     const newNode: MindMapNode = {
       id: generateId(),
       text,
       x,
       y,
-      width: 200, // Default width
-      height: 100, // Default height
+      width: 200,
+      height: 100,
     };
 
     setMindMapData(prevData => ({
@@ -149,7 +168,6 @@ export const MindMapContextProvider: React.FC<{ children: React.ReactNode }> = (
   };
 
   const linkNodes = (sourceId: string, targetId: string): MindMapLink | null => {
-    // Check if both nodes exist
     const sourceNode = mindMapData.nodes.find(node => node.id === sourceId);
     const targetNode = mindMapData.nodes.find(node => node.id === targetId);
 
@@ -158,7 +176,6 @@ export const MindMapContextProvider: React.FC<{ children: React.ReactNode }> = (
       return null;
     }
 
-    // Check if link already exists
     const existingLink = mindMapData.links.find(
       link => link.sourceId === sourceId && link.targetId === targetId
     );
@@ -205,10 +222,7 @@ export const MindMapContextProvider: React.FC<{ children: React.ReactNode }> = (
   };
 
   const deleteNode = (nodeId: string): void => {
-    // Remove the node
     const updatedNodes = mindMapData.nodes.filter(node => node.id !== nodeId);
-
-    // Remove any links connected to this node
     const updatedLinks = mindMapData.links.filter(
       link => link.sourceId !== nodeId && link.targetId !== nodeId
     );
