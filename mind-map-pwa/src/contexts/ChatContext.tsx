@@ -122,6 +122,31 @@ export const ChatContextProvider: React.FC<{ children: React.ReactNode }> = ({ c
     }
   }, [messages, currentSessionId]);
 
+  // Create a new chat session
+  const createSession = useCallback(() => {
+    // Use our chatHistoryService to create a new conversation ID
+    const newSessionId = createNewConversation();
+
+    const newSession: ChatSession = {
+      id: newSessionId,
+      messages: [],
+      model: import.meta.env.VITE_OPENROUTER_DEFAULT_MODEL,
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+
+    setSessions(prev => [...prev, newSession]);
+    setCurrentSessionId(newSessionId);
+    setMessages([]);
+
+    // Add initial system message to IndexedDB
+    addSystemMessage(newSessionId, 'You are a helpful assistant for a mind mapping application. Provide concise, clear responses.')
+      .catch(error => logError('Error saving system message to IndexedDB:', error));
+
+    logInfo('Created new chat session:', newSessionId);
+    return newSessionId;
+  }, []);
+
   // Send a message to the OpenRouter API
   const sendMessage = useCallback(async (content: string, options?: ChatOptions) => {
     if (!content.trim()) return;
@@ -220,31 +245,6 @@ export const ChatContextProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const cancelRequest = useCallback(() => {
     openRouterService.cancelRequest();
     setIsLoading(false);
-  }, []);
-
-  // Create a new chat session
-  const createSession = useCallback(() => {
-    // Use our chatHistoryService to create a new conversation ID
-    const newSessionId = createNewConversation();
-
-    const newSession: ChatSession = {
-      id: newSessionId,
-      messages: [],
-      model: import.meta.env.VITE_OPENROUTER_DEFAULT_MODEL,
-      createdAt: Date.now(),
-      updatedAt: Date.now()
-    };
-
-    setSessions(prev => [...prev, newSession]);
-    setCurrentSessionId(newSessionId);
-    setMessages([]);
-
-    // Add initial system message to IndexedDB
-    addSystemMessage(newSessionId, 'You are a helpful assistant for a mind mapping application. Provide concise, clear responses.')
-      .catch(error => logError('Error saving system message to IndexedDB:', error));
-
-    logInfo('Created new chat session:', newSessionId);
-    return newSessionId;
   }, []);
 
   // Load an existing session

@@ -9,8 +9,7 @@ import {
   detectSystemPreference,
   watchSystemPreference,
   loadThemeSettings,
-  saveThemeSettings,
-  getDefaultThemeSettings
+  saveThemeSettings
 } from '../styles/theme-engine';
 import { saveThemeSettings as saveThemeSettingsToIndexedDB, loadThemeSettings as loadThemeSettingsFromIndexedDB } from '../services/settingsService';
 import { runAllMigrations } from '../utils/migrationUtils';
@@ -21,7 +20,6 @@ export const ThemeContextProvider: React.FC<{ children: React.ReactNode }> = ({ 
   // Load theme settings from localStorage initially, will be updated from IndexedDB
   const [settings, setSettings] = useState<ThemeSettings>(loadThemeSettings());
   const [systemPreference, setSystemPreference] = useState<'light' | 'dark'>(detectSystemPreference());
-  const [isInitialized, setIsInitialized] = useState<boolean>(false);
 
   // Destructure settings for easier access
   const { mode, useCssVars } = settings;
@@ -41,8 +39,6 @@ export const ThemeContextProvider: React.FC<{ children: React.ReactNode }> = ({ 
       } catch (error) {
         console.error('Failed to initialize settings from IndexedDB:', error);
         // Already using localStorage settings as fallback
-      } finally {
-        setIsInitialized(true);
       }
     };
 

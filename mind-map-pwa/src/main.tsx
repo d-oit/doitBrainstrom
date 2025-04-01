@@ -27,6 +27,7 @@ import { register as registerServiceWorker } from './serviceWorker'
 import { setupGlobalErrorHandler } from './utils/errorHandler'
 import { initLogger } from './utils/logger'
 import createEmotionCache from './utils/createEmotionCache'
+import { runAllMigrations } from './utils/migrationUtils'
 
 // Initialize logger
 initLogger();
@@ -36,6 +37,17 @@ setupGlobalErrorHandler();
 
 // Register service worker for offline capabilities
 registerServiceWorker();
+
+// Run migrations from localStorage to IndexedDB
+runAllMigrations().then(success => {
+  if (success) {
+    console.log('Successfully migrated data from localStorage to IndexedDB');
+  } else {
+    console.warn('Some migrations from localStorage to IndexedDB failed, will retry on next app load');
+  }
+}).catch(error => {
+  console.error('Error running migrations:', error);
+});
 
 // Create Emotion cache
 const emotionCache = createEmotionCache();
