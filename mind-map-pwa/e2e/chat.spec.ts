@@ -18,8 +18,9 @@ test('chat functionality', async ({ page }) => {
   const messageInput = page.getByPlaceholder('Type your message...');
   await messageInput.fill('Hello, can you help me with brainstorm mapping?');
 
-  // Send the message
-  await page.getByRole('button', { name: /send message/i }).click();
+  // Send the message - the button has a tooltip with 'Send message' text
+  // but it's actually an IconButton with a SendIcon
+  await page.locator('button[type="submit"]').click();
 
   // Check that the message appears in the chat
   await expect(page.getByText('Hello, can you help me with brainstorm mapping?')).toBeVisible();
@@ -30,8 +31,8 @@ test('chat functionality', async ({ page }) => {
     console.log('Loading indicator not seen - response may have been immediate');
   });
 
-  // Close the chat window
-  await page.getByRole('button', { name: /close chat/i }).click();
+  // Close the chat window - using the close icon button
+  await page.locator('button[aria-label="close chat"]').click();
 
   // Check that the chat window is closed
   await expect(page.getByText('Welcome to Brainstorm Map Assistant')).not.toBeVisible();
@@ -43,7 +44,7 @@ test('chat functionality', async ({ page }) => {
   await expect(page.getByText('Hello, can you help me with brainstorm mapping?')).toBeVisible();
 
   // Test chat menu functionality
-  await page.getByRole('button', { name: /chat options/i }).click();
+  await page.locator('button[aria-label="chat options"]').click();
 
   // Click "Clear Messages"
   await page.getByRole('menuitem', { name: /clear messages/i }).click();
@@ -51,6 +52,6 @@ test('chat functionality', async ({ page }) => {
   // Check that messages are cleared
   await expect(page.getByText('Welcome to Brainstorm Map Assistant')).toBeVisible();
 
-  // Close the chat window
-  await page.getByRole('button', { name: /close chat/i }).click();
+  // Close the chat window - using the close icon button
+  await page.locator('button[aria-label="close chat"]').click();
 });

@@ -34,7 +34,7 @@ export const ChatContextProvider: React.FC<{ children: React.ReactNode }> = ({ c
         if (savedSessions) {
           const parsedSessions = JSON.parse(savedSessions) as ChatSession[];
           setSessions(parsedSessions);
-          
+
           // Load last active session if available
           const lastSessionId = localStorage.getItem('last-chat-session');
           if (lastSessionId) {
@@ -126,13 +126,15 @@ export const ChatContextProvider: React.FC<{ children: React.ReactNode }> = ({ c
       const response = await openRouterService.sendChatRequest(messageHistory, options);
 
       // Handle error response
-      if ('error' in response) {
+      if (response && typeof response === 'object' && 'error' in response) {
         setError(response.message);
         return;
       }
 
       // Add assistant response to state
-      setMessages(prev => [...prev, response.message]);
+      if (response && response.message) {
+        setMessages(prev => [...prev, response.message]);
+      }
     } catch (error) {
       logError('Error sending message:', error);
       setError('Failed to send message. Please try again.');
@@ -144,7 +146,7 @@ export const ChatContextProvider: React.FC<{ children: React.ReactNode }> = ({ c
   // Clear all messages in the current session
   const clearMessages = useCallback(() => {
     setMessages([]);
-    
+
     // Update current session if it exists
     if (currentSessionId) {
       setSessions(prevSessions => {
@@ -182,7 +184,7 @@ export const ChatContextProvider: React.FC<{ children: React.ReactNode }> = ({ c
     setSessions(prev => [...prev, newSession]);
     setCurrentSessionId(newSessionId);
     setMessages([]);
-    
+
     logInfo('Created new chat session:', newSessionId);
     return newSessionId;
   }, []);
@@ -202,13 +204,13 @@ export const ChatContextProvider: React.FC<{ children: React.ReactNode }> = ({ c
   // Delete a session
   const deleteSession = useCallback((sessionId: string) => {
     setSessions(prev => prev.filter(s => s.id !== sessionId));
-    
+
     // If deleting current session, create a new one
     if (sessionId === currentSessionId) {
       const newSessionId = createSession();
       setCurrentSessionId(newSessionId);
     }
-    
+
     logInfo('Deleted chat session:', sessionId);
   }, [currentSessionId, createSession]);
 

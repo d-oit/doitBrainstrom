@@ -118,7 +118,7 @@ function App() {
           </Typography>
 
           {isLoading ? (
-            <Box display="flex" justifyContent="center" p={2}>
+            <Box sx={{ display: "flex", justifyContent: "center", p: 2 }}>
               <CircularProgress />
             </Box>
           ) : error ? (

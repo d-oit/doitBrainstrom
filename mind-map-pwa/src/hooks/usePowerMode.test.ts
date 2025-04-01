@@ -45,7 +45,9 @@ describe('usePowerMode', () => {
   });
 
   it('should detect normal power mode', async () => {
-    mockPowerMode(0.8, true, false);
+    act(() => {
+      mockPowerMode(0.8, true, false);
+    });
     const { result } = renderHook(() => usePowerMode());
 
     // Wait for any effects to complete
@@ -58,7 +60,9 @@ describe('usePowerMode', () => {
   });
 
   it('should detect low power mode with low battery', async () => {
-    mockPowerMode(0.15, false, false);
+    act(() => {
+      mockPowerMode(0.15, false, false);
+    });
     const { result } = renderHook(() => usePowerMode());
 
     // Wait for any effects to complete

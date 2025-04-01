@@ -30,7 +30,11 @@ const MockVirtualizedList = ({ items, renderItem }: any) => {
 
   return (
     <div data-testid={shouldVirtualizeList ? "virtualized-list" : "non-virtualized-list"}>
-      {visibleItems.map((item: any, index: number) => renderItem(item, index))}
+      {visibleItems.map((item: any, index: number) => (
+        <React.Fragment key={index}>
+          {renderItem(item, index)}
+        </React.Fragment>
+      ))}
     </div>
   );
 };

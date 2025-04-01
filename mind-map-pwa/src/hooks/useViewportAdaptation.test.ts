@@ -18,7 +18,9 @@ describe('useViewportAdaptation', () => {
   });
 
   it('should return xs breakpoint for small screens', () => {
-    mockWindowProperties(320, 568);
+    act(() => {
+      mockWindowProperties(320, 568);
+    });
     const { result } = renderHook(() => useViewportAdaptation());
 
     expect(result.current.breakpoint).toBe('xs');
@@ -28,7 +30,9 @@ describe('useViewportAdaptation', () => {
   });
 
   it('should return sm breakpoint for medium screens', () => {
-    mockWindowProperties(768, 1024);
+    act(() => {
+      mockWindowProperties(768, 1024);
+    });
     const { result } = renderHook(() => useViewportAdaptation());
 
     expect(result.current.breakpoint).toBe('sm');
@@ -38,7 +42,9 @@ describe('useViewportAdaptation', () => {
   });
 
   it('should return lg breakpoint for large screens', () => {
-    mockWindowProperties(1440, 900);
+    act(() => {
+      mockWindowProperties(1440, 900);
+    });
     const { result } = renderHook(() => useViewportAdaptation());
 
     expect(result.current.breakpoint).toBe('lg');
@@ -48,7 +54,9 @@ describe('useViewportAdaptation', () => {
   });
 
   it('should detect landscape orientation', () => {
-    mockWindowProperties(800, 600);
+    act(() => {
+      mockWindowProperties(800, 600);
+    });
     const { result } = renderHook(() => useViewportAdaptation());
 
     expect(result.current.isLandscape).toBe(true);

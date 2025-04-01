@@ -6,7 +6,16 @@ import { openRouterService } from '../services/llm/openRouterService';
 // Mock the openRouterService
 vi.mock('../services/llm/openRouterService', () => ({
   openRouterService: {
-    sendChatRequest: vi.fn(),
+    sendChatRequest: vi.fn().mockResolvedValue({
+      message: {
+        role: 'assistant',
+        content: 'Test response',
+        timestamp: Date.now()
+      },
+      status: 'complete',
+      model: 'test-model',
+      id: 'test-id'
+    }),
     cancelRequest: vi.fn()
   }
 }));
@@ -137,6 +146,18 @@ describe('ChatContext', () => {
   });
 
   it('clears messages in the current session', async () => {
+    // Mock successful response for this test
+    (openRouterService.sendChatRequest as any).mockResolvedValue({
+      message: {
+        role: 'assistant',
+        content: 'Test response',
+        timestamp: Date.now()
+      },
+      status: 'complete',
+      model: 'test-model',
+      id: 'test-id'
+    });
+
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <ChatContextProvider>{children}</ChatContextProvider>
     );
@@ -153,8 +174,8 @@ describe('ChatContext', () => {
       await result.current.sendMessage('Test message');
     });
 
-    // Check that we have a message
-    expect(result.current.messages).toHaveLength(1);
+    // Check that we have messages (user message + assistant response)
+    expect(result.current.messages).toHaveLength(2);
 
     // Clear messages
     await act(async () => {
