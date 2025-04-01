@@ -4,10 +4,10 @@ import { logInfo, logError } from '../utils/logger';
 import { NetworkError } from '../utils/errorHandler';
 
 // Get environment variables
-const S3_ENDPOINT = (import.meta as any).env.VITE_S3_ENDPOINT as string;
-const S3_ACCESS_KEY_ID = (import.meta as any).env.VITE_S3_ACCESS_KEY_ID as string;
-const S3_SECRET_ACCESS_KEY = (import.meta as any).env.VITE_S3_SECRET_ACCESS_KEY as string;
-const S3_BUCKET_NAME = (import.meta as any).env.VITE_S3_BUCKET_NAME as string;
+const S3_ENDPOINT = import.meta.env.VITE_S3_ENDPOINT as string;
+const S3_ACCESS_KEY_ID = import.meta.env.VITE_S3_ACCESS_KEY_ID as string;
+const S3_SECRET_ACCESS_KEY = import.meta.env.VITE_S3_SECRET_ACCESS_KEY as string;
+const S3_BUCKET_NAME = import.meta.env.VITE_S3_BUCKET_NAME as string;
 
 const s3 = new AWS.S3({
   endpoint: S3_ENDPOINT,
