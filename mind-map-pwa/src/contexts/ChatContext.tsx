@@ -139,9 +139,11 @@ export const ChatContextProvider: React.FC<{ children: React.ReactNode }> = ({ c
     setCurrentSessionId(newSessionId);
     setMessages([]);
 
-    // Add initial system message to IndexedDB
-    addSystemMessage(newSessionId, 'You are a helpful assistant for a mind mapping application. Provide concise, clear responses.')
-      .catch(error => logError('Error saving system message to IndexedDB:', error));
+    // Add initial system message to IndexedDB if available
+    if (typeof addSystemMessage === 'function') {
+      addSystemMessage(newSessionId, 'You are a helpful assistant for a mind mapping application. Provide concise, clear responses.')
+        .catch(error => logError('Error saving system message to IndexedDB:', error));
+    }
 
     logInfo('Created new chat session:', newSessionId);
     return newSessionId;
@@ -169,10 +171,12 @@ export const ChatContextProvider: React.FC<{ children: React.ReactNode }> = ({ c
     setIsLoading(true);
     setError(null);
 
-    // Save user message to IndexedDB
-    await addUserMessage(currentSessionId, content).catch(error => {
-      logError('Error saving user message to IndexedDB:', error);
-    });
+    // Save user message to IndexedDB if available
+    if (typeof addUserMessage === 'function') {
+      await addUserMessage(currentSessionId, content).catch(error => {
+        logError('Error saving user message to IndexedDB:', error);
+      });
+    }
 
     try {
       // Create message history for the API request
@@ -207,10 +211,12 @@ export const ChatContextProvider: React.FC<{ children: React.ReactNode }> = ({ c
       if (response && response.message) {
         setMessages(prev => [...prev, response.message]);
 
-        // Save assistant message to IndexedDB
-        await addAssistantMessage(currentSessionId, response.message.content).catch(error => {
-          logError('Error saving assistant message to IndexedDB:', error);
-        });
+        // Save assistant message to IndexedDB if available
+        if (typeof addAssistantMessage === 'function') {
+          await addAssistantMessage(currentSessionId, response.message.content).catch(error => {
+            logError('Error saving assistant message to IndexedDB:', error);
+          });
+        }
       }
     } catch (error) {
       logError('Error sending message:', error);

@@ -112,10 +112,12 @@ export const I18nContextProvider: React.FC<{ children: React.ReactNode }> = ({ c
     // Save to localStorage for backward compatibility
     localStorage.setItem('locale', locale);
 
-    // Save to IndexedDB
-    saveLocaleSettings(locale).catch(error => {
-      console.error('Failed to save locale to IndexedDB:', error);
-    });
+    // Save to IndexedDB if available
+    if (typeof saveLocaleSettings === 'function') {
+      saveLocaleSettings(locale).catch(error => {
+        console.error('Failed to save locale to IndexedDB:', error);
+      });
+    }
   }, [locale]);
 
   // Translation function

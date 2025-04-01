@@ -8,6 +8,8 @@ import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { I18nContextProvider, useI18n } from './I18nContext';
+import * as settingsService from '../services/settingsService';
+import * as migrationUtils from '../utils/migrationUtils';
 
 // Test component that uses the i18n context
 const TestComponent = () => {
@@ -23,10 +25,22 @@ const TestComponent = () => {
   );
 };
 
+// Mock the settingsService
+vi.mock('../services/settingsService', () => ({
+  saveLocaleSettings: vi.fn().mockResolvedValue(true),
+  loadLocaleSettings: vi.fn().mockResolvedValue(null)
+}));
+
+// Mock the migrationUtils
+vi.mock('../utils/migrationUtils', () => ({
+  runAllMigrations: vi.fn().mockResolvedValue(true)
+}));
+
 describe('I18nContext', () => {
   beforeEach(() => {
     // Reset localStorage before each test
     localStorage.clear();
+    vi.resetAllMocks();
   });
 
   it('provides English translations by default', async () => {
@@ -123,6 +137,9 @@ describe('I18nContext', () => {
     const getItemSpy = vi.spyOn(Storage.prototype, 'getItem');
     const setItemSpy = vi.spyOn(Storage.prototype, 'setItem');
 
+    // Mock loadLocaleSettings to return null initially, then 'de' after setting
+    vi.mocked(settingsService.loadLocaleSettings).mockResolvedValueOnce(null);
+
     // First render with default locale
     const { unmount } = render(
       <I18nContextProvider>
@@ -148,12 +165,13 @@ describe('I18nContext', () => {
 
     // Verify localStorage was updated
     expect(setItemSpy).toHaveBeenCalledWith('locale', 'de');
+    expect(settingsService.saveLocaleSettings).toHaveBeenCalledWith('de');
 
     // Unmount and remount to verify persistence
     unmount();
 
-    // Mock localStorage to return 'de' for the next render
-    getItemSpy.mockReturnValue('de');
+    // Mock loadLocaleSettings to return 'de' for the next render
+    vi.mocked(settingsService.loadLocaleSettings).mockResolvedValueOnce('de');
 
     render(
       <I18nContextProvider>

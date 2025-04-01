@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, renderHook, act } from '@testing-library/react';
 import { ChatContextProvider, useChat } from './ChatContext';
 import { openRouterService } from '../services/llm/openRouterService';
+import * as chatHistoryService from '../services/chatHistoryService';
+import * as migrationUtils from '../utils/migrationUtils';
 
 // Mock the openRouterService
 vi.mock('../services/llm/openRouterService', () => ({
@@ -18,6 +20,20 @@ vi.mock('../services/llm/openRouterService', () => ({
     }),
     cancelRequest: vi.fn()
   }
+}));
+
+// Mock the chatHistoryService
+vi.mock('../services/chatHistoryService', () => ({
+  createNewConversation: vi.fn().mockReturnValue('test-conversation-id'),
+  getChatHistory: vi.fn().mockResolvedValue([]),
+  addUserMessage: vi.fn().mockResolvedValue(true),
+  addAssistantMessage: vi.fn().mockResolvedValue(true),
+  addSystemMessage: vi.fn().mockResolvedValue(true)
+}));
+
+// Mock the migrationUtils
+vi.mock('../utils/migrationUtils', () => ({
+  runAllMigrations: vi.fn().mockResolvedValue(true)
 }));
 
 // Mock localStorage
@@ -78,11 +94,23 @@ describe('ChatContext', () => {
     };
     (openRouterService.sendChatRequest as any).mockResolvedValue(mockResponse);
 
+    // Mock chat history service
+    (chatHistoryService.createNewConversation as any).mockReturnValue('test-conversation-id');
+    (chatHistoryService.getChatHistory as any).mockResolvedValue([]);
+    (chatHistoryService.addUserMessage as any).mockResolvedValue(true);
+    (chatHistoryService.addAssistantMessage as any).mockResolvedValue(true);
+    (chatHistoryService.addSystemMessage as any).mockResolvedValue(true);
+
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <ChatContextProvider>{children}</ChatContextProvider>
     );
 
     const { result } = renderHook(() => useChat(), { wrapper });
+
+    // Create a session first
+    await act(async () => {
+      result.current.createSession();
+    });
 
     // Send a message
     await act(async () => {
@@ -114,6 +142,10 @@ describe('ChatContext', () => {
       ]),
       undefined
     );
+
+    // Check that the chat history service was called
+    expect(chatHistoryService.addUserMessage).toHaveBeenCalledWith('test-conversation-id', 'Test message');
+    expect(chatHistoryService.addAssistantMessage).toHaveBeenCalledWith('test-conversation-id', 'Test response');
   });
 
   it('creates and manages sessions', async () => {

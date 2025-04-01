@@ -7,10 +7,18 @@ import { MindMapRecord, SettingsRecord, AppStateRecord, ChatMessageRecord } from
 export type { MindMapRecord, SettingsRecord, AppStateRecord, ChatMessageRecord } from './config';
 import { StorageError } from '../errorHandler';
 
+// Check if IndexedDB is available
+const isIndexedDBAvailable = typeof window !== 'undefined' && window.indexedDB;
+
 // Initialize the database
 export const initDB = (): Promise<IDBDatabase> => {
+  // If IndexedDB is not available (e.g., in test environment), throw an error
+  if (!isIndexedDBAvailable) {
+    return Promise.reject(new StorageError('IndexedDB is not available in this environment'));
+  }
+
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_CONFIG.name, DB_CONFIG.version);
+    const request = window.indexedDB.open(DB_CONFIG.name, DB_CONFIG.version);
 
     request.onerror = (event) => {
       const error = (event.target as IDBRequest).error || new Error('Unknown IndexedDB error');

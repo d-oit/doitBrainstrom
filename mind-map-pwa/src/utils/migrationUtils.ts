@@ -37,25 +37,25 @@ export const migrateThemeSettings = async (): Promise<boolean> => {
   try {
     const themeSettingsKey = 'theme-settings';
     const storedSettings = localStorage.getItem(themeSettingsKey);
-    
+
     if (!storedSettings) {
       logInfo('No theme settings found in localStorage to migrate');
       return true;
     }
-    
+
     const parsedSettings = JSON.parse(storedSettings);
     const timestamp = new Date().toISOString();
-    
+
     const settingsRecord: SettingsRecord = {
       id: 'theme',
       category: 'theme',
       data: parsedSettings,
       lastModified: timestamp
     };
-    
+
     await saveSettings(settingsRecord);
     logInfo('Theme settings migrated from localStorage to IndexedDB');
-    
+
     return true;
   } catch (error) {
     logError('Error migrating theme settings:', error);
@@ -70,25 +70,25 @@ export const migrateAccessibilitySettings = async (): Promise<boolean> => {
   try {
     const accessibilitySettingsKey = 'accessibility-settings';
     const storedSettings = localStorage.getItem(accessibilitySettingsKey);
-    
+
     if (!storedSettings) {
       logInfo('No accessibility settings found in localStorage to migrate');
       return true;
     }
-    
+
     const parsedSettings = JSON.parse(storedSettings);
     const timestamp = new Date().toISOString();
-    
+
     const settingsRecord: SettingsRecord = {
       id: 'accessibility',
       category: 'accessibility',
       data: parsedSettings,
       lastModified: timestamp
     };
-    
+
     await saveSettings(settingsRecord);
     logInfo('Accessibility settings migrated from localStorage to IndexedDB');
-    
+
     return true;
   } catch (error) {
     logError('Error migrating accessibility settings:', error);
@@ -103,24 +103,24 @@ export const migrateLocaleSettings = async (): Promise<boolean> => {
   try {
     const localeKey = 'locale';
     const storedLocale = localStorage.getItem(localeKey);
-    
+
     if (!storedLocale) {
       logInfo('No locale settings found in localStorage to migrate');
       return true;
     }
-    
+
     const timestamp = new Date().toISOString();
-    
+
     const settingsRecord: SettingsRecord = {
       id: 'locale',
       category: 'i18n',
       data: { locale: storedLocale },
       lastModified: timestamp
     };
-    
+
     await saveSettings(settingsRecord);
     logInfo('Locale settings migrated from localStorage to IndexedDB');
-    
+
     return true;
   } catch (error) {
     logError('Error migrating locale settings:', error);
@@ -135,25 +135,25 @@ export const migrateNavigationState = async (): Promise<boolean> => {
   try {
     const navigationStateKey = 'doitBrainstorm.navigationState.drawerOpen';
     const storedState = localStorage.getItem(navigationStateKey);
-    
+
     if (!storedState) {
       logInfo('No navigation state found in localStorage to migrate');
       return true;
     }
-    
+
     const parsedState = JSON.parse(storedState);
     const timestamp = new Date().toISOString();
-    
+
     const stateRecord: AppStateRecord = {
       id: 'navigation.drawerOpen',
       category: 'navigation',
       data: { drawerOpen: parsedState },
       lastModified: timestamp
     };
-    
+
     await saveAppState(stateRecord);
     logInfo('Navigation state migrated from localStorage to IndexedDB');
-    
+
     return true;
   } catch (error) {
     logError('Error migrating navigation state:', error);
@@ -168,24 +168,24 @@ export const migrateClientId = async (): Promise<boolean> => {
   try {
     const clientIdKey = 'sync_client_id';
     const storedClientId = localStorage.getItem(clientIdKey);
-    
+
     if (!storedClientId) {
       logInfo('No client ID found in localStorage to migrate');
       return true;
     }
-    
+
     const timestamp = new Date().toISOString();
-    
+
     const settingsRecord: SettingsRecord = {
       id: 'sync.clientId',
       category: 'sync',
       data: { clientId: storedClientId },
       lastModified: timestamp
     };
-    
+
     await saveSettings(settingsRecord);
     logInfo('Client ID migrated from localStorage to IndexedDB');
-    
+
     return true;
   } catch (error) {
     logError('Error migrating client ID:', error);
@@ -201,30 +201,59 @@ export const runAllMigrations = async (): Promise<boolean> => {
     logInfo('Migration already completed, skipping');
     return true;
   }
-  
+
   try {
     logInfo('Starting migration from localStorage to IndexedDB');
-    
-    const themeResult = await migrateThemeSettings();
-    const accessibilityResult = await migrateAccessibilitySettings();
-    const localeResult = await migrateLocaleSettings();
-    const navigationResult = await migrateNavigationState();
-    const clientIdResult = await migrateClientId();
-    
-    const allSuccessful = 
-      themeResult && 
-      accessibilityResult && 
-      localeResult && 
-      navigationResult && 
-      clientIdResult;
-    
+
+    let allSuccessful = true;
+
+    try {
+      const themeResult = await migrateThemeSettings();
+      if (!themeResult) allSuccessful = false;
+    } catch (error) {
+      logError('Error migrating theme settings:', error);
+      allSuccessful = false;
+    }
+
+    try {
+      const accessibilityResult = await migrateAccessibilitySettings();
+      if (!accessibilityResult) allSuccessful = false;
+    } catch (error) {
+      logError('Error migrating accessibility settings:', error);
+      allSuccessful = false;
+    }
+
+    try {
+      const localeResult = await migrateLocaleSettings();
+      if (!localeResult) allSuccessful = false;
+    } catch (error) {
+      logError('Error migrating locale settings:', error);
+      allSuccessful = false;
+    }
+
+    try {
+      const navigationResult = await migrateNavigationState();
+      if (!navigationResult) allSuccessful = false;
+    } catch (error) {
+      logError('Error migrating navigation state:', error);
+      allSuccessful = false;
+    }
+
+    try {
+      const clientIdResult = await migrateClientId();
+      if (!clientIdResult) allSuccessful = false;
+    } catch (error) {
+      logError('Error migrating client ID:', error);
+      allSuccessful = false;
+    }
+
     if (allSuccessful) {
       markMigrationCompleted();
       logInfo('All migrations completed successfully');
     } else {
       logWarn('Some migrations failed, will retry on next app load');
     }
-    
+
     return allSuccessful;
   } catch (error) {
     logError('Error running migrations:', error);
