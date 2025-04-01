@@ -3,7 +3,6 @@ import { Box, Fab, Tooltip, Badge, useTheme } from '@mui/material';
 import ChatIcon from '@mui/icons-material/Chat';
 import CloseIcon from '@mui/icons-material/Close';
 import ChatWindow from './ChatWindow';
-import { useChat } from '../../contexts/ChatContext';
 
 interface FloatingChatButtonProps {
   position?: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
@@ -16,7 +15,6 @@ const FloatingChatButton: React.FC<FloatingChatButtonProps> = ({
   position = 'bottom-right' 
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { messages } = useChat();
   const theme = useTheme();
 
   // Calculate position styles

@@ -89,7 +89,13 @@ vi.mock('../contexts/ResponsiveContext', () => ({
       isDesktop: true,
       isLandscape: true,
       isPortrait: false,
-      pixelRatio: 1
+      pixelRatio: 1,
+      safeAreaInsets: {
+        top: 0,
+        right: 0,
+        bottom: 0,
+        left: 0
+      }
     },
     memory: {
       deviceMemory: 8,
