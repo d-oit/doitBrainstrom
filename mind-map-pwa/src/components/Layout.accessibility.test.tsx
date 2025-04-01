@@ -20,27 +20,33 @@ vi.mock('../test/axe-setup', () => ({
 import { axeConfig } from '../test/axe-setup';
 
 // Mock Material UI components to reduce file loading
-vi.mock('@mui/material', () => ({
-  AppBar: ({ children, ...props }: any) => <div data-testid="appbar" {...props}>{children}</div>,
-  Toolbar: ({ children, ...props }: any) => <div data-testid="toolbar" {...props}>{children}</div>,
-  IconButton: ({ children, ...props }: any) => <button data-testid="iconbutton" {...props}>{children}</button>,
-  Typography: ({ children, ...props }: any) => <div data-testid="typography" {...props}>{children}</div>,
-  Container: ({ children, ...props }: any) => <div data-testid="container" {...props}>{children}</div>,
-  Box: ({ children, ...props }: any) => <div data-testid="box" {...props}>{children}</div>,
-  useTheme: () => ({
-    palette: {
-      primary: { main: '#1976d2' },
-      background: { paper: '#fff' },
-      text: { primary: '#000' }
-    },
-    breakpoints: {
-      up: () => false,
-      down: () => false
-    },
-    spacing: (factor: number) => `${factor * 8}px`
-  }),
-  useMediaQuery: () => false
-}));
+vi.mock('@mui/material', async () => {
+  const actual = await vi.importActual('@mui/material');
+  return {
+    ...actual,
+    AppBar: ({ children, ...props }: any) => <div data-testid="appbar" {...props}>{children}</div>,
+    Toolbar: ({ children, ...props }: any) => <div data-testid="toolbar" {...props}>{children}</div>,
+    IconButton: ({ children, ...props }: any) => <button data-testid="iconbutton" {...props}>{children}</button>,
+    Typography: ({ children, ...props }: any) => <div data-testid="typography" {...props}>{children}</div>,
+    Container: ({ children, ...props }: any) => <div data-testid="container" {...props}>{children}</div>,
+    Box: ({ children, ...props }: any) => <div data-testid="box" {...props}>{children}</div>,
+    Stack: ({ children, ...props }: any) => <div data-testid="stack" {...props}>{children}</div>,
+    Divider: ({ orientation, flexItem, ...props }: any) => <div data-testid="divider" {...props}></div>,
+    useTheme: () => ({
+      palette: {
+        primary: { main: '#1976d2' },
+        background: { paper: '#fff' },
+        text: { primary: '#000' }
+      },
+      breakpoints: {
+        up: () => false,
+        down: () => false
+      },
+      spacing: (factor: number) => `${factor * 8}px`
+    }),
+    useMediaQuery: () => false
+  };
+});
 
 // Mock all icons to reduce file loading
 vi.mock('@mui/icons-material', () => ({
@@ -112,17 +118,9 @@ vi.mock('../contexts/ResponsiveContext', () => ({
 
 import { I18nContext } from '../contexts/I18nContext';
 
-// Mock Material UI components
-vi.mock('@mui/material', () => ({
-  AppBar: ({ children, ...props }: any) => <header {...props}>{children}</header>,
-  Toolbar: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-  Typography: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-  Container: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-  Box: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-  Stack: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-  Divider: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-  Tooltip: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-  Badge: ({ children, ...props }: any) => <div {...props}>{children}</div>
+// Mock NetworkStatusIndicator component
+vi.mock('./NetworkStatusIndicator', () => ({
+  default: () => <div aria-label="Network status">Online</div>
 }), { virtual: true });
 
 // Mock the components used in Layout

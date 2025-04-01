@@ -22,7 +22,11 @@ vi.mock('@mui/material', () => ({
     }
   }),
   Fab: ({ children, ...props }: any) => <button data-testid="fab" {...props}>{children}</button>,
-  Badge: ({ children, ...props }: any) => <div data-testid="badge" {...props}>{children}</div>,
+  Badge: ({ children, badgeContent, invisible, color, ...props }: any) => (
+    <div data-testid="badge" data-badge-content={badgeContent} data-invisible={invisible} data-color={color} {...props}>
+      {children}
+    </div>
+  ),
   Box: ({ children, ...props }: any) => <div data-testid="box" {...props}>{children}</div>,
   Tooltip: ({ children, ...props }: any) => <div data-testid="tooltip" {...props}>{children}</div>
 }));
@@ -94,11 +98,11 @@ describe('FloatingChatButton', () => {
     );
 
     // Get the button container
-    const buttonContainer = screen.getByRole('button', { name: /Open chat assistance/i }).closest('div');
+    const buttonContainer = screen.getByTestId('box');
 
     // Check bottom-right position
-    expect(buttonContainer).toHaveStyle('bottom: 16px');
-    expect(buttonContainer).toHaveStyle('right: 16px');
+    expect(buttonContainer).toHaveAttribute('style', expect.stringContaining('bottom: 16px'));
+    expect(buttonContainer).toHaveAttribute('style', expect.stringContaining('right: 16px'));
 
     // Rerender with different position
     rerender(
@@ -108,7 +112,7 @@ describe('FloatingChatButton', () => {
     );
 
     // Check bottom-left position
-    expect(buttonContainer).toHaveStyle('bottom: 16px');
-    expect(buttonContainer).toHaveStyle('left: 16px');
+    expect(buttonContainer).toHaveAttribute('style', expect.stringContaining('bottom: 16px'));
+    expect(buttonContainer).toHaveAttribute('style', expect.stringContaining('left: 16px'));
   });
 });

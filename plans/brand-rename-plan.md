@@ -8,18 +8,12 @@
   "app": {
 -    "title": "Mind Map PWA",
 +    "title": "d.o. Brainstroming",
--    "subtitle": "A Progressive Web App for creating mind maps"
+-    "subtitle": "A Progressive Web App for creating mind maps",
 +    "subtitle": "A sleek, user-friendly mind mapping app with real-time collaboration"
   },
   "tabs": {
 -    "mindMap": "Mind Map",
-+    "mindMap": "Brainstorm Map",
-    ...
-  },
-  "mindMap": {
--    "mainIdeaDesc": "This is the central concept of your mind map",
-+    "mainIdeaDesc": "This is the central concept of your brainstorm map",
-    ...
++    "mindMap": "Brainstorm Map"
   }
 }
 ```
@@ -31,69 +25,95 @@
 +    "title": "d.o. Brainstroming",
 +    "subtitle": "Eine benutzerfreundliche Mind-Mapping-App mit Echtzeit-Zusammenarbeit"
 +  },
--  "mind_map": "Mind Map",
-+  "mind_map": "Brainstorm-Karte",
-   "create_map": "Karte erstellen",
-   ...
-   "map_settings": "Karten-Einstellungen",
-   // Add missing translations from en.json:
-+  "tabs": {
-+    "mindMap": "Brainstorm-Karte",
-+    "s3Connection": "S3-Verbindung",
-+    "sampleCards": "Beispielkarten"
-+  },
-+  "s3": {
-+    "connectionTest": "S3-Verbindungstest",
-+    "connectionError": "S3-Verbindung fehlgeschlagen. Bitte überprüfen Sie Ihre Anmeldedaten.",
-+    "noBuckets": "Keine Buckets in Ihrem S3-Konto gefunden.",
-+    "connectionSuccess": "Erfolgreich mit S3 verbunden!",
-+    "availableBuckets": "Verfügbare Buckets:"
-+  }
+  "mind_map": "Brainstorm-Karte",
+  // Add missing translations matching en.json structure
 }
 ```
 
-## Component Updates (15 files)
-- Layout.tsx: Footer copyright
-- App.test.tsx: Test assertions
-- openRouterService.ts: S3 metadata headers
-- Index.html: Meta descriptions
+### Spanish (es.json)
+```diff
+{
+  "app": {
+-    "title": "Mapa Mental PWA",
++    "title": "d.o. Brainstroming",
+-    "subtitle": "Una aplicación web progresiva para crear mapas mentales",
++    "subtitle": "Una aplicación elegante y fácil de usar para mapas mentales con colaboración en tiempo real"
+  },
+  "tabs": {
+-    "mindMap": "Mapa Mental",
++    "mindMap": "Mapa de Brainstorming"
+  }
+}
+```
 
-## Documentation Updates
+### Arabic (ar.json)
+```diff
+{
+  "app": {
+-    "title": "تطبيق خريطة العقل",
++    "title": "d.o. Brainstroming",
+-    "subtitle": "تطبيق ويب تقدمي لإنشاء خرائط ذهنية",
++    "subtitle": "تطبيق أنيق وسهل الاستخدام للخرائط الذهنية مع التعاون في الوقت الفعلي"
+  },
+  "tabs": {
+-    "mindMap": "خريطة ذهنية",
++    "mindMap": "خريطة العصف الذهني"
+  }
+}
+```
 
-| File | Changes Required |
-|------|------------------|
-| README.md | Header + 8 body references |
-| PROJECT_DOCUMENTATION.md | 4 section headers + 12 content refs |
-| DEPLOYMENT_GUIDE.md | 3 instance updates |
-| MAINTENANCE_PLAN.md | 2 headers + 5 content refs |
+## Component Updates
 
-## Testing Strategy
+### React Components
+1. Layout.tsx:
+   - Footer copyright
+   - App header branding
+2. App.test.tsx:
+   - Test assertions
+   - Translation mocks
+3. openRouterService.ts:
+   - S3 metadata headers
+4. Index.html:
+   - Meta descriptions
+   - Title tags
+   - PWA manifest
 
-1. Update test regex patterns:
-   ```regex
-   /Mind\s*Map\s*PWA/gi → /d\.o\.\s*Brainstroming/gi
-   /Mind\s*Map/gi → /Brainstorm[- ]Map/gi
-   ```
-2. Update snapshots:
-   ```bash
-   npm test -- -u
-   ```
-3. Validate translations:
-   ```bash
-   npm run i18n:validate
-   ```
+### Test Updates
+1. Update regex patterns:
+```typescript
+/Mind\s*Map\s*PWA/gi → /d\.o\.\s*Brainstroming/gi
+/Mind\s*Map/gi → /Brainstorm[- ]Map/gi
+```
 
-## Visual Updates
-1. Verify UI text overflow with new brand name
-2. Check responsive layouts on:
-   - Mobile (320px)
-   - Tablet (768px)
-   - Desktop (1024px+)
-3. Validate PDF exports with new branding
+2. Update translation mocks in tests:
+```typescript
+const mockTranslations = {
+  'app.title': 'd.o. Brainstroming',
+  'app.subtitle': 'A sleek, user-friendly mind mapping app with real-time collaboration'
+};
+```
 
 ## Implementation Steps
-1. Update translation files (en.json, de.json)
-2. Update component references
-3. Run tests and fix any failed assertions
-4. Manual testing of all features
-5. Update documentation
+
+1. Update i18n files
+   - en.json (base translations)
+   - de.json (German)
+   - es.json (Spanish)
+   - ar.json (Arabic)
+
+2. Update components using brand name
+   - Header/title components
+   - Footer components
+   - Meta tags
+   - Documentation references
+
+3. Fix failing tests
+   - Update test assertions
+   - Refresh snapshots
+   - Update translation mocks
+
+4. Manual Testing
+   - Verify all translations
+   - Check responsive layouts
+   - Test RTL support (Arabic)
+   - Validate PDF exports

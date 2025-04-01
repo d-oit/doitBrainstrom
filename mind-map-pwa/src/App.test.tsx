@@ -31,11 +31,14 @@ vi.mock('@mui/material', () => {
         values: { xs: 0, sm: 600, md: 900, lg: 1200, xl: 1536 }
       }
     }),
-    Grid: ({ children, ...props }: any) => <div data-testid="grid" {...props}>{children}</div>,
     Box: ({ children, ...props }: any) => <div data-testid="box" {...props}>{children}</div>,
+    Grid: ({ children, ...props }: any) => <div data-testid="grid" {...props}>{children}</div>,
+    Typography: ({ children, ...props }: any) => <div data-testid="typography" {...props}>{children}</div>,
+    Alert: ({ children, ...props }: any) => <div data-testid="alert" {...props}>{children}</div>,
     Paper: ({ children, ...props }: any) => <div data-testid="paper" {...props}>{children}</div>,
-    CircularProgress: (props: any) => <div data-testid="progress" {...props} />,
-    Alert: ({ children, ...props }: any) => <div data-testid="alert" {...props}>{children}</div>
+    Tabs: ({ children, ...props }: any) => <div role="tablist" data-testid="tabs" {...props}>{children}</div>,
+    Tab: ({ label, id, 'aria-controls': ariaControls, ...props }: any) => <div role="tab" data-testid="tab" tabIndex={0} id={id} aria-controls={ariaControls} {...props}>{label}</div>,
+    CircularProgress: ({ ...props }: any) => <div data-testid="progress" {...props}>Loading...</div>
   };
 });
 
@@ -50,17 +53,6 @@ vi.mock('./contexts/I18nContext', () => ({
     dir: 'ltr',
     availableLocales: ['en', 'es', 'ar']
   })
-}));
-
-vi.mock('@mui/material', () => ({
-  Box: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-  Grid: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-  Typography: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-  Alert: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-  Paper: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-  Tabs: ({ children, ...props }: any) => <div role="tablist" {...props}>{children}</div>,
-  Tab: ({ label, id, 'aria-controls': ariaControls, ...props }: any) => <div role="tab" tabIndex={0} id={id} aria-controls={ariaControls} {...props}>{label}</div>,
-  CircularProgress: ({ ...props }: any) => <div {...props}>Loading...</div>
 }));
 
 vi.mock('./components/Layout', () => ({
@@ -123,6 +115,29 @@ vi.mock('./contexts/ResponsiveContext', () => ({
     shouldReduceImageQuality: false,
     shouldUseOfflineFirst: false
   })
+}));
+
+// Mock the ChatContextProvider and useChat hook
+vi.mock('./contexts/ChatContext', () => ({
+  ChatContextProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  useChat: () => ({
+    messages: [],
+    isLoading: false,
+    error: null,
+    sendMessage: vi.fn(),
+    clearMessages: vi.fn(),
+    cancelRequest: vi.fn(),
+    sessions: [],
+    currentSessionId: null,
+    createSession: vi.fn(),
+    loadSession: vi.fn(),
+    deleteSession: vi.fn()
+  })
+}));
+
+// Mock the FloatingChatButton component
+vi.mock('./components/Chat/FloatingChatButton', () => ({
+  default: ({ position }: { position?: string }) => <div data-testid="mock-chat-button" data-position={position}>Chat Button</div>
 }));
 
 // Now import App after all mocks are defined
