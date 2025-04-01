@@ -85,8 +85,8 @@ describe('ResponsiveImage', () => {
 
   it('uses low-res image when shouldReduceImageQuality is true', async () => {
     // Override the mock to enable image quality reduction
-    const useResponsive = require('../contexts/ResponsiveContext').useResponsive;
-    useResponsive.mockImplementation(() => ({
+    // Import at the top level instead of using require
+    useResponsive.mockImplementationOnce(() => ({
       shouldReduceImageQuality: true,
       network: {
         online: true,

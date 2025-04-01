@@ -1,5 +1,6 @@
 import { vi } from 'vitest';
 
 declare global {
-  var vi: typeof vi;
+  // Using const instead of var to fix the linting error
+  const vi: typeof vi;
 }

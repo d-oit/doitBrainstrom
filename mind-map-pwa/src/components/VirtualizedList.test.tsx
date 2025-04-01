@@ -52,7 +52,7 @@ describe('VirtualizedList', () => {
 
   it('renders all items when virtualization is disabled', () => {
     // Override the mock to disable virtualization
-    const useResponsive = require('../contexts/ResponsiveContext').useResponsive;
+    // Import at the top level instead of using require
     useResponsive.mockImplementation(() => ({
       shouldVirtualizeList: false,
       viewport: {

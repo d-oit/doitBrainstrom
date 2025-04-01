@@ -24,20 +24,25 @@ function VirtualizedList<T>({
   const containerRef = useRef<HTMLDivElement>(null);
   const [scrollTop, setScrollTop] = useState(0);
 
-  // If virtualization is disabled, render all items
-  if (!shouldVirtualizeList) {
-    return (
-      <Box 
-        className={className}
-        sx={{ 
-          height, 
-          overflowY: 'auto' 
-        }}
-      >
-        {items.map((item, index) => renderItem(item, index))}
-      </Box>
-    );
-  }
+  // Handle scroll events - defined outside of any conditionals
+  const handleScroll = useCallback(() => {
+    if (containerRef.current) {
+      setScrollTop(containerRef.current.scrollTop);
+    }
+  }, []);
+
+  // Add scroll event listener - defined outside of any conditionals
+  useEffect(() => {
+    if (!shouldVirtualizeList) return; // Skip if not virtualizing
+
+    const container = containerRef.current;
+    if (container) {
+      container.addEventListener('scroll', handleScroll);
+      return () => {
+        container.removeEventListener('scroll', handleScroll);
+      };
+    }
+  }, [handleScroll, shouldVirtualizeList]);
 
   // Calculate visible items range
   const totalHeight = items.length * itemHeight;
@@ -47,23 +52,20 @@ function VirtualizedList<T>({
     Math.floor((scrollTop + height) / itemHeight) + overscan
   );
 
-  // Handle scroll events
-  const handleScroll = useCallback(() => {
-    if (containerRef.current) {
-      setScrollTop(containerRef.current.scrollTop);
-    }
-  }, []);
-
-  // Add scroll event listener
-  useEffect(() => {
-    const container = containerRef.current;
-    if (container) {
-      container.addEventListener('scroll', handleScroll);
-      return () => {
-        container.removeEventListener('scroll', handleScroll);
-      };
-    }
-  }, [handleScroll]);
+  // If virtualization is disabled, render all items
+  if (!shouldVirtualizeList) {
+    return (
+      <Box
+        className={className}
+        sx={{
+          height,
+          overflowY: 'auto'
+        }}
+      >
+        {items.map((item, index) => renderItem(item, index))}
+      </Box>
+    );
+  }
 
   // Render only visible items
   const visibleItems = [];

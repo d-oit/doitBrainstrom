@@ -1,5 +1,5 @@
 // src/contexts/MindMapContext.tsx
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { initializeMindMapData, saveMindMapLocally } from '../services/s3SyncService';
 import { MindMapData, MindMapNode, MindMapLink, generateId } from '../utils/MindMapDataModel';
 
@@ -52,22 +52,8 @@ export const MindMapContextProvider: React.FC<{ children: React.ReactNode }> = (
     }
   }, [mindMapData, isLoading]);
 
-  // Listen for online/offline events
-  useEffect(() => {
-    const handleOnline = () => {
-      console.log('App is online, attempting to sync...');
-      syncMindMap();
-    };
-
-    window.addEventListener('online', handleOnline);
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-    };
-  }, []);
-
-  // Function to manually trigger synchronization
-  const syncMindMap = async (): Promise<boolean> => {
+  // Function to manually trigger synchronization - using useCallback to avoid dependency issues
+  const syncMindMap = useCallback(async (): Promise<boolean> => {
     if (navigator.onLine) {
       setSyncStatus('syncing');
       try {
@@ -84,7 +70,21 @@ export const MindMapContextProvider: React.FC<{ children: React.ReactNode }> = (
       setSyncStatus('idle');
       return false;
     }
-  };
+  }, [mindMapData, setSyncStatus]);
+
+  // Listen for online/offline events
+  useEffect(() => {
+    const handleOnline = () => {
+      console.log('App is online, attempting to sync...');
+      syncMindMap();
+    };
+
+    window.addEventListener('online', handleOnline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+    };
+  }, [syncMindMap]); // Added syncMindMap as a dependency
 
   const createNode = (text: string, x: number, y: number): MindMapNode => {
     const newNode: MindMapNode = {
