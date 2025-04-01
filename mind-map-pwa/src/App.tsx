@@ -4,6 +4,8 @@ import { listBuckets } from './services/s3Service'
 import Layout from './components/Layout'
 import { Box, Grid, Typography, Alert, Paper, Tabs, Tab, CircularProgress } from '@mui/material'
 import { useI18n } from './contexts/I18nContext'
+import { ChatContextProvider } from './contexts/ChatContext'
+import FloatingChatButton from './components/Chat/FloatingChatButton'
 
 // Lazy load components
 const MindMapCard = lazy(() => import('./components/MindMapCard'))
@@ -168,6 +170,11 @@ function App() {
           </Grid>
         </Grid>
       </TabPanel>
+
+      {/* Chat Button */}
+      <ChatContextProvider>
+        <FloatingChatButton position="bottom-right" />
+      </ChatContextProvider>
     </Layout>
   )
 }
