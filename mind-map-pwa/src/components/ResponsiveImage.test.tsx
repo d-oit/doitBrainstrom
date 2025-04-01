@@ -6,9 +6,10 @@ import { ResponsiveContextProvider, useResponsive } from '../contexts/Responsive
 import { vi, describe, it, expect } from 'vitest';
 
 // Mock the useResponsive hook
+const mockUseResponsive = vi.fn();
 vi.mock('../contexts/ResponsiveContext', () => ({
-  ...vi.importActual('../contexts/ResponsiveContext'),
-  useResponsive: vi.fn()
+  ResponsiveContextProvider: ({ children }: { children: React.ReactNode }) => children,
+  useResponsive: () => mockUseResponsive()
 }));
 
 // Mock Material UI components
@@ -134,7 +135,7 @@ describe('ResponsiveImage', () => {
 
   it('uses low-res image when shouldReduceImageQuality is true', async () => {
     // Mock the useResponsive hook to return shouldReduceImageQuality: true
-    vi.mocked(useResponsive).mockReturnValue({
+    mockUseResponsive.mockReturnValue({
       shouldReduceImageQuality: true,
       network: {
         online: true,

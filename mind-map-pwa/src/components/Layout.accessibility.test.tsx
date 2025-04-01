@@ -1,17 +1,46 @@
+/**
+ * @vitest-environment jsdom
+ */
+
 import { describe, it, expect, vi } from 'vitest';
 import { render } from '@testing-library/react';
+
 // Mock axe-core
 vi.mock('@axe-core/react', () => ({
   axe: vi.fn().mockResolvedValue({ violations: [] })
 }), { virtual: true });
 
 import { axe } from '@axe-core/react';
+
 // Mock axe-config
 vi.mock('../test/axe-setup', () => ({
   axeConfig: {}
 }), { virtual: true });
 
 import { axeConfig } from '../test/axe-setup';
+
+// Mock Material UI components to reduce file loading
+vi.mock('@mui/material', () => ({
+  AppBar: ({ children, ...props }: any) => <div data-testid="appbar" {...props}>{children}</div>,
+  Toolbar: ({ children, ...props }: any) => <div data-testid="toolbar" {...props}>{children}</div>,
+  IconButton: ({ children, ...props }: any) => <button data-testid="iconbutton" {...props}>{children}</button>,
+  Typography: ({ children, ...props }: any) => <div data-testid="typography" {...props}>{children}</div>,
+  Container: ({ children, ...props }: any) => <div data-testid="container" {...props}>{children}</div>,
+  Box: ({ children, ...props }: any) => <div data-testid="box" {...props}>{children}</div>,
+  useTheme: () => ({
+    palette: { primary: { main: '#1976d2' } },
+    breakpoints: { up: () => false }
+  })
+}));
+
+// Mock all icons to reduce file loading
+vi.mock('@mui/icons-material', () => ({
+  Menu: () => <div data-testid="menu-icon">Menu</div>,
+  Brightness4: () => <div data-testid="dark-mode-icon">Dark</div>,
+  Brightness7: () => <div data-testid="light-mode-icon">Light</div>,
+  Language: () => <div data-testid="language-icon">Language</div>
+}));
+
 import Layout from './Layout';
 // Mock I18nContext
 vi.mock('../contexts/I18nContext', () => ({

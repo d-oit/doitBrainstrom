@@ -4,25 +4,31 @@ import FloatingChatButton from './FloatingChatButton';
 import { ChatContextProvider } from '../../contexts/ChatContext';
 
 // Mock Material UI hooks
-vi.mock('@mui/material', async () => {
-  const actual = await vi.importActual('@mui/material');
-  return {
-    ...actual,
-    useTheme: () => ({
-      palette: {
-        primary: { main: '#1976d2' },
-        background: { paper: '#fff' },
-        text: { primary: '#000' },
-        divider: '#e0e0e0'
-      },
-      shadows: Array(25).fill('none'),
-      spacing: (factor: number) => `${factor * 8}px`,
-      breakpoints: {
-        down: () => false
-      }
-    })
-  };
+const mockUseTheme = () => ({
+  palette: {
+    primary: { main: '#1976d2', contrastText: '#fff' },
+    background: { paper: '#fff', default: '#fafafa' },
+    text: { primary: '#000', secondary: '#666' },
+    divider: '#e0e0e0',
+    action: { hover: '#f5f5f5', disabledBackground: '#e0e0e0', disabled: '#9e9e9e' }
+  },
+  shadows: Array(25).fill('none'),
+  spacing: (factor: number) => `${factor * 8}px`,
+  breakpoints: {
+    down: () => false,
+    up: () => false,
+    values: { xs: 0, sm: 600, md: 900, lg: 1200, xl: 1536 }
+  }
 });
+
+vi.mock('@mui/material', () => ({
+  ...vi.importActual('@mui/material'),
+  useTheme: mockUseTheme,
+  Fab: ({ children, ...props }: any) => <button data-testid="fab" {...props}>{children}</button>,
+  Badge: ({ children, ...props }: any) => <div data-testid="badge" {...props}>{children}</div>,
+  Box: ({ children, ...props }: any) => <div data-testid="box" {...props}>{children}</div>,
+  Tooltip: ({ children, ...props }: any) => <div data-testid="tooltip" {...props}>{children}</div>
+}));
 
 // Mock the ChatWindow component
 vi.mock('./ChatWindow', () => ({

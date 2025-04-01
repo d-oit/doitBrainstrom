@@ -11,23 +11,33 @@ vi.mock('./services/s3Service', () => ({
   listBuckets: vi.fn(() => Promise.resolve({ buckets: [{ Name: 'test-bucket' }], error: null }))
 }));
 
-vi.mock('@mui/material', async () => {
-  const actual = await vi.importActual('@mui/material');
+// Mock Material UI
+const mockUseTheme = () => ({
+  palette: {
+    primary: { main: '#1976d2', contrastText: '#fff' },
+    background: { paper: '#fff', default: '#fafafa' },
+    text: { primary: '#000', secondary: '#666' },
+    divider: '#e0e0e0',
+    action: { hover: '#f5f5f5', disabledBackground: '#e0e0e0', disabled: '#9e9e9e' }
+  },
+  shadows: Array(25).fill('none'),
+  spacing: (factor: number) => `${factor * 8}px`,
+  breakpoints: {
+    down: () => false,
+    up: () => false,
+    values: { xs: 0, sm: 600, md: 900, lg: 1200, xl: 1536 }
+  }
+});
+
+vi.mock('@mui/material', () => {
   return {
-    ...actual,
-    useTheme: () => ({
-      palette: {
-        primary: { main: '#1976d2' },
-        background: { paper: '#fff' },
-        text: { primary: '#000' },
-        divider: '#e0e0e0'
-      },
-      shadows: Array(25).fill('none'),
-      spacing: (factor: number) => `${factor * 8}px`,
-      breakpoints: {
-        down: () => false
-      }
-    })
+    ...vi.importActual('@mui/material'),
+    useTheme: mockUseTheme,
+    Grid: ({ children, ...props }: any) => <div data-testid="grid" {...props}>{children}</div>,
+    Box: ({ children, ...props }: any) => <div data-testid="box" {...props}>{children}</div>,
+    Paper: ({ children, ...props }: any) => <div data-testid="paper" {...props}>{children}</div>,
+    CircularProgress: (props: any) => <div data-testid="progress" {...props} />,
+    Alert: ({ children, ...props }: any) => <div data-testid="alert" {...props}>{children}</div>
   };
 });
 

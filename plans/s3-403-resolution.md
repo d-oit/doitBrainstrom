@@ -2,86 +2,165 @@
 
 ## Environment Configuration
 ```env
-# Required .env variables
-S3_ENDPOINT=your-s3-endpoint
-S3_BUCKET_NAME=your-bucket-name
-AWS_ACCESS_KEY_ID=your-access-key
-AWS_SECRET_ACCESS_KEY=your-secret-key
+# mind-map-pwa/.env
+VITE_S3_ENDPOINT=sdf.XX.idrivee2-7.com
+VITE_S3_BUCKET_NAME=bucket
+VITE_S3_ACCESS_KEY_ID=xx
+VITE_S3_SECRET_ACCESS_KEY=xxx
 ```
 
 ## TypeScript Implementation
 
 ```ts
 // src/types/env.d.ts
-declare namespace NodeJS {
-  interface ProcessEnv {
-    S3_ENDPOINT: string;
-    S3_BUCKET_NAME: string;
-    AWS_ACCESS_KEY_ID: string;
-    AWS_SECRET_ACCESS_KEY: string;
-  }
+/// <reference types="vite/client" />
+
+interface ImportMetaEnv {
+  readonly VITE_S3_ENDPOINT: string
+  readonly VITE_S3_BUCKET_NAME: string
+  readonly VITE_S3_ACCESS_KEY_ID: string
+  readonly VITE_S3_SECRET_ACCESS_KEY: string
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv
 }
 
 // src/utils/s3Config.ts
 import { S3 } from 'aws-sdk';
+import { logError, logWarn } from './logger';
 
 export class S3Config {
-  private static instance: S3;
+  private static instance: S3 | null = null;
+  private static isInitializing = false;
 
-  public static getInstance(): S3 {
-    if (!this.instance) {
-      this.validateEnv();
-      this.instance = new S3({
-        endpoint: process.env.S3_ENDPOINT,
-        signatureVersion: 'v4',
-        credentials: {
-          accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-          secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
-        }
-      });
+  public static async getInstance(): Promise<S3 | null> {
+    if (this.instance) return this.instance;
+    if (!this.isConfigured()) {
+      logWarn('S3 environment variables not configured');
+      return null;
     }
-    return this.instance;
+
+    try {
+      this.isInitializing = true;
+      this.instance = new S3({
+        endpoint: import.meta.env.VITE_S3_ENDPOINT,
+        credentials: {
+          accessKeyId: import.meta.env.VITE_S3_ACCESS_KEY_ID,
+          secretAccessKey: import.meta.env.VITE_S3_SECRET_ACCESS_KEY
+        },
+        signatureVersion: 'v4',
+        s3ForcePathStyle: true
+      });
+
+      // Verify bucket access
+      await this.instance.headBucket({
+        Bucket: import.meta.env.VITE_S3_BUCKET_NAME
+      }).promise();
+
+      return this.instance;
+    } catch (error) {
+      logError('S3 initialization failed:', error);
+      this.instance = null;
+      return null;
+    } finally {
+      this.isInitializing = false;
+    }
   }
 
-  private static validateEnv(): void {
-    const required = [
-      'S3_ENDPOINT',
-      'S3_BUCKET_NAME',
-      'AWS_ACCESS_KEY_ID',
-      'AWS_SECRET_ACCESS_KEY'
-    ];
-
-    const missing = required.filter(key => !process.env[key]);
-    if (missing.length > 0) {
-      throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
-    }
+  private static isConfigured(): boolean {
+    return !!(
+      import.meta.env.VITE_S3_ENDPOINT &&
+      import.meta.env.VITE_S3_BUCKET_NAME &&
+      import.meta.env.VITE_S3_ACCESS_KEY_ID &&
+      import.meta.env.VITE_S3_SECRET_ACCESS_KEY
+    );
   }
 }
 
-// src/services/s3Service.ts
-export class S3Service {
-  private s3 = S3Config.getInstance();
+// src/hooks/useS3.ts
+import { useState, useCallback } from 'react';
+import { S3Config } from '../utils/s3Config';
 
-  async getObject(key: string): Promise<AWS.S3.GetObjectOutput> {
-    try {
-      return await this.s3.getObject({
-        Bucket: process.env.S3_BUCKET_NAME,
-        Key: key
-      }).promise();
-    } catch (error) {
-      throw new Error(`Failed to get object ${key}: ${error.message}`);
-    }
-  }
+interface UseS3Result {
+  isLoading: boolean;
+  error: Error | null;
+  uploadFile: (key: string, body: AWS.S3.Body) => Promise<void>;
+  downloadFile: (key: string) => Promise<AWS.S3.GetObjectOutput>;
+}
 
-  async uploadObject(key: string, body: AWS.S3.Body): Promise<AWS.S3.PutObjectOutput> {
+export function useS3(): UseS3Result {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  const uploadFile = useCallback(async (key: string, body: AWS.S3.Body) => {
+    setIsLoading(true);
+    setError(null);
     try {
-      return await this.s3.putObject({
-        Bucket: process.env.S3_BUCKET_NAME,
+      const s3 = await S3Config.getInstance();
+      if (!s3) throw new Error('S3 not configured');
+
+      await s3.putObject({
+        Bucket: import.meta.env.VITE_S3_BUCKET_NAME,
         Key: key,
         Body: body
       }).promise();
-    } catch (error) {
-      throw new Error(`Failed to upload object ${key}: ${error.message}`);
+    } catch (err) {
+      setError(err as Error);
+      throw err;
+    } finally {
+      setIsLoading(false);
     }
-  }
+  }, []);
+
+  const downloadFile = useCallback(async (key: string) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const s3 = await S3Config.getInstance();
+      if (!s3) throw new Error('S3 not configured');
+
+      return await s3.getObject({
+        Bucket: import.meta.env.VITE_S3_BUCKET_NAME,
+        Key: key
+      }).promise();
+    } catch (err) {
+      setError(err as Error);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  return { isLoading, error, uploadFile, downloadFile };
 }
+```
+
+## Resolution Steps
+
+1. **Environment Variables**
+   - Copy .env.example to .env
+   - Update variables with your S3 credentials
+   - Environment variables are properly typed in `env.d.ts`
+
+2. **S3 Configuration**
+   - Single source of truth through `S3Config` singleton
+   - Proper error handling and logging
+   - Initialization check with bucket access verification
+
+3. **React Integration**
+   - React hook pattern with useS3()
+   - Loading and error states for UI feedback
+   - TypeScript types for all operations
+
+4. **Error Handling**
+   - Proper TypeScript error types
+   - Error state management in React
+   - Descriptive error messages for debugging
+
+This implementation ensures:
+- No hardcoded values
+- Type safety with TypeScript
+- React 18 patterns with hooks
+- Proper error handling
+- Environment-based configuration

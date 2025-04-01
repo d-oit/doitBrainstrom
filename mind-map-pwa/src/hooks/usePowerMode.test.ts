@@ -46,35 +46,38 @@ describe('usePowerMode', () => {
 
   it('should detect normal power mode', async () => {
     mockPowerMode(0.8, true, false);
-    const { result, waitForNextUpdate } = renderHook(() => usePowerMode());
+    const { result } = renderHook(() => usePowerMode());
 
-    await waitForNextUpdate();
-
-    expect(result.current.isLowPowerMode).toBe(false);
-    expect(result.current.batteryLevel).toBe(0.8);
-    expect(result.current.batteryCharging).toBe(true);
-    expect(result.current.reducedMotion).toBe(false);
+    // Wait for any effects to complete
+    await vi.waitFor(() => {
+      expect(result.current.isLowPowerMode).toBe(false);
+      expect(result.current.batteryLevel).toBe(0.8);
+      expect(result.current.batteryCharging).toBe(true);
+      expect(result.current.reducedMotion).toBe(false);
+    });
   });
 
   it('should detect low power mode with low battery', async () => {
     mockPowerMode(0.15, false, false);
-    const { result, waitForNextUpdate } = renderHook(() => usePowerMode());
+    const { result } = renderHook(() => usePowerMode());
 
-    await waitForNextUpdate();
-
-    expect(result.current.isLowPowerMode).toBe(true);
-    expect(result.current.batteryLevel).toBe(0.15);
-    expect(result.current.batteryCharging).toBe(false);
+    // Wait for any effects to complete
+    await vi.waitFor(() => {
+      expect(result.current.isLowPowerMode).toBe(true);
+      expect(result.current.batteryLevel).toBe(0.15);
+      expect(result.current.batteryCharging).toBe(false);
+    });
   });
 
   it('should detect reduced motion preference', async () => {
     mockPowerMode(0.5, true, true);
-    const { result, waitForNextUpdate } = renderHook(() => usePowerMode());
+    const { result } = renderHook(() => usePowerMode());
 
-    await waitForNextUpdate();
-
-    expect(result.current.isLowPowerMode).toBe(true);
-    expect(result.current.reducedMotion).toBe(true);
+    // Wait for any effects to complete
+    await vi.waitFor(() => {
+      expect(result.current.isLowPowerMode).toBe(true);
+      expect(result.current.reducedMotion).toBe(true);
+    });
   });
 
   it('should handle missing Battery API', () => {

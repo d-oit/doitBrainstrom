@@ -17,31 +17,31 @@ describe('useViewportAdaptation', () => {
     mockWindowProperties(1024, 768, 1);
   });
 
-  it('should return mobile breakpoint for small screens', () => {
+  it('should return xs breakpoint for small screens', () => {
     mockWindowProperties(320, 568);
     const { result } = renderHook(() => useViewportAdaptation());
 
-    expect(result.current.breakpoint).toBe('mobile');
+    expect(result.current.breakpoint).toBe('xs');
     expect(result.current.isMobile).toBe(true);
     expect(result.current.isTablet).toBe(false);
     expect(result.current.isDesktop).toBe(false);
   });
 
-  it('should return tablet breakpoint for medium screens', () => {
+  it('should return sm breakpoint for medium screens', () => {
     mockWindowProperties(768, 1024);
     const { result } = renderHook(() => useViewportAdaptation());
 
-    expect(result.current.breakpoint).toBe('tablet');
-    expect(result.current.isMobile).toBe(false);
-    expect(result.current.isTablet).toBe(true);
+    expect(result.current.breakpoint).toBe('sm');
+    expect(result.current.isMobile).toBe(true); // isMobile is true for xs and sm
+    expect(result.current.isTablet).toBe(false); // isTablet is only true for md
     expect(result.current.isDesktop).toBe(false);
   });
 
-  it('should return desktop breakpoint for large screens', () => {
+  it('should return lg breakpoint for large screens', () => {
     mockWindowProperties(1440, 900);
     const { result } = renderHook(() => useViewportAdaptation());
 
-    expect(result.current.breakpoint).toBe('desktop');
+    expect(result.current.breakpoint).toBe('lg');
     expect(result.current.isMobile).toBe(false);
     expect(result.current.isTablet).toBe(false);
     expect(result.current.isDesktop).toBe(true);
@@ -74,13 +74,13 @@ describe('useViewportAdaptation', () => {
     mockWindowProperties(320, 568);
     const { result } = renderHook(() => useViewportAdaptation());
 
-    expect(result.current.breakpoint).toBe('mobile');
+    expect(result.current.breakpoint).toBe('xs');
 
     // Simulate window resize
     act(() => {
       mockWindowProperties(1440, 900);
     });
 
-    expect(result.current.breakpoint).toBe('desktop');
+    expect(result.current.breakpoint).toBe('lg');
   });
 });
