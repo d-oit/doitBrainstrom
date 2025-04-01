@@ -25,11 +25,20 @@ export const I18nContextProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
   // Load translations for the current locale
   useEffect(() => {
+    // Import English translations synchronously as a fallback
+    const enTranslations = require('../locales/en.json');
+
     const loadTranslations = async () => {
       try {
-        // Dynamic import of translation file
-        const module = await import(`../locales/${locale}.json`);
-        setTranslations(module.default || {});
+        // Set English translations first to ensure we always have something
+        setTranslations(enTranslations);
+
+        // Only try to load non-English translations dynamically
+        if (locale !== 'en') {
+          // Dynamic import of translation file
+          const module = await import(`../locales/${locale}.json`);
+          setTranslations(module.default || enTranslations);
+        }
 
         // Set text direction
         const localeInfo = SUPPORTED_LOCALES.find(l => l.code === locale);
@@ -40,10 +49,8 @@ export const I18nContextProvider: React.FC<{ children: React.ReactNode }> = ({ c
         document.documentElement.dir = localeInfo?.dir || 'ltr';
       } catch (error) {
         console.error(`Failed to load translations for ${locale}`, error);
-        // Fallback to English
-        if (locale !== 'en') {
-          setLocale('en');
-        }
+        // Keep using English translations as fallback
+        setTranslations(enTranslations);
       }
     };
 

@@ -1,5 +1,5 @@
 // src/components/accessibility/KeyboardShortcutsHelp.tsx
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -48,8 +48,8 @@ const KeyboardShortcutsHelp: React.FC<KeyboardShortcutsHelpProps> = ({ open, onC
   const [filteredShortcuts, setFilteredShortcuts] = useState<Record<string, any[]>>({});
   const dialogRef = useRef<HTMLDivElement>(null);
 
-  // Get shortcuts grouped by category
-  const shortcutsByGroup = getShortcutsByGroup();
+  // Get shortcuts grouped by category (memoized to prevent infinite updates)
+  const shortcutsByGroup = useMemo(() => getShortcutsByGroup(), [getShortcutsByGroup]);
 
   // Filter shortcuts based on search query
   useEffect(() => {

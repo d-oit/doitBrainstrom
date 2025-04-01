@@ -427,23 +427,64 @@ export class VersionedStateManager {
     try {
       const storedState = await getMindMap('flow-state');
       if (!storedState) {
-        return false;
+        // If no state exists, create a default state with a sample node
+        this.createDefaultState();
+        // Persist the default state
+        this.persistState();
+        return true;
       }
 
       // Convert from storage format
       const loadedState: FlowState = {
-        nodes: storedState.data.nodes,
-        edges: storedState.data.edges,
-        viewport: storedState.data.viewport,
-        versionVector: storedState.data.versionVector
+        nodes: storedState.data.nodes || [],
+        edges: storedState.data.edges || [],
+        viewport: storedState.data.viewport || { x: 0, y: 0, zoom: 1 },
+        versionVector: storedState.data.versionVector || createVersionVector()
       };
 
       // Update current state
       this.currentState = loadedState;
+
+      // If there are no nodes, create a default state
+      if (this.currentState.nodes.length === 0) {
+        this.createDefaultState();
+        this.persistState();
+      }
+
       return true;
     } catch (error) {
       logError('Error loading state from IndexedDB:', error);
-      return false;
+      // Create a default state on error
+      this.createDefaultState();
+      this.persistState();
+      return true;
     }
+  }
+
+  /**
+   * Create a default state with a sample node
+   */
+  private createDefaultState(): void {
+    // Create a sample node in the center of the viewport
+    const sampleNode: VersionedNode = {
+      id: generateId(),
+      type: 'mindMapCard',
+      position: { x: 100, y: 100 },
+      data: {
+        title: 'Welcome to Mind Map',
+        description: 'Click to edit or drag to move. Add more nodes using the + button.'
+      },
+      version: 1,
+      lastModified: new Date().toISOString(),
+      createdBy: this.clientId
+    };
+
+    // Set as current state
+    this.currentState = {
+      nodes: [sampleNode],
+      edges: [],
+      viewport: { x: 0, y: 0, zoom: 1 },
+      versionVector: createVersionVector()
+    };
   }
 }

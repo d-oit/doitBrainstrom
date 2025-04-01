@@ -129,6 +129,15 @@ const initializeS3 = async () => {
 
 // Helper function to check if S3 is available and accessible
 const checkS3Available = async (forceCheck = false) => {
+  // If S3 is not configured, return early without network requests
+  if (!isS3Configured()) {
+    return {
+      available: false,
+      error: S3ErrorType.NOT_CONFIGURED,
+      details: 'S3 is not configured'
+    };
+  }
+
   // If we already know S3 is not available and we're not forcing a check,
   // return the cached result to avoid unnecessary network requests
   if (!forceCheck && lastS3Error) {
@@ -139,11 +148,12 @@ const checkS3Available = async (forceCheck = false) => {
     };
   }
 
-  // If S3 is not initialized or we're forcing a check, initialize it
-  if (!isS3Initialized || forceCheck) {
+  // Only initialize S3 if explicitly requested with forceCheck
+  // or if we're already initialized and just checking availability
+  if (forceCheck && !isS3Initialized) {
     const initResult = await initializeS3();
     if (!initResult.success) {
-      logWarn('S3 is not configured or initialization failed');
+      logWarn('S3 initialization failed');
       return {
         available: false,
         error: initResult.error || S3ErrorType.NOT_CONFIGURED,
@@ -229,10 +239,10 @@ export const initializeMindMapData = async (defaultId: string = 'default'): Prom
   try {
     logInfo('Initializing mind map data...');
 
-    // Try to load from S3 only if explicitly configured
-    // We don't want to trigger network requests on app load
-    // unless S3 has been previously successfully initialized
-    if (isS3Initialized && isS3Available) {
+    // Skip S3 initialization on app load
+    // Only use S3 if it's already initialized and available
+    // This prevents network requests on startup
+    if (false) { // Disabled S3 auto-loading
       try {
         const params = {
           Bucket: BUCKET_NAME,

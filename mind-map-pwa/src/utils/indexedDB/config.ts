@@ -11,6 +11,18 @@ export const DB_CONFIG = {
         { name: 'synced', keyPath: 'synced' },
         { name: 'hasConflict', keyPath: 'hasConflict' } // New index for conflict detection
       ]
+    },
+    offlineOperations: {
+      name: 'offlineOperations',
+      keyPath: 'id',
+      indexes: [
+        { name: 'status', keyPath: 'status' },
+        { name: 'priority', keyPath: 'priority' },
+        { name: 'timestamp', keyPath: 'timestamp' },
+        { name: 'entityId', keyPath: 'entityId' },
+        { name: 'entityType', keyPath: 'entityType' },
+        { name: 'type', keyPath: 'type' }
+      ]
     }
   }
 };

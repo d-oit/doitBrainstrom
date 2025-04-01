@@ -34,7 +34,8 @@ export const initDB = (): Promise<IDBDatabase> => {
       // Create object stores and indexes
       const { stores } = DB_CONFIG;
 
-      // If the store doesn't exist, create it with all indexes
+      // Create all stores that don't exist
+      // Create mindMaps store if it doesn't exist
       if (!db.objectStoreNames.contains(stores.mindMaps.name)) {
         logInfo('Creating mind maps object store');
         const mindMapsStore = db.createObjectStore(stores.mindMaps.name, { keyPath: stores.mindMaps.keyPath });
@@ -45,10 +46,27 @@ export const initDB = (): Promise<IDBDatabase> => {
           mindMapsStore.createIndex(index.name, index.keyPath);
         });
       }
+
+      // Create offlineOperations store if it doesn't exist
+      if (!db.objectStoreNames.contains(stores.offlineOperations.name)) {
+        logInfo('Creating offline operations object store');
+        const offlineOperationsStore = db.createObjectStore(stores.offlineOperations.name, { keyPath: stores.offlineOperations.keyPath });
+
+        // Create all indexes
+        stores.offlineOperations.indexes.forEach(index => {
+          logInfo(`Creating index: ${index.name}`);
+          offlineOperationsStore.createIndex(index.name, index.keyPath);
+        });
+      }
       // If the store exists but we're upgrading from version 1 to 2, add the new indexes
       else if (oldVersion === 1 && newVersion >= 2) {
         logInfo('Upgrading mind maps object store schema');
-        const transaction = event.target as IDBTransaction;
+        // Access the transaction from the event object correctly
+        const transaction = (event.target as IDBOpenDBRequest).transaction;
+        if (!transaction) {
+          logError('Transaction not available during upgrade');
+          return;
+        }
         const mindMapsStore = transaction.objectStore(stores.mindMaps.name);
 
         // Add new indexes if they don't exist
