@@ -70,7 +70,9 @@ describe('usePowerMode', () => {
   });
 
   it('should detect reduced motion preference', async () => {
-    mockPowerMode(0.5, true, true);
+    act(() => {
+      mockPowerMode(0.5, true, true);
+    });
     const { result } = renderHook(() => usePowerMode());
 
     // Wait for any effects to complete
@@ -81,7 +83,9 @@ describe('usePowerMode', () => {
   });
 
   it('should handle missing Battery API', () => {
-    mockPowerMode(null, null, false);
+    act(() => {
+      mockPowerMode(null, null, false);
+    });
     const { result } = renderHook(() => usePowerMode());
 
     expect(result.current.batteryLevel).toBeNull();

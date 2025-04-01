@@ -56,7 +56,9 @@ describe('useViewportAdaptation', () => {
   });
 
   it('should detect portrait orientation', () => {
-    mockWindowProperties(600, 800);
+    act(() => {
+      mockWindowProperties(600, 800);
+    });
     const { result } = renderHook(() => useViewportAdaptation());
 
     expect(result.current.isLandscape).toBe(false);
@@ -64,14 +66,18 @@ describe('useViewportAdaptation', () => {
   });
 
   it('should detect high pixel ratio screens', () => {
-    mockWindowProperties(1024, 768, 2);
+    act(() => {
+      mockWindowProperties(1024, 768, 2);
+    });
     const { result } = renderHook(() => useViewportAdaptation());
 
     expect(result.current.pixelRatio).toBe(2);
   });
 
   it('should update when window is resized', () => {
-    mockWindowProperties(320, 568);
+    act(() => {
+      mockWindowProperties(320, 568);
+    });
     const { result } = renderHook(() => useViewportAdaptation());
 
     expect(result.current.breakpoint).toBe('xs');

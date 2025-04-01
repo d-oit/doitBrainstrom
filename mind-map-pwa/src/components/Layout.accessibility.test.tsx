@@ -28,9 +28,18 @@ vi.mock('@mui/material', () => ({
   Container: ({ children, ...props }: any) => <div data-testid="container" {...props}>{children}</div>,
   Box: ({ children, ...props }: any) => <div data-testid="box" {...props}>{children}</div>,
   useTheme: () => ({
-    palette: { primary: { main: '#1976d2' } },
-    breakpoints: { up: () => false }
-  })
+    palette: {
+      primary: { main: '#1976d2' },
+      background: { paper: '#fff' },
+      text: { primary: '#000' }
+    },
+    breakpoints: {
+      up: () => false,
+      down: () => false
+    },
+    spacing: (factor: number) => `${factor * 8}px`
+  }),
+  useMediaQuery: () => false
 }));
 
 // Mock all icons to reduce file loading

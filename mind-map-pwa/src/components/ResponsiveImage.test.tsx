@@ -6,9 +6,25 @@ import { ResponsiveContextProvider, useResponsive } from '../contexts/Responsive
 import { vi, describe, it, expect } from 'vitest';
 
 // Mock the useResponsive hook
-const mockUseResponsive = vi.fn();
+const mockUseResponsive = vi.fn().mockReturnValue({
+  shouldReduceImageQuality: false,
+  network: {
+    online: true,
+    connectionType: 'wifi',
+    effectiveType: '4g',
+    downlink: 10,
+    rtt: 50,
+    saveData: false
+  },
+  viewport: {
+    isMobile: false,
+    isTablet: false,
+    isDesktop: true
+  }
+});
+
 vi.mock('../contexts/ResponsiveContext', () => ({
-  ResponsiveContextProvider: ({ children }: { children: React.ReactNode }) => children,
+  ResponsiveContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   useResponsive: () => mockUseResponsive()
 }));
 
@@ -135,7 +151,7 @@ describe('ResponsiveImage', () => {
 
   it('uses low-res image when shouldReduceImageQuality is true', async () => {
     // Mock the useResponsive hook to return shouldReduceImageQuality: true
-    mockUseResponsive.mockReturnValue({
+    mockUseResponsive.mockReturnValueOnce({
       shouldReduceImageQuality: true,
       network: {
         online: true,
@@ -145,36 +161,12 @@ describe('ResponsiveImage', () => {
         rtt: 150,
         saveData: true
       },
-      power: {
-        isLowPowerMode: false,
-        batteryLevel: 0.8,
-        batteryCharging: true,
-        reducedMotion: false
-      },
       viewport: {
-        breakpoint: 'mobile',
         isMobile: true,
         isTablet: false,
-        isDesktop: false,
-        isLandscape: false,
-        isPortrait: true,
-        pixelRatio: 2
+        isDesktop: false
       },
-      memory: {
-        deviceMemory: 4,
-        lowMemoryMode: false
-      },
-      foldable: {
-        isFoldable: false,
-        isSpanned: false,
-        foldSize: null,
-        foldAngle: null,
-        spanDirection: null,
-        screenSegments: null
-      },
-      shouldReduceAnimations: false,
-      shouldVirtualizeList: true,
-      shouldUseOfflineFirst: true
+      shouldReduceAnimations: false
     });
 
     render(

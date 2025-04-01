@@ -22,15 +22,15 @@ vi.mock('@mui/material', () => ({
 
 import { ThemeProvider, createTheme } from '@mui/material';
 
-// Create a real ResponsiveContextProvider for testing
-const ResponsiveContextProvider = ({ children }: { children: React.ReactNode }) => {
-  return children;
-};
+// Mock the ResponsiveContext
+vi.mock('../contexts/ResponsiveContext', () => {
+  // Create a mock component for ResponsiveContextProvider
+  const MockResponsiveContextProvider = ({ children }: { children: React.ReactNode }) => {
+    return <>{children}</>;
+  };
 
-// Mock the useResponsive hook
-vi.mock('../contexts/ResponsiveContext', () => ({
-  ResponsiveContextProvider: ({ children }: { children: React.ReactNode }) => children,
-  useResponsive: () => ({
+  // Create a mock hook for useResponsive
+  const mockUseResponsive = () => ({
     viewport: {
       isMobile: false,
       isTablet: false,
@@ -43,11 +43,19 @@ vi.mock('../contexts/ResponsiveContext', () => ({
       online: true,
       effectiveType: '4g'
     }
-  })
-}));
+  });
+
+  return {
+    ResponsiveContextProvider: MockResponsiveContextProvider,
+    useResponsive: mockUseResponsive
+  };
+});
 
 // Create a theme for testing
 const theme = createTheme();
+
+// Import the mocked components
+import { ResponsiveContextProvider } from '../contexts/ResponsiveContext';
 
 // Wrap component in ThemeProvider and ResponsiveContextProvider for testing
 const renderWithTheme = (component: React.ReactElement) => {

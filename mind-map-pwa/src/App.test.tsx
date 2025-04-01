@@ -12,27 +12,25 @@ vi.mock('./services/s3Service', () => ({
 }));
 
 // Mock Material UI
-const mockUseTheme = () => ({
-  palette: {
-    primary: { main: '#1976d2', contrastText: '#fff' },
-    background: { paper: '#fff', default: '#fafafa' },
-    text: { primary: '#000', secondary: '#666' },
-    divider: '#e0e0e0',
-    action: { hover: '#f5f5f5', disabledBackground: '#e0e0e0', disabled: '#9e9e9e' }
-  },
-  shadows: Array(25).fill('none'),
-  spacing: (factor: number) => `${factor * 8}px`,
-  breakpoints: {
-    down: () => false,
-    up: () => false,
-    values: { xs: 0, sm: 600, md: 900, lg: 1200, xl: 1536 }
-  }
-});
-
 vi.mock('@mui/material', () => {
   return {
     ...vi.importActual('@mui/material'),
-    useTheme: mockUseTheme,
+    useTheme: () => ({
+      palette: {
+        primary: { main: '#1976d2', contrastText: '#fff' },
+        background: { paper: '#fff', default: '#fafafa' },
+        text: { primary: '#000', secondary: '#666' },
+        divider: '#e0e0e0',
+        action: { hover: '#f5f5f5', disabledBackground: '#e0e0e0', disabled: '#9e9e9e' }
+      },
+      shadows: Array(25).fill('none'),
+      spacing: (factor: number) => `${factor * 8}px`,
+      breakpoints: {
+        down: () => false,
+        up: () => false,
+        values: { xs: 0, sm: 600, md: 900, lg: 1200, xl: 1536 }
+      }
+    }),
     Grid: ({ children, ...props }: any) => <div data-testid="grid" {...props}>{children}</div>,
     Box: ({ children, ...props }: any) => <div data-testid="box" {...props}>{children}</div>,
     Paper: ({ children, ...props }: any) => <div data-testid="paper" {...props}>{children}</div>,
