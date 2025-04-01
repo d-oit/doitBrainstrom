@@ -83,10 +83,12 @@ vi.mock('../contexts/ResponsiveContext', () => ({
       saveData: false
     },
     viewport: {
-      breakpoint: 'desktop',
+      breakpoint: 'md',
+      deviceCategory: 'desktop',
       isMobile: false,
       isTablet: false,
       isDesktop: true,
+      isWidescreen: false,
       isLandscape: true,
       isPortrait: false,
       pixelRatio: 1,
@@ -95,6 +97,11 @@ vi.mock('../contexts/ResponsiveContext', () => ({
         right: 0,
         bottom: 0,
         left: 0
+      },
+      layout: {
+        sidebarWidth: '380px',
+        mapWidth: 'calc(100% - 380px)',
+        toolbarHeight: '64px'
       }
     },
     memory: {
@@ -138,8 +145,12 @@ vi.mock('./LocaleSwitcher', () => ({
   default: () => <button aria-label="Language switcher">Language</button>
 }), { virtual: true });
 
-vi.mock('./SyncStatus', () => ({
+vi.mock('./sync/SyncStatusPanel', () => ({
   default: () => <div aria-label="Sync status">Synced</div>
+}), { virtual: true });
+
+vi.mock('./offline/OfflineIndicator', () => ({
+  default: () => <div aria-label="Offline indicator">Offline</div>
 }), { virtual: true });
 
 // Mock the sanitization utility

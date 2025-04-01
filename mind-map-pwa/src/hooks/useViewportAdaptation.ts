@@ -1,12 +1,14 @@
 // src/hooks/useViewportAdaptation.ts
 import { useState, useEffect } from 'react';
-import { Breakpoint, breakpoints } from '../styles/breakpoints';
+import { Breakpoint, breakpoints, DeviceCategory, deviceLayouts } from '../styles/breakpoints';
 
 export interface ViewportConfig {
   breakpoint: Breakpoint;
+  deviceCategory: DeviceCategory;
   isMobile: boolean;
   isTablet: boolean;
   isDesktop: boolean;
+  isWidescreen: boolean;
   isLandscape: boolean;
   isPortrait: boolean;
   pixelRatio: number;
@@ -16,6 +18,7 @@ export interface ViewportConfig {
     bottom: number;
     left: number;
   };
+  layout: typeof deviceLayouts.mobile | typeof deviceLayouts.tablet | typeof deviceLayouts.desktop | typeof deviceLayouts.widescreen;
 }
 
 /**
@@ -25,9 +28,11 @@ export interface ViewportConfig {
 export const useViewportAdaptation = (): ViewportConfig => {
   const [config, setConfig] = useState<ViewportConfig>({
     breakpoint: 'xl',
+    deviceCategory: 'widescreen',
     isMobile: false,
     isTablet: false,
-    isDesktop: true,
+    isDesktop: false,
+    isWidescreen: true,
     isLandscape: true,
     isPortrait: false,
     pixelRatio: window.devicePixelRatio || 1,
@@ -36,7 +41,8 @@ export const useViewportAdaptation = (): ViewportConfig => {
       right: 0,
       bottom: 0,
       left: 0
-    }
+    },
+    layout: deviceLayouts.widescreen
   });
 
   useEffect(() => {
@@ -46,7 +52,7 @@ export const useViewportAdaptation = (): ViewportConfig => {
       const isLandscape = width > height;
       const pixelRatio = window.devicePixelRatio || 1;
 
-      // Determine breakpoint based on Material UI v6 breakpoints
+      // Determine breakpoint based on Material UI v7 breakpoints
       let breakpoint: Breakpoint = 'xs';
       if (width >= breakpoints.xl) {
         breakpoint = 'xl';
@@ -56,6 +62,16 @@ export const useViewportAdaptation = (): ViewportConfig => {
         breakpoint = 'md';
       } else if (width >= breakpoints.sm) {
         breakpoint = 'sm';
+      }
+
+      // Determine device category based on breakpoints
+      let deviceCategory: DeviceCategory = 'mobile';
+      if (width >= breakpoints.lg) {
+        deviceCategory = 'widescreen';
+      } else if (width >= breakpoints.md) {
+        deviceCategory = 'desktop';
+      } else if (width >= breakpoints.sm) {
+        deviceCategory = 'tablet';
       }
 
       // Get safe area insets if available (for notches, etc.)
@@ -68,13 +84,16 @@ export const useViewportAdaptation = (): ViewportConfig => {
 
       setConfig({
         breakpoint,
-        isMobile: breakpoint === 'xs' || breakpoint === 'sm',
-        isTablet: breakpoint === 'md',
-        isDesktop: breakpoint === 'lg' || breakpoint === 'xl',
+        deviceCategory,
+        isMobile: deviceCategory === 'mobile',
+        isTablet: deviceCategory === 'tablet',
+        isDesktop: deviceCategory === 'desktop',
+        isWidescreen: deviceCategory === 'widescreen',
         isLandscape,
         isPortrait: !isLandscape,
         pixelRatio,
-        safeAreaInsets
+        safeAreaInsets,
+        layout: deviceLayouts[deviceCategory]
       });
     };
 

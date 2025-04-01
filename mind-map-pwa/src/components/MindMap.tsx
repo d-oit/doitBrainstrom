@@ -1,10 +1,12 @@
 // src/components/MindMap.tsx
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Box, Paper, TextField, Button, useTheme, useMediaQuery } from '@mui/material';
+import { Box, Paper, TextField, Button, useTheme } from '@mui/material';
 import MindMapCard from './MindMapCard';
+import MapControls from './mindmap/MapControls';
 import { useMindMap } from '../contexts/MindMapContext';
 import { useI18n } from '../contexts/I18nContext';
 import { useResponsive } from '../contexts/ResponsiveContext';
+import { loadPriority } from '../utils/performanceConfig';
 import '../styles/responsive.css';
 
 const MindMap: React.FC = () => {
@@ -16,22 +18,25 @@ const MindMap: React.FC = () => {
   } = useMindMap();
   const { t, dir } = useI18n();
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
   const {
-    viewport: { breakpoint, isLandscape },
+    viewport,
     shouldReduceAnimations
   } = useResponsive();
 
-  // Responsive configuration based on viewport
+  // Get device-specific loading configuration
+  const deviceLoadConfig = loadPriority[viewport.deviceCategory];
+
+  // Responsive configuration based on device category
   const getCanvasConfig = () => {
-    // Map Material UI breakpoints to our config
-    if (breakpoint === 'xs' || breakpoint === 'sm') {
-      return { nodeSize: 32, fontScale: 0.8, linkWidth: 1 }; // mobile
-    } else if (breakpoint === 'md') {
-      return { nodeSize: 40, fontScale: 1.0, linkWidth: 1.5 }; // tablet
+    // Map device category to canvas configuration
+    if (viewport.isMobile) {
+      return { nodeSize: 32, fontScale: 0.8, linkWidth: 1, initialNodes: deviceLoadConfig.initialNodes }; // mobile
+    } else if (viewport.isTablet) {
+      return { nodeSize: 40, fontScale: 1.0, linkWidth: 1.5, initialNodes: deviceLoadConfig.initialNodes }; // tablet
+    } else if (viewport.isDesktop) {
+      return { nodeSize: 48, fontScale: 1.2, linkWidth: 2, initialNodes: deviceLoadConfig.initialNodes }; // desktop
     } else {
-      return { nodeSize: 48, fontScale: 1.2, linkWidth: 2 }; // desktop (lg, xl)
+      return { nodeSize: 56, fontScale: 1.3, linkWidth: 2.5, initialNodes: deviceLoadConfig.initialNodes }; // widescreen
     }
   };
 
@@ -42,10 +47,41 @@ const MindMap: React.FC = () => {
   const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [scale, setScale] = useState(1);
-  const [, setPosition] = useState({ x: 0, y: 0 });
+  const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isPinching, setIsPinching] = useState(false);
   const [lastDistance, setLastDistance] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Map control functions
+  const handleZoomIn = () => {
+    setScale(prev => Math.min(2, prev + 0.1));
+  };
+
+  const handleZoomOut = () => {
+    setScale(prev => Math.max(0.5, prev - 0.1));
+  };
+
+  const handleCenterMap = () => {
+    if (!containerRef.current) return;
+
+    // Reset position and scale
+    setPosition({ x: 0, y: 0 });
+    setScale(1);
+  };
+
+  // Undo/Redo state (placeholder for actual implementation)
+  const [canUndo, setCanUndo] = useState(false);
+  const [canRedo, setCanRedo] = useState(false);
+
+  const handleUndo = () => {
+    // Implement undo functionality
+    console.log('Undo');
+  };
+
+  const handleRedo = () => {
+    // Implement redo functionality
+    console.log('Redo');
+  };
 
   const handleCreateNode = () => {
     if (newNodeText.trim() === '') return;
@@ -235,74 +271,116 @@ const MindMap: React.FC = () => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <Box sx={{ mb: 2, display: 'flex', gap: 1 }}>
-        <TextField
-          label={t('mindMap.newNode')}
-          variant="outlined"
-          size="small"
-          value={newNodeText}
-          onChange={(e) => setNewNodeText(e.target.value)}
-          onKeyPress={(e) => e.key === 'Enter' && handleCreateNode()}
-          sx={{ flexGrow: 1 }}
-        />
-        <Button
-          variant="contained"
-          onClick={handleCreateNode}
-          disabled={newNodeText.trim() === ''}
-        >
-          {t('mindMap.addNode')}
-        </Button>
-      </Box>
-
-      <Paper
-        ref={containerRef}
-        className="mind-map-container"
-        sx={{
-          flexGrow: 1,
-          position: 'relative',
-          overflow: 'hidden',
-          height: isMobile ? (isLandscape ? 'calc(100vh - 150px)' : 'calc(100vh - 250px)') :
-                  isTablet ? '600px' : '700px',
-          backgroundColor: theme => theme.palette.mode === 'dark' ? '#1e1e1e' : '#f5f5f5',
-          cursor: draggingNodeId ? 'grabbing' : 'default',
-          direction: dir, // Support RTL layout
-          transform: `scale(${scale})`,
-          transformOrigin: '0 0',
-          transition: isPinching || shouldReduceAnimations ? 'none' : 'transform 0.1s ease-out',
-          touchAction: 'none' // Disable browser handling of touch gestures
-        }}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onTouchMove={handleCanvasTouchMove}
-        onTouchEnd={handleTouchEnd}
-      >
-        {renderLinks()}
-
-        {mindMapData.nodes.map(node => (
-          <Box
-            key={node.id}
-            sx={{
-              position: 'absolute',
-              top: node.y,
-              left: node.x,
-              zIndex: 1,
-              border: selectedNodeId === node.id ? '2px solid #1976d2' : 'none',
-              borderRadius: '4px',
-              cursor: draggingNodeId === node.id ? 'grabbing' : 'grab',
-              touchAction: 'none' // Disable browser handling of touch gestures
-            }}
-            onMouseDown={(e) => handleMouseDown(e, node.id)}
-            onTouchStart={(e) => handleTouchStart(e, node.id)}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
+      {/* Only show text input in tablet and larger screens */}
+      {!viewport.isMobile && (
+        <Box sx={{ mb: 2, display: 'flex', gap: 1 }}>
+          <TextField
+            label={t('mindMap.newNode')}
+            variant="outlined"
+            size="small"
+            value={newNodeText}
+            onChange={(e) => setNewNodeText(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleCreateNode()}
+            sx={{ flexGrow: 1 }}
+          />
+          <Button
+            variant="contained"
+            onClick={handleCreateNode}
+            disabled={newNodeText.trim() === ''}
           >
-            <MindMapCard
-              title={node.text}
-              onClick={() => handleNodeClick(node.id)}
-            />
-          </Box>
-        ))}
-      </Paper>
+            {t('mindMap.addNode')}
+          </Button>
+        </Box>
+      )}
+
+      <Box sx={{ position: 'relative', flexGrow: 1 }}>
+        <Paper
+          ref={containerRef}
+          className="mind-map-container"
+          sx={{
+            flexGrow: 1,
+            position: 'relative',
+            overflow: 'hidden',
+            height: viewport.isMobile ?
+                    (viewport.isLandscape ? 'calc(100vh - 150px)' : 'calc(100vh - 200px)') :
+                    viewport.isTablet ? '600px' :
+                    viewport.isDesktop ? '700px' : '800px',
+            backgroundColor: theme => theme.palette.mode === 'dark' ? '#1e1e1e' : '#f5f5f5',
+            cursor: draggingNodeId ? 'grabbing' : 'default',
+            direction: dir, // Support RTL layout
+            transform: `scale(${scale}) translate(${position.x}px, ${position.y}px)`,
+            transformOrigin: '0 0',
+            transition: isPinching || shouldReduceAnimations ? 'none' : 'transform 0.1s ease-out',
+            touchAction: 'none' // Disable browser handling of touch gestures
+          }}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onTouchMove={handleCanvasTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
+          {renderLinks()}
+
+          {mindMapData.nodes.map(node => (
+            <Box
+              key={node.id}
+              sx={{
+                position: 'absolute',
+                top: node.y,
+                left: node.x,
+                zIndex: 1,
+                border: selectedNodeId === node.id ? '2px solid #1976d2' : 'none',
+                borderRadius: '4px',
+                cursor: draggingNodeId === node.id ? 'grabbing' : 'grab',
+                touchAction: 'none' // Disable browser handling of touch gestures
+              }}
+              onMouseDown={(e) => handleMouseDown(e, node.id)}
+              onTouchStart={(e) => handleTouchStart(e, node.id)}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+            >
+              <MindMapCard
+                title={node.text}
+                onClick={() => handleNodeClick(node.id)}
+              />
+            </Box>
+          ))}
+        </Paper>
+
+        {/* Add the map controls */}
+        <MapControls
+          onZoomIn={handleZoomIn}
+          onZoomOut={handleZoomOut}
+          onAddNode={() => {
+            // For mobile, show a prompt to enter text
+            if (viewport.isMobile) {
+              const text = prompt(t('mindMap.enterNodeText'));
+              if (text && text.trim() !== '') {
+                setNewNodeText(text);
+                handleCreateNode();
+              }
+            } else {
+              // Focus the text field for desktop
+              const textField = document.querySelector('input[type="text"]') as HTMLInputElement;
+              if (textField) textField.focus();
+            }
+          }}
+          onDeleteNode={() => {
+            // Implement delete functionality
+            console.log('Delete node', selectedNodeId);
+          }}
+          onEditNode={() => {
+            // Implement edit functionality
+            console.log('Edit node', selectedNodeId);
+          }}
+          onUndo={handleUndo}
+          onRedo={handleRedo}
+          onCenter={handleCenterMap}
+          canUndo={canUndo}
+          canRedo={canRedo}
+          canDelete={selectedNodeId !== null}
+          canEdit={selectedNodeId !== null}
+        />
+      </Box>
     </Box>
   );
 };

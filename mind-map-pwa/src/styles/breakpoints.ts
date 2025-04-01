@@ -1,17 +1,55 @@
 /**
  * Breakpoints configuration for responsive design
- * Based on Material UI v7 breakpoint system
+ * Based on Material UI v7 breakpoint system with custom device categories
  */
 
 export const breakpoints = {
-  xs: 0,
-  sm: 600,
-  md: 900,
-  lg: 1200,
-  xl: 1536
+  xs: 0,    // mobile
+  sm: 600,  // tablet
+  md: 900,  // desktop
+  lg: 1200, // widescreen
+  xl: 1536  // large widescreen
 };
 
 export type Breakpoint = keyof typeof breakpoints;
+
+/**
+ * Device category breakpoints for semantic device targeting
+ */
+export const deviceBreakpoints = {
+  mobile: '0px',
+  tablet: '600px',
+  desktop: '900px',
+  widescreen: '1200px'
+};
+
+export type DeviceCategory = keyof typeof deviceBreakpoints;
+
+/**
+ * Device-specific layout configurations
+ */
+export const deviceLayouts = {
+  mobile: {
+    sidebarWidth: '100%',
+    mapWidth: '100%',
+    toolbarHeight: '56px'
+  },
+  tablet: {
+    sidebarWidth: '320px',
+    mapWidth: 'calc(100% - 320px)',
+    toolbarHeight: '64px'
+  },
+  desktop: {
+    sidebarWidth: '380px',
+    mapWidth: 'calc(100% - 380px)',
+    toolbarHeight: '64px'
+  },
+  widescreen: {
+    sidebarWidth: '420px',
+    mapWidth: 'calc(100% - 420px)',
+    toolbarHeight: '72px'
+  }
+};
 
 /**
  * Media query helpers for styled components

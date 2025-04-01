@@ -36,9 +36,10 @@ describe('useViewportAdaptation', () => {
     const { result } = renderHook(() => useViewportAdaptation());
 
     expect(result.current.breakpoint).toBe('sm');
-    expect(result.current.isMobile).toBe(true); // isMobile is true for xs and sm
-    expect(result.current.isTablet).toBe(false); // isTablet is only true for md
+    expect(result.current.isMobile).toBe(false); // isMobile is only true for xs
+    expect(result.current.isTablet).toBe(true); // isTablet is true for sm
     expect(result.current.isDesktop).toBe(false);
+    expect(result.current.deviceCategory).toBe('tablet');
   });
 
   it('should return lg breakpoint for large screens', () => {
@@ -50,7 +51,9 @@ describe('useViewportAdaptation', () => {
     expect(result.current.breakpoint).toBe('lg');
     expect(result.current.isMobile).toBe(false);
     expect(result.current.isTablet).toBe(false);
-    expect(result.current.isDesktop).toBe(true);
+    expect(result.current.isDesktop).toBe(false); // isDesktop is only true for md
+    expect(result.current.isWidescreen).toBe(true); // isWidescreen is true for lg and xl
+    expect(result.current.deviceCategory).toBe('widescreen');
   });
 
   it('should detect landscape orientation', () => {
