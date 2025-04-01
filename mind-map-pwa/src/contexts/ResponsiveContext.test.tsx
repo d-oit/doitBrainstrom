@@ -7,7 +7,7 @@ import { vi, describe, it, expect } from 'vitest';
 // Mock the hooks
 vi.mock('../hooks/useViewportAdaptation', () => ({
   __esModule: true,
-  default: vi.fn().mockReturnValue({
+  default: () => ({
     breakpoint: 'mobile',
     isMobile: true,
     isTablet: false,
@@ -20,7 +20,7 @@ vi.mock('../hooks/useViewportAdaptation', () => ({
 
 vi.mock('../hooks/useNetworkStatus', () => ({
   __esModule: true,
-  default: vi.fn().mockReturnValue({
+  default: () => ({
     online: true,
     connectionType: 'wifi',
     effectiveType: '4g',
@@ -32,7 +32,7 @@ vi.mock('../hooks/useNetworkStatus', () => ({
 
 vi.mock('../hooks/useDeviceMemory', () => ({
   __esModule: true,
-  default: vi.fn().mockReturnValue({
+  default: () => ({
     deviceMemory: 4,
     jsHeapSizeLimit: 2000000000,
     totalJSHeapSize: 1000000000,
@@ -43,7 +43,7 @@ vi.mock('../hooks/useDeviceMemory', () => ({
 
 vi.mock('../hooks/useFoldableDisplay', () => ({
   __esModule: true,
-  default: vi.fn().mockReturnValue({
+  default: () => ({
     isFoldable: false,
     isSpanned: false,
     foldSize: null,
@@ -55,7 +55,7 @@ vi.mock('../hooks/useFoldableDisplay', () => ({
 
 vi.mock('../hooks/usePowerMode', () => ({
   __esModule: true,
-  default: vi.fn().mockReturnValue({
+  default: () => ({
     isLowPowerMode: false,
     batteryLevel: 0.8,
     batteryCharging: true,

@@ -50,14 +50,14 @@ const MindMap: React.FC = () => {
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', flex: 1 }}>
       {/* Accessibility description of the mind map */}
       <Typography id="mind-map-description" sx={{ position: 'absolute', height: 1, width: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', clipPath: 'inset(50%)' }}>
         {t('accessibility.mindMapDescription')}
       </Typography>
 
       <ContainerQuery type="component">
-        <Box sx={{ position: 'relative', flexGrow: 1 }}>
+        <Box sx={{ position: 'relative', flexGrow: 1, height: '100%', display: 'flex', flexDirection: 'column' }}>
           {stateManager ? (
             <FlowOrchestrator
               readOnly={false}

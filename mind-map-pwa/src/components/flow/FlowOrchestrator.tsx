@@ -189,7 +189,12 @@ const FlowOrchestrator: React.FC<FlowOrchestratorProps> = ({
   }
 
   return (
-    <Box sx={{ width: '100%' }}>
+    <Box sx={{
+      width: '100%',
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column'
+    }}>
       {/* Toolbar */}
       <Paper
         elevation={1}
@@ -238,16 +243,18 @@ const FlowOrchestrator: React.FC<FlowOrchestratorProps> = ({
       </Paper>
 
       {/* Flow diagram */}
-      {stateManagerRef.current ? (
-        <ReactFlowAdapter
-          stateManager={stateManagerRef.current}
-          isReadOnly={readOnly}
-          virtualizationConfig={virtualizationConfig}
-          onNodeClick={handleNodeClick}
-          onEdgeClick={handleEdgeClick}
-          onViewportChange={handleViewportChange}
-        />
-      ) : null}
+      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        {stateManagerRef.current ? (
+          <ReactFlowAdapter
+            stateManager={stateManagerRef.current}
+            isReadOnly={readOnly}
+            virtualizationConfig={virtualizationConfig}
+            onNodeClick={handleNodeClick}
+            onEdgeClick={handleEdgeClick}
+            onViewportChange={handleViewportChange}
+          />
+        ) : null}
+      </Box>
 
       {/* Notifications */}
       <Snackbar

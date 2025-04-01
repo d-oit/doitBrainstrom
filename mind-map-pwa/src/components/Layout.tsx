@@ -31,7 +31,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const appTitle = sanitizeTextInput(t('app.title'));
 
   return (
-    <Box sx={{ direction: dir }} className="app-container">
+    <Box sx={{
+      direction: dir,
+      display: 'flex',
+      flexDirection: 'column',
+      minHeight: '100vh',
+      width: '100%'
+    }} className="app-container">
       {/* Skip links for keyboard navigation */}
       <SkipLinks links={[
         { id: 'main-content', label: t('accessibility.skipToMainContent') },
@@ -95,7 +101,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {(viewport.isMobile || viewport.isDesktop || viewport.isWidescreen) && <OfflineIndicator />}
 
       {/* Use semantic main element with responsive padding */}
-      <main id="main-content" tabIndex={-1} role="main" aria-label={t('accessibility.mainContent')}>
+      <main
+        id="main-content"
+        tabIndex={-1}
+        role="main"
+        aria-label={t('accessibility.mainContent')}
+        style={{ flex: 1, display: 'flex', flexDirection: 'column' }}
+      >
         <ResponsiveGrid
           container
           fluid={false}
@@ -105,7 +117,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         >
           <ResponsiveGridItem xs={12}>
             <ContainerQuery type="content">
-              <Box className="content-grid">
+              <Box className="content-grid" sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                 {children}
               </Box>
             </ContainerQuery>

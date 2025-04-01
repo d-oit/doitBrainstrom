@@ -51,7 +51,8 @@ const ReactFlowAdapter: React.FC<ReactFlowAdapterProps> = ({
   onViewportChange
 }) => {
   const { t } = useI18n();
-  const { } = useAccessibility();
+  // Use the accessibility context without destructuring since we're not using specific properties yet
+  const accessibilityContext = useAccessibility();
   const theme = useTheme();
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -258,10 +259,13 @@ const ReactFlowAdapter: React.FC<ReactFlowAdapterProps> = ({
     <Paper
       elevation={2}
       sx={{
-        height: '70vh',
+        height: '100%',
         width: '100%',
         overflow: 'hidden',
-        borderRadius: 2
+        borderRadius: 2,
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column'
       }}
     >
       <ReactFlow
