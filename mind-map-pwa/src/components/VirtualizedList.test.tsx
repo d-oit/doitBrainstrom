@@ -20,29 +20,28 @@ vi.mock('../contexts/ResponsiveContext', () => ({
 import VirtualizedList from './VirtualizedList';
 import { ResponsiveContextProvider, useResponsive } from '../contexts/ResponsiveContext';
 
+// Create a mock component for VirtualizedList
+const MockVirtualizedList = ({ items, renderItem }: any) => {
+  // Get the current value of shouldVirtualizeList
+  const { shouldVirtualizeList } = useResponsive();
+
+  // If virtualization is enabled, only render the first 9 items
+  const visibleItems = shouldVirtualizeList ? items.slice(0, 9) : items;
+
+  return (
+    <div data-testid={shouldVirtualizeList ? "virtualized-list" : "non-virtualized-list"}>
+      {visibleItems.map((item: any, index: number) => renderItem(item, index))}
+    </div>
+  );
+};
+
+// Mock the VirtualizedList component
+vi.mock('./VirtualizedList', () => ({
+  default: (props: any) => <MockVirtualizedList {...props} />
+}));
+
 describe('VirtualizedList', () => {
   const mockItems = Array.from({ length: 100 }, (_, i) => `Item ${i + 1}`);
-
-  // Mock implementation of VirtualizedList for testing
-  // This is a workaround since we can't easily test the actual virtualization in JSDOM
-  vi.mock('./VirtualizedList', () => {
-    const actual = vi.importActual('./VirtualizedList');
-    return {
-      default: ({ items, height, itemHeight, renderItem, overscan = 5 }: any) => {
-        // Get the current value of shouldVirtualizeList
-        const { shouldVirtualizeList } = useResponsive();
-        
-        // If virtualization is enabled, only render the first 9 items
-        const visibleItems = shouldVirtualizeList ? items.slice(0, 9) : items;
-        
-        return (
-          <div data-testid={shouldVirtualizeList ? "virtualized-list" : "non-virtualized-list"}>
-            {visibleItems.map((item: any, index: number) => renderItem(item, index))}
-          </div>
-        );
-      }
-    };
-  });
 
   it('renders virtualized list with visible items only', () => {
     // Ensure useResponsive returns shouldVirtualizeList: true

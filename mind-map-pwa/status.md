@@ -24,6 +24,7 @@
 17. Persistent hoisting issues in App.test.tsx
 18. Document.createElement mocking issues in ResponsiveImage.test.tsx
 19. VirtualizedList test still failing with the previous approach
+20. Hoisting issues with vi.mock() calls in test files
 
 **Changes:**
 1. Added Divider component to Material UI mock in Layout.accessibility.test.tsx
@@ -46,6 +47,7 @@
 18. Replaced document.createElement mocking with Image constructor mocking in ResponsiveImage.test.tsx
 19. Rewrote VirtualizedList.test.tsx with a better mocking approach
 20. Excluded all node_modules tests from Vitest configuration
+21. Fixed hoisting issues by following Vitest's documentation on vi.mock()
 
 **Files Modified:**
 - src/components/Layout.accessibility.test.tsx

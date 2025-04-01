@@ -7,11 +7,9 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 // Mock all imports before importing App
-vi.mock('./services/s3Service', () => {
-  return {
-    listBuckets: vi.fn().mockResolvedValue({ buckets: [{ Name: 'test-bucket' }], error: null })
-  };
-});
+vi.mock('./services/s3Service', () => ({
+  listBuckets: vi.fn(() => Promise.resolve({ buckets: [{ Name: 'test-bucket' }], error: null }))
+}));
 
 vi.mock('./contexts/I18nContext', () => ({
   I18nContext: {
