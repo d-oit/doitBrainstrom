@@ -95,7 +95,7 @@ export const GestureHandler: React.FC<GestureHandlerProps> = ({
   className = '',
   style,
   as: Component = 'div'
-}) {
+}) => {
   const { power } = useResponsive();
   const elementRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<number | null>(null);
