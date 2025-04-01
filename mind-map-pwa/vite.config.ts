@@ -10,10 +10,16 @@ export default defineConfig(({ mode }) => {
   return {
   plugins: [react()],
   define: {
+    // S3 Configuration
     'import.meta.env.VITE_S3_ENDPOINT': JSON.stringify(env.VITE_S3_ENDPOINT),
     'import.meta.env.VITE_S3_ACCESS_KEY_ID': JSON.stringify(env.VITE_S3_ACCESS_KEY_ID),
     'import.meta.env.VITE_S3_SECRET_ACCESS_KEY': JSON.stringify(env.VITE_S3_SECRET_ACCESS_KEY),
     'import.meta.env.VITE_S3_BUCKET_NAME': JSON.stringify(env.VITE_S3_BUCKET_NAME),
+
+    // OpenRouter Configuration
+    'import.meta.env.VITE_OPENROUTER_API_KEY': JSON.stringify(env.VITE_OPENROUTER_API_KEY),
+    'import.meta.env.VITE_OPENROUTER_BASE_URL': JSON.stringify(env.VITE_OPENROUTER_BASE_URL),
+    'import.meta.env.VITE_OPENROUTER_DEFAULT_MODEL': JSON.stringify(env.VITE_OPENROUTER_DEFAULT_MODEL),
   },
   build: {
     // Enhanced code splitting configuration
