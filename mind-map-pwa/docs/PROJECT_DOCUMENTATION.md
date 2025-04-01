@@ -16,8 +16,8 @@ d.o. Brainstroming is a sleek, user-friendly mind mapping app with real-time col
 ### Key Features
 - Interactive mind map creation and editing
 - Offline-first architecture with IndexedDB storage
-- Background synchronization with AWS S3
-- Responsive design for all device sizes
+- Enhanced background synchronization with AWS S3 including offline queue and conflict resolution
+- Comprehensive responsive design system with fluid typography, container queries, and touch interactions
 - Comprehensive theme system with light, dark, system, and high-contrast modes
 - Internationalization with RTL language support
 - Accessibility compliance (WCAG 2.1 Level AA)
@@ -95,21 +95,25 @@ d.o. Brainstroming is a sleek, user-friendly mind mapping app with real-time col
 - Node editing capabilities
 
 ### Phase 3.1: Responsive Design (RESPONSIVE-003-1)
+- Modern CSS Grid system with 12-column layout
+- Fluid typography using clamp() function
+- Container queries for component-level responsiveness
+- Touch-friendly controls with proper hit areas
+- Advanced gesture handling (pan, pinch, rotate, swipe)
 - Viewport adaptation with breakpoints
-- Touch optimization with gesture support
-- Responsive UI components
-- Orientation handling
+- Orientation handling and foldable device support
+- Safe area insets handling for notched devices
 - Density scaling for high-DPI screens
-- Safe area insets handling
-- Pinch/zoom gesture support
 
 ### Phase 4: Offline Support (OFFLINE-004)
 - Service worker implementation
-- IndexedDB integration
-- Background synchronization with S3
-- Conflict resolution strategy
+- IndexedDB integration with schema versioning
+- Enhanced background synchronization with S3
+- Version vector-based conflict detection
+- Visual conflict resolution UI with diff visualization
+- Offline operation queue with priority levels
 - Offline-first architecture
-- Sync status indicator
+- Sync status indicator with detailed status information
 
 ### Phase 5: Error Handling (ERROR-005)
 - Comprehensive error handling strategy
@@ -179,7 +183,22 @@ The main layout component that provides the application structure with header, m
 The main mind map component responsible for rendering and managing the mind map. It handles node creation, editing, linking, and interaction.
 
 #### MindMapCard
-A reusable card component used for displaying mind map nodes. It's optimized with memoization to prevent unnecessary re-renders.
+A reusable card component used for displaying mind map nodes. It's optimized with memoization to prevent unnecessary re-renders. Uses container queries for responsive sizing and touch-friendly interactions.
+
+#### ResponsiveGrid and ResponsiveGridItem
+Modern CSS Grid-based layout system with support for different device sizes, responsive column spans, and automatic layout adjustment.
+
+#### ContainerQuery
+Creates container query contexts for component-level responsive design, enabling components to adapt based on their own size rather than viewport size.
+
+#### FluidTypography
+Implements fluid typography using CSS clamp() function, allowing text to scale smoothly between viewport sizes with appropriate minimum and maximum sizes.
+
+#### TouchFriendly
+Enhances elements with touch-friendly properties such as proper hit areas and touch feedback, improving usability on touch devices.
+
+#### GestureHandler
+Provides advanced gesture recognition for pan, pinch, rotate, tap, double tap, long press, and swipe gestures, with support for multi-touch interactions.
 
 #### ThemeSwitcher
 Allows users to switch between light, dark, system, and high-contrast themes. It provides advanced settings for accessibility including color blindness support, reduced motion preferences, and animation controls. It uses the ThemeContext to manage theme state.
@@ -187,8 +206,8 @@ Allows users to switch between light, dark, system, and high-contrast themes. It
 #### LocaleSwitcher
 Enables users to change the application language. It supports multiple languages including RTL languages like Arabic.
 
-#### SyncStatus
-Displays the current synchronization status between local IndexedDB and S3 storage.
+#### SyncStatusIndicator
+Displays the current synchronization status between local IndexedDB and S3 storage, including pending operations count, last sync time, and error information. Provides controls for manual sync, processing pending operations, and enabling/disabling background sync.
 
 ### Context Providers
 
@@ -206,6 +225,16 @@ Handles internationalization, including language switching, translation loading,
 #### MindMapContext
 Manages the mind map data state, including nodes, links, and editing operations.
 
+#### ResponsiveContext
+Provides comprehensive viewport and device information including:
+- Device type detection (mobile, tablet, desktop, widescreen)
+- Orientation detection (portrait, landscape)
+- Safe area insets for notched devices
+- Reduced motion preferences
+- Network status monitoring
+- Touch capability detection
+- Viewport dimensions and breakpoints
+
 #### ErrorNotificationContext
 Provides error notification functionality for displaying user-friendly error messages.
 
@@ -214,8 +243,13 @@ Provides error notification functionality for displaying user-friendly error mes
 #### s3Service
 Handles communication with AWS S3 or compatible storage service.
 
-#### s3SyncService
-Manages synchronization between local IndexedDB and S3 storage, including conflict resolution.
+#### enhancedS3SyncService
+Manages synchronization between local IndexedDB and S3 storage with advanced features:
+- Offline operation queue with priority levels
+- Version vector-based conflict detection
+- Exponential backoff retry mechanism
+- Background sync with configurable intervals
+- Detailed sync status reporting
 
 ### Utilities
 
@@ -243,12 +277,21 @@ Implements a custom logging system with different log levels.
 
 #### Database Schema
 - **Database Name**: mindMapDB
-- **Version**: 1
+- **Version**: 2
 - **Object Stores**:
   - mindMapData (keyPath: 'id')
     - Indexes:
       - lastModified
       - synced
+      - hasConflict
+  - offlineOperations (keyPath: 'id')
+    - Indexes:
+      - status
+      - priority
+      - timestamp
+      - entityId
+      - entityType
+      - type
 
 #### Core Functions
 
@@ -297,17 +340,38 @@ const listMindMapsInS3 = async (): Promise<string[]>
 ### Synchronization API
 
 ```typescript
-// Synchronize local data with S3
-const syncWithS3 = async (): Promise<SyncResult>
+// Initialize S3 client
+const initializeS3 = async (): Promise<{ success: boolean; error?: S3ErrorType; details?: string }>
 
-// Resolve conflicts between local and remote data
-const resolveConflicts = async (conflicts: Conflict[]): Promise<void>
+// Check S3 availability
+const checkS3Availability = async (forceCheck?: boolean): Promise<{ available: boolean; error?: S3ErrorType; details?: string }>
 
-// Get synchronization status
-const getSyncStatus = (): SyncStatus
+// Get sync status
+const getSyncStatus = async (): Promise<SyncStatus>
 
-// Register sync event listener
-const registerSyncEventListener = (callback: (status: SyncStatus) => void): void
+// Save to S3
+const saveToS3 = async (mindMapData: MindMapData, mindMapId?: string): Promise<SaveResult>
+
+// Get from S3
+const getFromS3 = async (): Promise<{ data: MindMapData | null; error?: S3ErrorType; details?: string }>
+
+// Initialize mind map data
+const initializeMindMapData = async (defaultId?: string): Promise<MindMapInitResult>
+
+// Process pending operations
+const processPendingOperations = async (limit?: number): Promise<SyncResult>
+
+// Sync mind map data
+const syncMindMapData = async (mindMapId?: string, force?: boolean): Promise<SyncResult>
+
+// Enable background sync
+const enableBackgroundSync = (intervalMs?: number): void
+
+// Disable background sync
+const disableBackgroundSync = (): void
+
+// Register background sync with service worker
+const registerBackgroundSync = async (): Promise<boolean>
 ```
 
 ## 6. Deployment Guide

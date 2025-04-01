@@ -1,7 +1,10 @@
 // src/components/MindMapCard.tsx
 import React, { memo } from 'react';
-import { Card, CardContent, Typography } from '@mui/material';
+import { Card, CardContent } from '@mui/material';
 import { useResponsive } from '../contexts/ResponsiveContext';
+import ContainerQuery from './layout/ContainerQuery';
+import { Heading4, Paragraph } from './typography/FluidTypography';
+import TouchFriendly from './touch/TouchFriendly';
 import '../styles/responsive.css';
 
 interface MindMapCardProps {
@@ -21,58 +24,51 @@ const MindMapCard: React.FC<MindMapCardProps> = ({
   const { shouldReduceAnimations } = useResponsive();
 
   return (
-    <Card
-      className="mind-map-card"
-      sx={{
-        minWidth: { xs: 150, sm: 180, md: 200 },
-        maxWidth: { xs: 200, sm: 250, md: 300 },
-        cursor: onClick ? 'pointer' : 'default',
-        userSelect: 'none',
-        transition: shouldReduceAnimations ? 'none' : 'all 0.2s ease-in-out',
-        '&:hover': {
-          transform: shouldReduceAnimations ? 'none' : 'scale(1.02)',
-          boxShadow: 3
-        },
-        '& .MuiCardContent-root': {
-          padding: { xs: '12px', sm: '16px' }
-        },
-        // Touch-friendly tap target
-        minHeight: { xs: '80px', sm: '100px' }
-      }}
-      onClick={onClick}
-      draggable={draggable}
-      // Improve accessibility
-      role={onClick ? 'button' : undefined}
-      tabIndex={onClick ? 0 : undefined}
-      aria-label={onClick ? `Select ${title}` : undefined}
-    >
-      <CardContent>
-        <Typography
-          variant="h5"
-          component="div"
+    <ContainerQuery type="card">
+      <TouchFriendly
+        onClick={onClick}
+        role={onClick ? 'button' : undefined}
+        tabIndex={onClick ? 0 : undefined}
+        ariaLabel={onClick ? `Select ${title}` : undefined}
+      >
+        <Card
+          className="mind-map-card"
           sx={{
-            fontSize: { xs: '16px', sm: '18px', md: '20px' },
-            fontWeight: 'medium',
-            wordBreak: 'break-word'
+            minWidth: { xs: 150, sm: 180, md: 200 },
+            maxWidth: { xs: 200, sm: 250, md: 300 },
+            cursor: onClick ? 'pointer' : 'default',
+            userSelect: 'none',
+            transition: shouldReduceAnimations ? 'none' : 'all 0.2s ease-in-out',
+            '&:hover': {
+              transform: shouldReduceAnimations ? 'none' : 'scale(1.02)',
+              boxShadow: 3
+            },
+            // Touch-friendly tap target
+            minHeight: { xs: '80px', sm: '100px' }
           }}
+          draggable={draggable}
         >
-          {title}
-        </Typography>
-        {description && (
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{
-              mt: 1,
-              fontSize: { xs: '12px', sm: '14px' },
-              wordBreak: 'break-word'
-            }}
-          >
-            {description}
-          </Typography>
-        )}
-      </CardContent>
-    </Card>
+          <CardContent className="card-content">
+            <Heading4 className="card-title" style={{ wordBreak: 'break-word' }}>
+              {title}
+            </Heading4>
+            {description && (
+              <Paragraph
+                size="sm"
+                className="card-body"
+                style={{
+                  color: 'text.secondary',
+                  marginTop: '8px',
+                  wordBreak: 'break-word'
+                }}
+              >
+                {description}
+              </Paragraph>
+            )}
+          </CardContent>
+        </Card>
+      </TouchFriendly>
+    </ContainerQuery>
   );
 };
 

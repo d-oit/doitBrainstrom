@@ -1,0 +1,221 @@
+/* src/styles/fluid-typography.css */
+
+/* 
+ * Fluid Typography System
+ * Uses CSS clamp() function to create responsive typography
+ * that scales smoothly between viewport sizes
+ */
+
+:root {
+  /* Base font sizes for different screen sizes */
+  --font-size-base-mobile: 16px;
+  --font-size-base-tablet: 18px;
+  --font-size-base-desktop: 20px;
+  
+  /* Viewport sizes for scaling */
+  --viewport-min: 320px;  /* Minimum viewport width (small mobile) */
+  --viewport-max: 1920px; /* Maximum viewport width (large desktop) */
+  
+  /* Fluid typography formula using clamp() */
+  /* clamp(min, preferred, max) */
+  --fluid-base: clamp(
+    var(--font-size-base-mobile),
+    calc(var(--font-size-base-mobile) + (var(--font-size-base-desktop) - var(--font-size-base-mobile)) * ((100vw - var(--viewport-min)) / (var(--viewport-max) - var(--viewport-min)))),
+    var(--font-size-base-desktop)
+  );
+  
+  /* Fluid typography scale */
+  --fluid-scale-ratio: 1.2; /* Minor third scale */
+  
+  /* Fluid typography sizes */
+  --fluid-xs: calc(var(--fluid-base) / var(--fluid-scale-ratio) / var(--fluid-scale-ratio));
+  --fluid-sm: calc(var(--fluid-base) / var(--fluid-scale-ratio));
+  --fluid-md: var(--fluid-base);
+  --fluid-lg: calc(var(--fluid-base) * var(--fluid-scale-ratio));
+  --fluid-xl: calc(var(--fluid-base) * var(--fluid-scale-ratio) * var(--fluid-scale-ratio));
+  --fluid-2xl: calc(var(--fluid-base) * var(--fluid-scale-ratio) * var(--fluid-scale-ratio) * var(--fluid-scale-ratio));
+  --fluid-3xl: calc(var(--fluid-base) * var(--fluid-scale-ratio) * var(--fluid-scale-ratio) * var(--fluid-scale-ratio) * var(--fluid-scale-ratio));
+  
+  /* Fluid line heights */
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-loose: 1.8;
+  
+  /* Fluid spacing units */
+  --space-unit: clamp(16px, calc(16px + 0.5vw), 24px);
+  --space-xs: calc(var(--space-unit) * 0.25);
+  --space-sm: calc(var(--space-unit) * 0.5);
+  --space-md: var(--space-unit);
+  --space-lg: calc(var(--space-unit) * 1.5);
+  --space-xl: calc(var(--space-unit) * 2);
+  --space-2xl: calc(var(--space-unit) * 3);
+  --space-3xl: calc(var(--space-unit) * 4);
+}
+
+/* Apply fluid typography to HTML elements */
+html {
+  font-size: var(--fluid-base);
+}
+
+body {
+  font-size: 1rem; /* Equal to var(--fluid-md) */
+  line-height: var(--line-height-normal);
+}
+
+/* Headings with fluid typography */
+h1, .text-3xl {
+  font-size: var(--fluid-3xl);
+  line-height: var(--line-height-tight);
+  margin-top: var(--space-xl);
+  margin-bottom: var(--space-md);
+}
+
+h2, .text-2xl {
+  font-size: var(--fluid-2xl);
+  line-height: var(--line-height-tight);
+  margin-top: var(--space-lg);
+  margin-bottom: var(--space-md);
+}
+
+h3, .text-xl {
+  font-size: var(--fluid-xl);
+  line-height: var(--line-height-tight);
+  margin-top: var(--space-lg);
+  margin-bottom: var(--space-sm);
+}
+
+h4, .text-lg {
+  font-size: var(--fluid-lg);
+  line-height: var(--line-height-tight);
+  margin-top: var(--space-md);
+  margin-bottom: var(--space-sm);
+}
+
+h5, .text-md {
+  font-size: var(--fluid-md);
+  line-height: var(--line-height-normal);
+  margin-top: var(--space-md);
+  margin-bottom: var(--space-sm);
+}
+
+h6, .text-sm {
+  font-size: var(--fluid-sm);
+  line-height: var(--line-height-normal);
+  margin-top: var(--space-md);
+  margin-bottom: var(--space-sm);
+}
+
+.text-xs {
+  font-size: var(--fluid-xs);
+  line-height: var(--line-height-normal);
+}
+
+/* Paragraphs with fluid spacing */
+p {
+  margin-bottom: var(--space-md);
+}
+
+/* Fluid spacing utility classes */
+.mt-xs { margin-top: var(--space-xs); }
+.mt-sm { margin-top: var(--space-sm); }
+.mt-md { margin-top: var(--space-md); }
+.mt-lg { margin-top: var(--space-lg); }
+.mt-xl { margin-top: var(--space-xl); }
+.mt-2xl { margin-top: var(--space-2xl); }
+.mt-3xl { margin-top: var(--space-3xl); }
+
+.mb-xs { margin-bottom: var(--space-xs); }
+.mb-sm { margin-bottom: var(--space-sm); }
+.mb-md { margin-bottom: var(--space-md); }
+.mb-lg { margin-bottom: var(--space-lg); }
+.mb-xl { margin-bottom: var(--space-xl); }
+.mb-2xl { margin-bottom: var(--space-2xl); }
+.mb-3xl { margin-bottom: var(--space-3xl); }
+
+.mx-xs { margin-left: var(--space-xs); margin-right: var(--space-xs); }
+.mx-sm { margin-left: var(--space-sm); margin-right: var(--space-sm); }
+.mx-md { margin-left: var(--space-md); margin-right: var(--space-md); }
+.mx-lg { margin-left: var(--space-lg); margin-right: var(--space-lg); }
+.mx-xl { margin-left: var(--space-xl); margin-right: var(--space-xl); }
+.mx-2xl { margin-left: var(--space-2xl); margin-right: var(--space-2xl); }
+.mx-3xl { margin-left: var(--space-3xl); margin-right: var(--space-3xl); }
+
+.my-xs { margin-top: var(--space-xs); margin-bottom: var(--space-xs); }
+.my-sm { margin-top: var(--space-sm); margin-bottom: var(--space-sm); }
+.my-md { margin-top: var(--space-md); margin-bottom: var(--space-md); }
+.my-lg { margin-top: var(--space-lg); margin-bottom: var(--space-lg); }
+.my-xl { margin-top: var(--space-xl); margin-bottom: var(--space-xl); }
+.my-2xl { margin-top: var(--space-2xl); margin-bottom: var(--space-2xl); }
+.my-3xl { margin-top: var(--space-3xl); margin-bottom: var(--space-3xl); }
+
+.pt-xs { padding-top: var(--space-xs); }
+.pt-sm { padding-top: var(--space-sm); }
+.pt-md { padding-top: var(--space-md); }
+.pt-lg { padding-top: var(--space-lg); }
+.pt-xl { padding-top: var(--space-xl); }
+.pt-2xl { padding-top: var(--space-2xl); }
+.pt-3xl { padding-top: var(--space-3xl); }
+
+.pb-xs { padding-bottom: var(--space-xs); }
+.pb-sm { padding-bottom: var(--space-sm); }
+.pb-md { padding-bottom: var(--space-md); }
+.pb-lg { padding-bottom: var(--space-lg); }
+.pb-xl { padding-bottom: var(--space-xl); }
+.pb-2xl { padding-bottom: var(--space-2xl); }
+.pb-3xl { padding-bottom: var(--space-3xl); }
+
+.px-xs { padding-left: var(--space-xs); padding-right: var(--space-xs); }
+.px-sm { padding-left: var(--space-sm); padding-right: var(--space-sm); }
+.px-md { padding-left: var(--space-md); padding-right: var(--space-md); }
+.px-lg { padding-left: var(--space-lg); padding-right: var(--space-lg); }
+.px-xl { padding-left: var(--space-xl); padding-right: var(--space-xl); }
+.px-2xl { padding-left: var(--space-2xl); padding-right: var(--space-2xl); }
+.px-3xl { padding-left: var(--space-3xl); padding-right: var(--space-3xl); }
+
+.py-xs { padding-top: var(--space-xs); padding-bottom: var(--space-xs); }
+.py-sm { padding-top: var(--space-sm); padding-bottom: var(--space-sm); }
+.py-md { padding-top: var(--space-md); padding-bottom: var(--space-md); }
+.py-lg { padding-top: var(--space-lg); padding-bottom: var(--space-lg); }
+.py-xl { padding-top: var(--space-xl); padding-bottom: var(--space-xl); }
+.py-2xl { padding-top: var(--space-2xl); padding-bottom: var(--space-2xl); }
+.py-3xl { padding-top: var(--space-3xl); padding-bottom: var(--space-3xl); }
+
+/* Fluid typography for specific UI elements */
+.card-title {
+  font-size: var(--fluid-lg);
+  line-height: var(--line-height-tight);
+}
+
+.card-body {
+  font-size: var(--fluid-md);
+  line-height: var(--line-height-normal);
+}
+
+.button-text {
+  font-size: var(--fluid-sm);
+  line-height: var(--line-height-tight);
+}
+
+.caption {
+  font-size: var(--fluid-xs);
+  line-height: var(--line-height-normal);
+}
+
+/* Responsive font weights */
+@media (max-width: 767px) {
+  h1, .text-3xl {
+    font-weight: 700; /* Bolder on mobile for better readability */
+  }
+}
+
+/* High contrast mode adjustments */
+.high-contrast-theme {
+  --line-height-normal: 1.6; /* Increased line height for better readability */
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}

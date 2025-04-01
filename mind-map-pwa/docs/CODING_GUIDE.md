@@ -208,6 +208,18 @@ try {
 - Use the children prop for flexible composition
 - Implement compound components pattern for complex UIs
 
+### Responsive Design
+- Use the ResponsiveGrid component for layout instead of direct CSS Grid
+- Implement container queries with ContainerQuery component for component-level responsiveness
+- Use FluidTypography for text that scales smoothly between viewport sizes
+- Enhance interactive elements with TouchFriendly for better touch experience
+- Use GestureHandler for advanced touch interactions
+- Test on multiple device sizes and orientations
+- Support safe area insets for notched devices
+- Design for both portrait and landscape orientations
+- Support foldable devices where appropriate
+- Use the useResponsive hook to access viewport information
+
 ### Accessibility
 - Use semantic HTML elements
 - Implement ARIA attributes for dynamic content
@@ -218,6 +230,7 @@ try {
 - Implement reduced motion preferences
 - Provide color blindness accommodations
 - Ensure proper focus management
+- Ensure touch targets are at least 44x44px
 
 ## 6. State Management Guidelines
 

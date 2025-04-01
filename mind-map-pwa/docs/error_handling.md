@@ -259,3 +259,51 @@ export const ErrorNotificationContextProvider: React.FC<{ children: React.ReactN
     - Maintain keyboard navigation in error states
     - Ensure error messages are announced to screen readers
     - Maintain sufficient color contrast in error indicators
+
+## S3 Sync Errors
+
+### Error Types
+
+1. **Connection Errors**
+   - Network connectivity issues
+   - S3 endpoint unreachable
+   - Timeout errors
+2. **Authentication Errors**
+   - Invalid credentials
+   - Expired tokens
+   - Missing permissions
+3. **Data Errors**
+   - Invalid data format
+   - Corrupted data
+   - Version conflicts
+4. **Conflict Errors**
+   - Concurrent modifications detected via version vectors
+   - Incompatible changes requiring manual resolution
+
+### Handling Strategy
+
+1. **Retry with Exponential Backoff**
+   - Implement automatic retry for transient errors
+   - Use exponential backoff to avoid overwhelming the server
+   - Set maximum retry attempts configurable via environment variables
+   - Track retry count and status for each operation
+2. **Offline Operation Queue**
+   - Store operations in IndexedDB with priority levels
+   - Process operations in priority order when connectivity is restored
+   - Persist queue across browser sessions
+   - Provide queue statistics and management UI
+3. **Background Sync**
+   - Register with service worker for background sync when supported
+   - Implement periodic sync with configurable intervals
+   - Provide user controls to enable/disable background sync
+   - Show sync status indicators in the UI
+4. **User Notification**
+   - Inform users about sync status with clear indicators
+   - Provide detailed error messages with actionable information
+   - Offer manual sync retry option
+   - Show pending operation count
+5. **Conflict Resolution**
+   - Detect conflicts using version vectors for accurate detection
+   - Provide visual diff UI for comparing local and remote versions
+   - Support multiple resolution strategies (keep local, keep remote, merge, custom)
+   - Automatically merge non-conflicting changes

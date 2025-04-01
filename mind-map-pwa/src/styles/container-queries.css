@@ -1,0 +1,445 @@
+/* src/styles/container-queries.css */
+
+/* 
+ * Container Queries System
+ * Enables responsive design at the component level
+ * using the @container query feature
+ */
+
+/* Define container contexts */
+.container-context {
+  container-type: inline-size;
+  container-name: component;
+}
+
+.layout-context {
+  container-type: inline-size;
+  container-name: layout;
+}
+
+.card-context {
+  container-type: inline-size;
+  container-name: card;
+}
+
+.sidebar-context {
+  container-type: inline-size;
+  container-name: sidebar;
+}
+
+.content-context {
+  container-type: inline-size;
+  container-name: content;
+}
+
+/* Container size utility classes */
+.container-xs {
+  container-type: inline-size;
+  container-name: xs;
+}
+
+.container-sm {
+  container-type: inline-size;
+  container-name: sm;
+}
+
+.container-md {
+  container-type: inline-size;
+  container-name: md;
+}
+
+.container-lg {
+  container-type: inline-size;
+  container-name: lg;
+}
+
+.container-xl {
+  container-type: inline-size;
+  container-name: xl;
+}
+
+/* Component-level responsive styles using container queries */
+
+/* Card component container queries */
+@container card (max-width: 250px) {
+  .card-title {
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+  
+  .card-content {
+    padding: 8px;
+  }
+  
+  .card-actions {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .card-icon {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+@container card (min-width: 251px) and (max-width: 400px) {
+  .card-title {
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+  
+  .card-content {
+    padding: 12px;
+  }
+  
+  .card-actions {
+    flex-direction: row;
+    gap: 8px;
+  }
+  
+  .card-icon {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+@container card (min-width: 401px) {
+  .card-title {
+    font-size: 20px;
+    margin-bottom: 12px;
+  }
+  
+  .card-content {
+    padding: 16px;
+  }
+  
+  .card-actions {
+    flex-direction: row;
+    gap: 12px;
+  }
+  
+  .card-icon {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+/* Sidebar component container queries */
+@container sidebar (max-width: 200px) {
+  .sidebar-item-text {
+    display: none;
+  }
+  
+  .sidebar-item {
+    justify-content: center;
+    padding: 8px;
+  }
+  
+  .sidebar-header {
+    text-align: center;
+  }
+}
+
+@container sidebar (min-width: 201px) {
+  .sidebar-item-text {
+    display: block;
+  }
+  
+  .sidebar-item {
+    justify-content: flex-start;
+    padding: 8px 16px;
+  }
+  
+  .sidebar-header {
+    text-align: left;
+  }
+}
+
+/* Content layout container queries */
+@container content (max-width: 500px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .content-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .content-actions {
+    width: 100%;
+    justify-content: space-between;
+    margin-top: 8px;
+  }
+}
+
+@container content (min-width: 501px) and (max-width: 800px) {
+  .content-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  
+  .content-header {
+    flex-direction: row;
+    align-items: center;
+  }
+  
+  .content-actions {
+    width: auto;
+    margin-top: 0;
+  }
+}
+
+@container content (min-width: 801px) {
+  .content-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  
+  .content-header {
+    flex-direction: row;
+    align-items: center;
+  }
+  
+  .content-actions {
+    width: auto;
+    margin-top: 0;
+  }
+}
+
+/* Mind map node container queries */
+@container component (max-width: 200px) {
+  .mind-map-node {
+    padding: 8px;
+    border-radius: 4px;
+  }
+  
+  .node-text {
+    font-size: 12px;
+    line-height: 1.2;
+  }
+  
+  .node-actions {
+    opacity: 0;
+    pointer-events: none;
+  }
+  
+  .mind-map-node:hover .node-actions,
+  .mind-map-node:focus-within .node-actions {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+@container component (min-width: 201px) and (max-width: 300px) {
+  .mind-map-node {
+    padding: 12px;
+    border-radius: 6px;
+  }
+  
+  .node-text {
+    font-size: 14px;
+    line-height: 1.3;
+  }
+  
+  .node-actions {
+    opacity: 0.5;
+  }
+  
+  .mind-map-node:hover .node-actions,
+  .mind-map-node:focus-within .node-actions {
+    opacity: 1;
+  }
+}
+
+@container component (min-width: 301px) {
+  .mind-map-node {
+    padding: 16px;
+    border-radius: 8px;
+  }
+  
+  .node-text {
+    font-size: 16px;
+    line-height: 1.4;
+  }
+  
+  .node-actions {
+    opacity: 0.7;
+  }
+  
+  .mind-map-node:hover .node-actions,
+  .mind-map-node:focus-within .node-actions {
+    opacity: 1;
+  }
+}
+
+/* Form component container queries */
+@container component (max-width: 400px) {
+  .form-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .form-field {
+    width: 100%;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .form-actions button {
+    width: 100%;
+  }
+}
+
+@container component (min-width: 401px) {
+  .form-layout {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  
+  .form-field.full-width {
+    grid-column: span 2;
+  }
+  
+  .form-actions {
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: 12px;
+  }
+}
+
+/* Toolbar component container queries */
+@container component (max-width: 500px) {
+  .toolbar {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px;
+  }
+  
+  .toolbar-item {
+    flex: 0 0 auto;
+    min-width: 40px;
+  }
+  
+  .toolbar-item-text {
+    display: none;
+  }
+}
+
+@container component (min-width: 501px) {
+  .toolbar {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 12px;
+  }
+  
+  .toolbar-item {
+    flex: 0 0 auto;
+  }
+  
+  .toolbar-item-text {
+    display: inline-block;
+  }
+}
+
+/* Fallback for browsers that don't support container queries */
+@supports not (container-type: inline-size) {
+  /* Use media queries as fallback */
+  @media (max-width: 767px) {
+    .card-title {
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+    
+    .card-content {
+      padding: 8px;
+    }
+    
+    .sidebar-item-text {
+      display: none;
+    }
+    
+    .content-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    
+    .mind-map-node {
+      padding: 8px;
+      border-radius: 4px;
+    }
+    
+    .node-text {
+      font-size: 12px;
+      line-height: 1.2;
+    }
+  }
+  
+  @media (min-width: 768px) and (max-width: 1199px) {
+    .card-title {
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+    
+    .card-content {
+      padding: 12px;
+    }
+    
+    .sidebar-item-text {
+      display: block;
+    }
+    
+    .content-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+    
+    .mind-map-node {
+      padding: 12px;
+      border-radius: 6px;
+    }
+    
+    .node-text {
+      font-size: 14px;
+      line-height: 1.3;
+    }
+  }
+  
+  @media (min-width: 1200px) {
+    .card-title {
+      font-size: 20px;
+      margin-bottom: 12px;
+    }
+    
+    .card-content {
+      padding: 16px;
+    }
+    
+    .sidebar-item-text {
+      display: block;
+    }
+    
+    .content-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    
+    .mind-map-node {
+      padding: 16px;
+      border-radius: 8px;
+    }
+    
+    .node-text {
+      font-size: 16px;
+      line-height: 1.4;
+    }
+  }
+}

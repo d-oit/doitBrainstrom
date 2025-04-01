@@ -26,19 +26,36 @@ export const initDB = (): Promise<IDBDatabase> => {
 
     request.onupgradeneeded = (event) => {
       const db = (event.target as IDBOpenDBRequest).result;
+      const oldVersion = event.oldVersion;
+      const newVersion = event.newVersion || DB_CONFIG.version;
+
+      logInfo(`Upgrading IndexedDB from version ${oldVersion} to ${newVersion}`);
 
       // Create object stores and indexes
       const { stores } = DB_CONFIG;
 
+      // If the store doesn't exist, create it with all indexes
       if (!db.objectStoreNames.contains(stores.mindMaps.name)) {
         logInfo('Creating mind maps object store');
         const mindMapsStore = db.createObjectStore(stores.mindMaps.name, { keyPath: stores.mindMaps.keyPath });
 
-        // Create indexes
+        // Create all indexes
         stores.mindMaps.indexes.forEach(index => {
           logInfo(`Creating index: ${index.name}`);
           mindMapsStore.createIndex(index.name, index.keyPath);
         });
+      }
+      // If the store exists but we're upgrading from version 1 to 2, add the new indexes
+      else if (oldVersion === 1 && newVersion >= 2) {
+        logInfo('Upgrading mind maps object store schema');
+        const transaction = event.target as IDBTransaction;
+        const mindMapsStore = transaction.objectStore(stores.mindMaps.name);
+
+        // Add new indexes if they don't exist
+        if (!mindMapsStore.indexNames.contains('hasConflict')) {
+          logInfo('Adding hasConflict index');
+          mindMapsStore.createIndex('hasConflict', 'hasConflict');
+        }
       }
     };
   });
@@ -180,6 +197,60 @@ export const getUnsyncedMindMaps = async (): Promise<MindMapRecord[]> => {
   } catch (error) {
     logError('Error accessing IndexedDB:', error);
     throw new StorageError('Failed to access IndexedDB for getting unsynced mind maps', error as Error);
+  }
+};
+
+// Get all mind maps with conflicts
+export const getConflictedMindMaps = async (): Promise<MindMapRecord[]> => {
+  try {
+    logInfo('Getting mind maps with conflicts from IndexedDB');
+    const db = await initDB();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([DB_CONFIG.stores.mindMaps.name], 'readonly');
+      const store = transaction.objectStore(DB_CONFIG.stores.mindMaps.name);
+
+      // Use the hasConflict index if available
+      if (store.indexNames.contains('hasConflict')) {
+        const index = store.index('hasConflict');
+        const request = index.getAll(IDBKeyRange.only(true));
+
+        request.onsuccess = () => {
+          const results = request.result as MindMapRecord[];
+          logInfo(`Found ${results.length} mind maps with conflicts in IndexedDB`);
+          resolve(results || []);
+        };
+
+        request.onerror = (event) => {
+          const error = (event.target as IDBRequest).error || new Error('Unknown request error');
+          logError('Error getting mind maps with conflicts from IndexedDB:', error);
+          reject(new StorageError('Failed to get mind maps with conflicts', error));
+        };
+      } else {
+        // Fall back to getting all records and filtering
+        const request = store.getAll();
+
+        request.onsuccess = () => {
+          const allRecords = request.result as MindMapRecord[];
+          // Filter records where hasConflict is true
+          const results = allRecords.filter(record => record.hasConflict === true);
+          logInfo(`Found ${results.length} mind maps with conflicts in IndexedDB`);
+          resolve(results || []);
+        };
+
+        request.onerror = (event) => {
+          const error = (event.target as IDBRequest).error || new Error('Unknown request error');
+          logError('Error getting mind maps with conflicts from IndexedDB:', error);
+          reject(new StorageError('Failed to get mind maps with conflicts', error));
+        };
+      }
+
+      transaction.oncomplete = () => {
+        db.close();
+      };
+    });
+  } catch (error) {
+    logError('Error accessing IndexedDB:', error);
+    throw new StorageError('Failed to access IndexedDB for getting mind maps with conflicts', error as Error);
   }
 };
 

@@ -1,0 +1,260 @@
+/* src/styles/touch-interactions.css */
+
+/* 
+ * Touch Interactions System
+ * Enhances the user experience on touch devices
+ * with proper hit areas and touch feedback
+ */
+
+:root {
+  /* Touch target sizes based on WCAG 2.1 */
+  --touch-target-size: 44px;
+  --touch-target-spacing: 8px;
+  
+  /* Active state feedback */
+  --touch-highlight-color: rgba(0, 0, 0, 0.1);
+  --touch-highlight-color-dark: rgba(255, 255, 255, 0.1);
+  
+  /* Transition timing */
+  --touch-transition-duration: 0.15s;
+  --touch-transition-timing: ease-out;
+}
+
+/* Apply to all interactive elements */
+button,
+[role="button"],
+a,
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+input[type="checkbox"],
+input[type="radio"],
+select,
+.interactive {
+  /* Ensure minimum touch target size */
+  min-height: var(--touch-target-size);
+  min-width: var(--touch-target-size);
+  
+  /* Add touch feedback */
+  transition: transform var(--touch-transition-duration) var(--touch-transition-timing),
+              background-color var(--touch-transition-duration) var(--touch-transition-timing);
+  
+  /* Remove default tap highlight on mobile */
+  -webkit-tap-highlight-color: transparent;
+  
+  /* Improve touch target with padding if needed */
+  padding: max(8px, (var(--touch-target-size) - 100%) / 2);
+  
+  /* Ensure proper spacing between touch targets */
+  margin: calc(var(--touch-target-spacing) / 2);
+}
+
+/* Touch feedback for light theme */
+.light-theme button:active,
+.light-theme [role="button"]:active,
+.light-theme a:active,
+.light-theme input[type="button"]:active,
+.light-theme input[type="submit"]:active,
+.light-theme input[type="reset"]:active,
+.light-theme .interactive:active {
+  background-color: var(--touch-highlight-color);
+  transform: scale(0.97);
+}
+
+/* Touch feedback for dark theme */
+.dark-theme button:active,
+.dark-theme [role="button"]:active,
+.dark-theme a:active,
+.dark-theme input[type="button"]:active,
+.dark-theme input[type="submit"]:active,
+.dark-theme input[type="reset"]:active,
+.dark-theme .interactive:active,
+.high-contrast-theme button:active,
+.high-contrast-theme [role="button"]:active,
+.high-contrast-theme a:active,
+.high-contrast-theme input[type="button"]:active,
+.high-contrast-theme input[type="submit"]:active,
+.high-contrast-theme input[type="reset"]:active,
+.high-contrast-theme .interactive:active {
+  background-color: var(--touch-highlight-color-dark);
+  transform: scale(0.97);
+}
+
+/* Compact touch targets for desktop with pointer */
+@media (pointer: fine) {
+  button,
+  [role="button"],
+  a,
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"],
+  input[type="checkbox"],
+  input[type="radio"],
+  select,
+  .interactive {
+    min-height: unset;
+    min-width: unset;
+    padding: 8px;
+  }
+}
+
+/* Specific touch-friendly controls */
+.touch-friendly-slider {
+  --thumb-size: var(--touch-target-size);
+  height: var(--touch-target-size);
+}
+
+.touch-friendly-slider input[type="range"] {
+  height: var(--touch-target-size);
+}
+
+.touch-friendly-slider input[type="range"]::-webkit-slider-thumb {
+  width: var(--thumb-size);
+  height: var(--thumb-size);
+}
+
+.touch-friendly-slider input[type="range"]::-moz-range-thumb {
+  width: var(--thumb-size);
+  height: var(--thumb-size);
+}
+
+/* Touch-friendly checkboxes and radio buttons */
+.touch-friendly-checkbox,
+.touch-friendly-radio {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-target-size);
+  padding: 0;
+}
+
+.touch-friendly-checkbox input,
+.touch-friendly-radio input {
+  width: var(--touch-target-size);
+  height: var(--touch-target-size);
+  margin: 0;
+  padding: 0;
+}
+
+/* Touch-friendly select */
+.touch-friendly-select select {
+  height: var(--touch-target-size);
+  padding: 0 16px;
+}
+
+/* Touch-friendly tabs */
+.touch-friendly-tabs {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.touch-friendly-tabs .tab {
+  flex: 0 0 auto;
+  min-width: var(--touch-target-size);
+  min-height: var(--touch-target-size);
+  padding: 12px 16px;
+  scroll-snap-align: start;
+}
+
+/* Swipe actions */
+.swipe-container {
+  position: relative;
+  overflow: hidden;
+  touch-action: pan-y;
+}
+
+.swipe-content {
+  transition: transform var(--touch-transition-duration) var(--touch-transition-timing);
+}
+
+.swipe-actions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.swipe-action {
+  height: 100%;
+  min-width: var(--touch-target-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Pinch-to-zoom container */
+.pinch-zoom-container {
+  touch-action: none;
+  overflow: hidden;
+  position: relative;
+}
+
+.pinch-zoom-content {
+  transform-origin: 0 0;
+  transition: transform 0.1s ease-out;
+}
+
+/* Drag handle */
+.drag-handle {
+  cursor: grab;
+  touch-action: none;
+  min-width: var(--touch-target-size);
+  min-height: var(--touch-target-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+/* Touch-friendly scrolling */
+.touch-scroll {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+}
+
+/* Prevent text selection during touch interactions */
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Utility class for adding touch padding */
+.touch-padding {
+  padding: calc((var(--touch-target-size) - 24px) / 2);
+}
+
+/* Utility class for minimum touch target size */
+.touch-target {
+  min-width: var(--touch-target-size);
+  min-height: var(--touch-target-size);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* High contrast mode adjustments */
+.high-contrast-theme .touch-target:focus-visible {
+  outline: 3px solid var(--focus-outline-color);
+  outline-offset: 3px;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  button,
+  [role="button"],
+  a,
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"],
+  .interactive {
+    transition: none !important;
+    transform: none !important;
+  }
+}
