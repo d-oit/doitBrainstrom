@@ -259,39 +259,48 @@ export const ChatContextProvider: React.FC<{ children: React.ReactNode }> = ({ c
     if (session) {
       setCurrentSessionId(sessionId);
 
-      try {
-        // Try to load messages from IndexedDB first
-        const chatHistory = await getChatHistory(sessionId);
-        if (chatHistory && chatHistory.length > 0) {
-          // Convert IndexedDB format to ChatMessage format
-          const convertedMessages: ChatMessage[] = chatHistory.map(msg => ({
-            role: msg.role,
-            content: msg.content,
-            timestamp: new Date(msg.timestamp).getTime()
-          }));
-          setMessages(convertedMessages);
-        } else {
-          // Fall back to session messages if no IndexedDB history
-          setMessages(session.messages);
+      // Check if IndexedDB functions are available
+      if (typeof getChatHistory === 'function' &&
+          typeof addSystemMessage === 'function' &&
+          typeof addUserMessage === 'function' &&
+          typeof addAssistantMessage === 'function') {
+        try {
+          // Try to load messages from IndexedDB first
+          const chatHistory = await getChatHistory(sessionId);
+          if (chatHistory && chatHistory.length > 0) {
+            // Convert IndexedDB format to ChatMessage format
+            const convertedMessages: ChatMessage[] = chatHistory.map(msg => ({
+              role: msg.role,
+              content: msg.content,
+              timestamp: new Date(msg.timestamp).getTime()
+            }));
+            setMessages(convertedMessages);
+          } else {
+            // Fall back to session messages if no IndexedDB history
+            setMessages(session.messages);
 
-          // If we have messages in the session but not in IndexedDB, save them to IndexedDB
-          if (session.messages.length > 0) {
-            // Add system message first
-            await addSystemMessage(sessionId, 'You are a helpful assistant for a mind mapping application. Provide concise, clear responses.');
+            // If we have messages in the session but not in IndexedDB, save them to IndexedDB
+            if (session.messages.length > 0) {
+              // Add system message first
+              await addSystemMessage(sessionId, 'You are a helpful assistant for a mind mapping application. Provide concise, clear responses.');
 
-            // Add all other messages
-            for (const msg of session.messages) {
-              if (msg.role === 'user') {
-                await addUserMessage(sessionId, msg.content);
-              } else if (msg.role === 'assistant') {
-                await addAssistantMessage(sessionId, msg.content);
+              // Add all other messages
+              for (const msg of session.messages) {
+                if (msg.role === 'user') {
+                  await addUserMessage(sessionId, msg.content);
+                } else if (msg.role === 'assistant') {
+                  await addAssistantMessage(sessionId, msg.content);
+                }
               }
             }
           }
+        } catch (error) {
+          logError('Error loading chat history from IndexedDB:', error);
+          // Fall back to session messages
+          setMessages(session.messages);
         }
-      } catch (error) {
-        logError('Error loading chat history from IndexedDB:', error);
-        // Fall back to session messages
+      } else {
+        // IndexedDB functions not available, use session messages
         setMessages(session.messages);
       }
 

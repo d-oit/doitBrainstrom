@@ -51,12 +51,15 @@ function App() {
   useEffect(() => {
     const initializeAppState = async () => {
       try {
-        // Run migrations from localStorage to IndexedDB
-        await runAllMigrations();
+        // Check if IndexedDB functions are available
+        if (typeof runAllMigrations === 'function' && typeof getTabStateAsync === 'function') {
+          // Run migrations from localStorage to IndexedDB
+          await runAllMigrations();
 
-        // Load tab state from IndexedDB
-        const savedTabValue = await getTabStateAsync();
-        setTabValue(savedTabValue);
+          // Load tab state from IndexedDB
+          const savedTabValue = await getTabStateAsync();
+          setTabValue(savedTabValue);
+        }
       } catch (error) {
         console.error('Failed to initialize app state from IndexedDB:', error);
         // Already using default tab value as fallback
@@ -107,8 +110,10 @@ function App() {
   const handleTabChange = (newValue: number) => {
     setTabValue(newValue);
 
-    // Save tab state to IndexedDB
-    setTabState(newValue);
+    // Save tab state to IndexedDB if available
+    if (typeof setTabState === 'function') {
+      setTabState(newValue);
+    }
   };
 
   return (

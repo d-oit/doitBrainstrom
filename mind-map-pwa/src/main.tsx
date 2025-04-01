@@ -38,16 +38,20 @@ setupGlobalErrorHandler();
 // Register service worker for offline capabilities
 registerServiceWorker();
 
-// Run migrations from localStorage to IndexedDB
-runAllMigrations().then(success => {
-  if (success) {
-    console.log('Successfully migrated data from localStorage to IndexedDB');
-  } else {
-    console.warn('Some migrations from localStorage to IndexedDB failed, will retry on next app load');
-  }
-}).catch(error => {
-  console.error('Error running migrations:', error);
-});
+// Run migrations from localStorage to IndexedDB if available
+if (typeof runAllMigrations === 'function') {
+  runAllMigrations().then(success => {
+    if (success) {
+      console.log('Successfully migrated data from localStorage to IndexedDB');
+    } else {
+      console.warn('Some migrations from localStorage to IndexedDB failed, will retry on next app load');
+    }
+  }).catch(error => {
+    console.error('Error running migrations:', error);
+  });
+} else {
+  console.warn('IndexedDB migration not available in this environment');
+}
 
 // Create Emotion cache
 const emotionCache = createEmotionCache();
