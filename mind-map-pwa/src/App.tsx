@@ -36,40 +36,47 @@ function TabPanel(props: TabPanelProps) {
 }
 
 function App() {
-  const [buckets, setBuckets] = useState<AWS.S3.Bucket[] | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const [buckets, setBuckets] = useState<AWS.S3.Bucket[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [tabValue, setTabValue] = useState(0);
   const { t } = useI18n();
 
   useEffect(() => {
     const fetchBuckets = async () => {
+      setIsLoading(true);
+      setBuckets(null);
+      setError(null);
+
       try {
-        const result = await listBuckets()
+        const result = await listBuckets();
 
-        // Check if there was an error
+        // Always check for error first
         if (result.error) {
-          setBuckets(null)
-          setError(t('s3.connectionError'))
-          return
+          setError(t(result.error === 'No buckets found' ? 's3.noBuckets' : 's3.connectionError'));
+          return;
         }
 
-        // Only set buckets if the array has items, otherwise show error
-        if (result.buckets && result.buckets.length > 0) {
-          setBuckets(result.buckets)
-          setError(null) // Clear any previous errors
-        } else {
-          setBuckets(null)
-          setError(t('s3.noBuckets'))
+        // Double check buckets array
+        if (!result.buckets || result.buckets.length === 0) {
+          setError(t('s3.noBuckets'));
+          return;
         }
+
+        setBuckets(result.buckets);
       } catch (err) {
-        setBuckets(null)
-        setError(t('s3.connectionError'))
-        console.error(err)
+        console.error('Unexpected error:', err);
+        setError(t('s3.connectionError'));
+      } finally {
+        setIsLoading(false);
       }
-    }
+    };
 
-    fetchBuckets()
-  }, [t])
+    // Only fetch when S3 tab is active
+    if (tabValue === 1) {
+      fetchBuckets();
+    }
+  }, [t, tabValue]);
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
@@ -105,8 +112,14 @@ function App() {
           <Typography variant="h5" component="h2" gutterBottom>
             {t('s3.connectionTest')}
           </Typography>
-          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-          {buckets && (
+          
+          {isLoading ? (
+            <Box display="flex" justifyContent="center" p={2}>
+              <CircularProgress />
+            </Box>
+          ) : error ? (
+            <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>
+          ) : buckets ? (
             <Box>
               <Alert severity="success" sx={{ mb: 2 }}>{t('s3.connectionSuccess')}</Alert>
               <Typography variant="h6" component="h3" gutterBottom>
@@ -118,6 +131,8 @@ function App() {
                 ))}
               </ul>
             </Box>
+          ) : (
+            <Alert severity="info">{t('s3.testConnection')}</Alert>
           )}
         </Paper>
       </TabPanel>
