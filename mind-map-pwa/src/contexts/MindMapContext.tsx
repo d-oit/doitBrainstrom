@@ -29,12 +29,19 @@ export const MindMapContextProvider: React.FC<{ children: React.ReactNode }> = (
     const loadData = async () => {
       setIsLoading(true);
       try {
-        const data = await initializeMindMapData();
-        setMindMapData(data);
-        setSyncStatus('success');
+        const result = await initializeMindMapData();
+        setMindMapData(result.data);
+        // Only set success if data came from S3
+        setSyncStatus(result.source === 's3' ? 'success' : 'idle');
       } catch (error) {
         console.error('Error loading mind map data:', error);
         setSyncStatus('error');
+        // Show error in ErrorNotificationContext
+        if (window.ErrorNotificationContext?.showError) {
+          window.ErrorNotificationContext.showError(
+            'Error connecting to S3. Changes will be saved locally.'
+          );
+        }
       } finally {
         setIsLoading(false);
       }
