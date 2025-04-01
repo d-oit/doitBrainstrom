@@ -8,12 +8,12 @@ import { useI18n } from '../contexts/I18nContext';
 const SyncStatus: React.FC = () => {
   const { syncStatus, syncMindMap, isLoading } = useMindMap();
   const { t } = useI18n();
-  
+
   const getStatusIcon = () => {
     if (isLoading) {
       return <CircularProgress size={24} />;
     }
-    
+
     switch (syncStatus) {
       case 'success':
         return <CloudDone color="success" />;
@@ -27,12 +27,12 @@ const SyncStatus: React.FC = () => {
         return <CloudUpload color="action" />;
     }
   };
-  
+
   const getStatusText = () => {
     if (isLoading) {
       return t('sync.loading');
     }
-    
+
     switch (syncStatus) {
       case 'success':
         return t('sync.success');
@@ -46,13 +46,13 @@ const SyncStatus: React.FC = () => {
         return t('sync.idle');
     }
   };
-  
+
   const handleSync = () => {
     if (syncStatus !== 'syncing' && !isLoading) {
       syncMindMap();
     }
   };
-  
+
   return (
     <Box sx={{ display: 'flex', alignItems: 'center' }}>
       <Tooltip title={getStatusText()}>
@@ -60,16 +60,18 @@ const SyncStatus: React.FC = () => {
           {getStatusIcon()}
         </Box>
       </Tooltip>
-      
+
       <Tooltip title={t('sync.refresh')}>
-        <IconButton 
-          size="small" 
-          onClick={handleSync}
-          disabled={syncStatus === 'syncing' || isLoading}
-          aria-label={t('sync.refresh')}
-        >
-          <Refresh />
-        </IconButton>
+        <span>
+          <IconButton
+            size="small"
+            onClick={handleSync}
+            disabled={syncStatus === 'syncing' || isLoading}
+            aria-label={t('sync.refresh')}
+          >
+            <Refresh />
+          </IconButton>
+        </span>
       </Tooltip>
     </Box>
   );

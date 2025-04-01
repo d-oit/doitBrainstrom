@@ -154,12 +154,15 @@ export const getUnsyncedMindMaps = async (): Promise<MindMapRecord[]> => {
     return new Promise((resolve, reject) => {
       const transaction = db.transaction([DB_CONFIG.stores.mindMaps.name], 'readonly');
       const store = transaction.objectStore(DB_CONFIG.stores.mindMaps.name);
-      const index = store.index('synced');
 
-      const request = index.getAll(IDBKeyRange.only(false));
+      // Get all records and filter them in memory instead of using the index
+      // This avoids potential issues with IDBKeyRange.only(false)
+      const request = store.getAll();
 
       request.onsuccess = () => {
-        const results = request.result as MindMapRecord[];
+        const allRecords = request.result as MindMapRecord[];
+        // Filter records where synced is explicitly false
+        const results = allRecords.filter(record => record.synced === false);
         logInfo(`Found ${results.length} unsynced mind maps in IndexedDB`);
         resolve(results || []);
       };
