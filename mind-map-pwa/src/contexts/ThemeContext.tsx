@@ -4,13 +4,15 @@ import { ThemeProvider } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
 import { ThemeMode, ThemeSettings, ThemeContextType } from '../types/theme';
 import {
-  createAppTheme,
-  createLegacyTheme,
   detectSystemPreference,
   watchSystemPreference,
   loadThemeSettings,
   saveThemeSettings
 } from '../styles/theme-engine';
+import {
+  createAppTheme,
+  createCssVarsTheme
+} from '../../src/theme/theme';
 import { saveThemeSettings as saveThemeSettingsToIndexedDB, loadThemeSettings as loadThemeSettingsFromIndexedDB } from '../services/settingsService';
 import { runAllMigrations } from '../utils/migrationUtils';
 
@@ -81,9 +83,10 @@ export const ThemeContextProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   // Create the appropriate theme based on settings
   const theme = useMemo(() => {
+    const currentMode = mode === 'system' ? systemPreference : mode;
     return useCssVars
-      ? createAppTheme(mode === 'system' ? systemPreference : mode, settings)
-      : createLegacyTheme(mode === 'system' ? systemPreference : mode, settings);
+      ? createCssVarsTheme(currentMode, settings)
+      : createAppTheme(currentMode, settings);
   }, [mode, systemPreference, settings, useCssVars]);
 
   // Determine the current mode
