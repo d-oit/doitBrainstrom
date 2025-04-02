@@ -299,7 +299,8 @@ const SyncStatusIndicator: React.FC = () => {
             </SyncStatusText>
           </SyncStatusContainer>
 
-          {(syncStatus?.lastError || syncError) && (
+          {/* Only show errors if they're not just "not configured" state */}
+          {(syncStatus?.lastError?.type !== S3ErrorType.NOT_CONFIGURED && (syncStatus?.lastError || syncError)) && (
             <Alert severity="error" sx={{ mt: 2 }}>
               {getErrorMessage()}
             </Alert>
@@ -320,46 +321,54 @@ const SyncStatusIndicator: React.FC = () => {
           )}
         </Box>
 
-        <Divider />
+        {/* Only show sync options if S3 is configured */}
+        {syncStatus?.isS3Configured && (
+          <>
+            <Divider />
+            <MenuItem
+              onClick={handleSync}
+              disabled={isSyncing || !network.online || !syncStatus?.isS3Available}
+            >
+              <Refresh sx={{ mr: 1 }} />
+              {t('sync.syncNow')}
+            </MenuItem>
 
-        <MenuItem
-          onClick={handleSync}
-          disabled={isSyncing || !network.online || !syncStatus?.isS3Available}
-        >
-          <Refresh sx={{ mr: 1 }} />
-          {t('sync.syncNow')}
-        </MenuItem>
-
-        {syncStatus?.pendingOperations > 0 && (
-          <MenuItem
-            onClick={handleProcessPending}
-            disabled={isSyncing || !network.online || !syncStatus?.isS3Available}
-          >
-            <CloudSync sx={{ mr: 1 }} />
-            {t('sync.processPending')}
-          </MenuItem>
+            {syncStatus?.pendingOperations > 0 && (
+              <MenuItem
+                onClick={handleProcessPending}
+                disabled={isSyncing || !network.online || !syncStatus?.isS3Available}
+              >
+                <CloudSync sx={{ mr: 1 }} />
+                {t('sync.processPending')}
+              </MenuItem>
+            )}
+          </>
         )}
 
-        <Divider />
-
-        <MenuItem>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={backgroundSyncEnabled}
-                onChange={handleBackgroundSyncToggle}
-                disabled={!network.online || !syncStatus?.isS3Available}
-                size="small"
+        {/* Only show these options if S3 is configured */}
+        {syncStatus?.isS3Configured && (
+          <>
+            <Divider />
+            <MenuItem>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={backgroundSyncEnabled}
+                    onChange={handleBackgroundSyncToggle}
+                    disabled={!network.online || !syncStatus?.isS3Available}
+                    size="small"
+                  />
+                }
+                label={t('sync.backgroundSync')}
               />
-            }
-            label={t('sync.backgroundSync')}
-          />
-        </MenuItem>
+            </MenuItem>
 
-        <MenuItem onClick={handleClose}>
-          <Settings sx={{ mr: 1 }} />
-          {t('sync.settings')}
-        </MenuItem>
+            <MenuItem onClick={handleClose}>
+              <Settings sx={{ mr: 1 }} />
+              {t('sync.settings')}
+            </MenuItem>
+          </>
+        )}
       </Menu>
     </Box>
   );

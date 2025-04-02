@@ -239,10 +239,8 @@ export const initializeMindMapData = async (defaultId: string = 'default'): Prom
   try {
     logInfo('Initializing mind map data...');
 
-    // Skip S3 initialization on app load
-    // Only use S3 if it's already initialized and available
-    // This prevents network requests on startup
-    if (false) { // Disabled S3 auto-loading
+    // Only attempt to load from S3 if it's configured and auto-loading is enabled
+    if (isS3Configured() && isS3Available && import.meta.env.VITE_S3_AUTO_LOAD === 'true') {
       try {
         const params = {
           Bucket: BUCKET_NAME,
@@ -348,23 +346,23 @@ export const saveMindMapLocally = async (
         synced: false
       });
 
-      // Check if S3 is available
-      const isAvailable = await checkS3Available();
-
-      // Try to sync immediately if online and S3 is available
-      if (isAvailable && navigator.onLine) {
+      // Only attempt S3 sync if S3 is configured
+      if (isS3Configured() && navigator.onLine) {
         try {
-          const result = await saveMindMapToS3(mindMapData);
-          if (result.success) {
-            // Update synced status in IndexedDB
-            await saveMindMap({
-              id,
-              data: mindMapData,
-              lastModified: new Date().toISOString(),
-              synced: true
-            });
+          const s3Status = await checkS3Available();
+          if (s3Status.available) {
+            const result = await saveMindMapToS3(mindMapData);
+            if (result.success) {
+              // Update synced status in IndexedDB
+              await saveMindMap({
+                id,
+                data: mindMapData,
+                lastModified: new Date().toISOString(),
+                synced: true
+              });
+            }
+            return result;
           }
-          return result;
         } catch (syncError) {
           logError('Failed to sync with S3:', syncError);
           return {

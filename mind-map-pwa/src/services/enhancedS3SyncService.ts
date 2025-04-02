@@ -107,19 +107,15 @@ const isS3Configured = () => {
 
 // Initialize S3 client
 export const initializeS3 = async (): Promise<{ success: boolean; error?: S3ErrorType; details?: string }> => {
-  // If S3 is not configured, return early
+  // If S3 is not configured, return gracefully without error
   if (!isS3Configured()) {
-    logWarn('S3 is not configured');
+    logInfo('S3 is not configured - operating in local-only mode');
     isS3Initialized = false;
     isS3Available = false;
-    lastS3Error = {
-      type: S3ErrorType.NOT_CONFIGURED,
-      details: 'S3 environment variables are not configured'
-    };
+    lastS3Error = undefined;
     return {
-      success: false,
-      error: S3ErrorType.NOT_CONFIGURED,
-      details: 'S3 environment variables are not configured'
+      success: true,
+      details: 'Operating in local-only mode'
     };
   }
 
@@ -194,12 +190,11 @@ export const initializeS3 = async (): Promise<{ success: boolean; error?: S3Erro
 
 // Check if S3 is available
 export const checkS3Availability = async (forceCheck: boolean = false): Promise<{ available: boolean; error?: S3ErrorType; details?: string }> => {
-  // If S3 is not configured, return early
+  // If S3 is not configured, return gracefully
   if (!isS3Configured()) {
     return {
       available: false,
-      error: S3ErrorType.NOT_CONFIGURED,
-      details: 'S3 environment variables are not configured'
+      details: 'Operating in local-only mode'
     };
   }
 
