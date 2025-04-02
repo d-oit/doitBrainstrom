@@ -65,19 +65,16 @@ test('responsive design', async ({ page }) => {
   await expect(page.getByRole('heading', { name: /d\.o\. Brainstroming/i, level: 1 })).toBeVisible();
 });
 
-test.skip('theme switching', async ({ page }) => {
+test('theme switching', async ({ page }) => {
   await page.goto('/');
 
   // Navigate to the Sample Cards tab to ensure we have cards visible
   await page.getByRole('tab', { name: /Sample Cards/i }).click();
   await page.waitForTimeout(500);
 
-  // Find and click the theme switcher
-  const themeSwitcher = page.getByRole('button', { name: /theme/i });
-  await themeSwitcher.click();
-
-  // Wait for the theme menu to appear and click on Dark theme
-  await page.getByRole('menuitem', { name: /dark/i }).click();
+  // Find and click the theme switcher - now it's a direct toggle button in the AppBar
+  const themeSwitcher = page.getByRole('button', { name: /toggle theme mode/i });
+  await themeSwitcher.click(); // This will switch to dark mode directly
 
   // Wait a moment for the theme to apply
   await page.waitForTimeout(1000);
@@ -113,9 +110,23 @@ test.skip('theme switching', async ({ page }) => {
   // We should be in dark mode
   expect(isDarkMode).toBeTruthy();
 
+  // Switch to high contrast mode
+  await themeSwitcher.click();
+
+  // Wait a moment for the theme to apply
+  await page.waitForTimeout(1000);
+
+  // Check if we're in high contrast mode
+  const isHighContrastMode = await page.evaluate(() => {
+    return document.body.classList.contains('high-contrast-theme') ||
+           document.body.classList.contains('high-contrast-mode');
+  });
+
+  // We should be in high contrast mode
+  expect(isHighContrastMode).toBeTruthy();
+
   // Switch back to light theme
   await themeSwitcher.click();
-  await page.getByRole('menuitem', { name: /light/i }).click();
 
   // Wait a moment for the theme to apply
   await page.waitForTimeout(1000);

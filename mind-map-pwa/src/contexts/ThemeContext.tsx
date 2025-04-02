@@ -12,7 +12,7 @@ import {
 import {
   createAppTheme,
   createCssVarsTheme
-} from '../../src/theme/theme';
+} from '../theme/theme';
 import { saveThemeSettings as saveThemeSettingsToIndexedDB, loadThemeSettings as loadThemeSettingsFromIndexedDB } from '../services/settingsService';
 import { runAllMigrations } from '../utils/migrationUtils';
 
@@ -20,7 +20,13 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeContextProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Load theme settings from localStorage initially, will be updated from IndexedDB
-  const [settings, setSettings] = useState<ThemeSettings>(loadThemeSettings());
+  const [settings, setSettings] = useState<ThemeSettings>(loadThemeSettings() || {
+    mode: 'light',
+    useCssVars: true,
+    animations: true,
+    reducedMotion: false,
+    colorScheme: 'default'
+  });
   const [systemPreference, setSystemPreference] = useState<'light' | 'dark'>(detectSystemPreference());
 
   // Destructure settings for easier access
