@@ -2,7 +2,6 @@
 import { logInfo, logError, logWarn } from '../utils/logger';
 import { saveSettings, getSettings } from '../utils/indexedDB/dbService';
 import { SettingsRecord } from '../utils/indexedDB/config';
-import { StorageError } from '../utils/errorHandler';
 
 /**
  * Save theme settings to IndexedDB
