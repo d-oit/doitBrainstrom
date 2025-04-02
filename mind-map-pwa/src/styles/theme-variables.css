@@ -8,8 +8,11 @@
   --drawer-border-color: rgba(0, 0, 0, 0.12);
   --drawer-hover-color: rgba(0, 0, 0, 0.04);
   --drawer-active-color: rgba(33, 150, 243, 0.12);
+  --drawer-focus-color: rgba(33, 150, 243, 0.5);
   --drawer-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  
+  --drawer-scrollbar-track: rgba(0, 0, 0, 0.05);
+  --drawer-scrollbar-thumb: rgba(0, 0, 0, 0.2);
+
   /* Breadcrumb variables */
   --breadcrumb-bg-color: rgba(0, 0, 0, 0.03);
   --breadcrumb-text-color: rgba(0, 0, 0, 0.6);
@@ -28,8 +31,11 @@
     --drawer-border-color: rgba(255, 255, 255, 0.12);
     --drawer-hover-color: rgba(255, 255, 255, 0.08);
     --drawer-active-color: rgba(144, 202, 249, 0.16);
+    --drawer-focus-color: rgba(144, 202, 249, 0.5);
     --drawer-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-    
+    --drawer-scrollbar-track: rgba(0, 0, 0, 0.2);
+    --drawer-scrollbar-thumb: rgba(255, 255, 255, 0.3);
+
     /* Breadcrumb variables */
     --breadcrumb-bg-color: rgba(255, 255, 255, 0.05);
     --breadcrumb-text-color: rgba(255, 255, 255, 0.6);
@@ -49,7 +55,7 @@
   --drawer-hover-color: rgba(255, 255, 255, 0.08);
   --drawer-active-color: rgba(144, 202, 249, 0.16);
   --drawer-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-  
+
   /* Breadcrumb variables */
   --breadcrumb-bg-color: rgba(255, 255, 255, 0.05);
   --breadcrumb-text-color: rgba(255, 255, 255, 0.6);
@@ -68,7 +74,7 @@
   --drawer-hover-color: rgba(0, 0, 0, 0.04);
   --drawer-active-color: rgba(33, 150, 243, 0.12);
   --drawer-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  
+
   /* Breadcrumb variables */
   --breadcrumb-bg-color: rgba(0, 0, 0, 0.03);
   --breadcrumb-text-color: rgba(0, 0, 0, 0.6);
@@ -87,7 +93,7 @@
   --drawer-hover-color: #333333;
   --drawer-active-color: #ffff00;
   --drawer-shadow: 0 2px 10px rgba(255, 255, 255, 0.5);
-  
+
   /* Breadcrumb variables */
   --breadcrumb-bg-color: #000000;
   --breadcrumb-text-color: #ffffff;

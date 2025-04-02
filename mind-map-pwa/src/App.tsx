@@ -3,6 +3,7 @@ import './styles/App.css'
 // s3Service will be imported dynamically
 import Layout from './components/Layout'
 import { Box, Typography, Alert, Paper, CircularProgress } from '@mui/material'
+import ThemeDemo from './components/Demo/ThemeDemo'
 import { useI18n } from './contexts/I18nContext'
 import { ChatContextProvider } from './contexts/ChatContext'
 import FloatingChatButton from './components/Chat/FloatingChatButton'
@@ -64,6 +65,10 @@ function AppContent({ tabValue, onTabChange, buckets, error, isLoading, t }: {
         <Suspense fallback={<Box display="flex" justifyContent="center" p={4}><CircularProgress /></Box>}>
           <MindMap />
         </Suspense>
+      </TabPanel>
+
+      <TabPanel value={tabValue} index={3}>
+        <ThemeDemo />
       </TabPanel>
 
       <TabPanel value={tabValue} index={1}>
@@ -162,7 +167,7 @@ function App() {
   useEffect(() => {
     const fetchBuckets = async () => {
       if (tabValue !== 1) return;
-      
+
       setIsLoading(true);
       setBuckets(null);
       setError(null);

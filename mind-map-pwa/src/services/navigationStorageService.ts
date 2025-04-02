@@ -2,8 +2,9 @@
 import { saveDrawerState, loadDrawerState, saveTabState, loadTabState } from './appStateService';
 import { logError } from '../utils/logger';
 
-// For backward compatibility
-const STORAGE_KEY = 'doitBrainstorm.navigationState.drawerOpen';
+// Storage keys
+const DRAWER_OPEN_KEY = 'doitBrainstorm.navigationState.drawerOpen';
+const DRAWER_COLLAPSED_KEY = 'doitBrainstorm.navigationState.drawerCollapsed';
 
 /**
  * Get the drawer state from IndexedDB with localStorage fallback
@@ -12,7 +13,7 @@ const STORAGE_KEY = 'doitBrainstorm.navigationState.drawerOpen';
 export const getDrawerState = (): boolean => {
   try {
     // For backward compatibility, still try localStorage first
-    const storedState = localStorage.getItem(STORAGE_KEY);
+    const storedState = localStorage.getItem(DRAWER_OPEN_KEY);
 
     // Return the stored state or default based on screen size
     return storedState !== null
@@ -26,13 +27,32 @@ export const getDrawerState = (): boolean => {
 };
 
 /**
+ * Get the drawer collapsed state from localStorage
+ * @returns boolean - The drawer collapsed state (collapsed or expanded)
+ */
+export const getDrawerCollapsedState = (): boolean => {
+  try {
+    const storedState = localStorage.getItem(DRAWER_COLLAPSED_KEY);
+
+    // Return the stored state or default to false (expanded)
+    return storedState !== null
+      ? JSON.parse(storedState)
+      : false;
+  } catch (error) {
+    console.error('Error getting drawer collapsed state from localStorage:', error);
+    // Fallback to false (expanded)
+    return false;
+  }
+};
+
+/**
  * Set the drawer state in IndexedDB with localStorage fallback
  * @param isOpen boolean - The drawer state to save
  */
 export const setDrawerState = (isOpen: boolean): void => {
   try {
     // For backward compatibility, still save to localStorage
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(isOpen));
+    localStorage.setItem(DRAWER_OPEN_KEY, JSON.stringify(isOpen));
 
     // Also save to IndexedDB
     saveDrawerState(isOpen).catch(error => {
@@ -40,6 +60,18 @@ export const setDrawerState = (isOpen: boolean): void => {
     });
   } catch (error) {
     console.error('Error setting drawer state:', error);
+  }
+};
+
+/**
+ * Set the drawer collapsed state in localStorage
+ * @param isCollapsed boolean - The drawer collapsed state to save
+ */
+export const setDrawerCollapsedState = (isCollapsed: boolean): void => {
+  try {
+    localStorage.setItem(DRAWER_COLLAPSED_KEY, JSON.stringify(isCollapsed));
+  } catch (error) {
+    console.error('Error setting drawer collapsed state:', error);
   }
 };
 

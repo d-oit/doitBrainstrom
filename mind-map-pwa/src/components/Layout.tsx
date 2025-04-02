@@ -1,6 +1,7 @@
 // src/components/Layout.tsx
 import React, { useState, useEffect } from 'react';
-import { AppBar, Toolbar, Box, Stack, Divider } from '@mui/material';
+import { Box, Stack, Divider } from '@mui/material';
+import ModernAppBar from './Navigation/AppBar';
 import ThemeSwitcher from './ThemeSwitcher';
 import LocaleSwitcher from './LocaleSwitcher';
 import SyncStatusPanel from './sync/SyncStatusPanel';
@@ -23,7 +24,7 @@ import NavigationDrawer from './navigation/NavigationDrawer';
 import DrawerToggle from './navigation/DrawerToggle';
 import Breadcrumbs from './navigation/Breadcrumbs';
 // Import navigation storage service
-import { getDrawerState, setDrawerState } from '../services/navigationStorageService';
+import { getDrawerState, setDrawerState, getDrawerCollapsedState, setDrawerCollapsedState } from '../services/navigationStorageService';
 // Import CSS
 import '../styles/drawer.css';
 import '../styles/breadcrumbs.css';
@@ -34,30 +35,43 @@ interface LayoutProps {
   onTabChange?: (tabIndex: number) => void;
 }
 
-const Layout: React.FC<LayoutProps> = ({ 
-  children, 
-  currentTab = 0, 
-  onTabChange = () => {} 
+const Layout: React.FC<LayoutProps> = ({
+  children,
+  currentTab = 0,
+  onTabChange = () => {}
 }) => {
   const { t, dir } = useI18n();
   const { viewport } = useResponsive();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerCollapsed, setDrawerCollapsed] = useState(false);
 
   // Initialize drawer state from localStorage
   useEffect(() => {
     const initDrawerState = () => {
+      // For mobile, we use the open/closed state
       const storedState = getDrawerState();
       setDrawerOpen(storedState);
+
+      // For desktop/tablet, we use the collapsed/expanded state
+      const storedCollapsedState = getDrawerCollapsedState();
+      setDrawerCollapsed(storedCollapsedState);
     };
-    
+
     initDrawerState();
   }, []);
 
-  // Handle drawer toggle
+  // Handle drawer toggle for mobile (open/close)
   const handleDrawerToggle = () => {
     const newState = !drawerOpen;
     setDrawerOpen(newState);
     setDrawerState(newState);
+  };
+
+  // Handle drawer collapse toggle for desktop/tablet (expand/collapse)
+  const handleDrawerCollapseToggle = () => {
+    const newState = !drawerCollapsed;
+    setDrawerCollapsed(newState);
+    setDrawerCollapsedState(newState);
   };
 
   // Sanitize any text that might come from translations
@@ -78,11 +92,13 @@ const Layout: React.FC<LayoutProps> = ({
       ]} />
 
       {/* Navigation Drawer */}
-      <NavigationDrawer 
-        open={drawerOpen} 
+      <NavigationDrawer
+        open={viewport.isMobile ? drawerOpen : true} // Always open on desktop/tablet
         onClose={handleDrawerToggle}
         currentTab={currentTab}
         onTabChange={onTabChange}
+        collapsed={!viewport.isMobile && drawerCollapsed} // Only collapse on desktop/tablet
+        onToggleCollapse={handleDrawerCollapseToggle}
       />
 
       {/* Use semantic header element with safe area padding */}
@@ -90,55 +106,38 @@ const Layout: React.FC<LayoutProps> = ({
         {/* Show offline banner for tablet view */}
         {viewport.isTablet && <OfflineIndicator />}
 
-        <AppBar position="static">
-          <Toolbar sx={{
-            minHeight: viewport.layout.toolbarHeight,
-            px: { xs: 1, sm: 2, md: 3 }
-          }}>
-            {/* Drawer Toggle Button */}
-            <DrawerToggle onClick={handleDrawerToggle} />
-            
-            <ContainerQuery type="component">
-              <Heading1
-                className="card-title"
-                style={{ flexGrow: 1, marginLeft: '16px' }}
-                aria-label="Application title"
-              >
-                {appTitle}
-              </Heading1>
-            </ContainerQuery>
-            <Stack
-              direction="row"
-              spacing={{ xs: 0.5, sm: 1 }}
-              alignItems="center"
-              role="toolbar"
-              aria-label="Application tools"
-              className="toolbar-context"
-            >
-              <TouchFriendly>
-                <NetworkStatusIndicator />
-              </TouchFriendly>
-              {!viewport.isMobile && (
-                <Divider orientation="vertical" flexItem sx={{ mx: { xs: 0.25, sm: 0.5 } }} />
-              )}
-              <TouchFriendly>
-                <SyncStatusPanel />
-              </TouchFriendly>
-              {!viewport.isMobile && (
-                <Divider orientation="vertical" flexItem sx={{ mx: { xs: 0.25, sm: 0.5 } }} />
-              )}
-              <TouchFriendly>
-                <LocaleSwitcher />
-              </TouchFriendly>
-              <TouchFriendly>
-                <ThemeSwitcher />
-              </TouchFriendly>
-              <TouchFriendly>
-                <AccessibilityMenu />
-              </TouchFriendly>
-            </Stack>
-          </Toolbar>
-        </AppBar>
+        <ModernAppBar title={appTitle}>
+          {/* Drawer Toggle Button */}
+          <DrawerToggle onClick={handleDrawerToggle} />
+
+          <Stack
+            direction="row"
+            spacing={{ xs: 0.5, sm: 1 }}
+            alignItems="center"
+            role="toolbar"
+            aria-label="Application tools"
+            className="toolbar-context"
+          >
+            <TouchFriendly>
+              <NetworkStatusIndicator />
+            </TouchFriendly>
+            {!viewport.isMobile && (
+              <Divider orientation="vertical" flexItem sx={{ mx: { xs: 0.25, sm: 0.5 } }} />
+            )}
+            <TouchFriendly>
+              <SyncStatusPanel />
+            </TouchFriendly>
+            {!viewport.isMobile && (
+              <Divider orientation="vertical" flexItem sx={{ mx: { xs: 0.25, sm: 0.5 } }} />
+            )}
+            <TouchFriendly>
+              <LocaleSwitcher />
+            </TouchFriendly>
+            <TouchFriendly>
+              <AccessibilityMenu />
+            </TouchFriendly>
+          </Stack>
+        </ModernAppBar>
       </header>
 
       {/* Show mobile and desktop offline indicators */}
@@ -151,7 +150,7 @@ const Layout: React.FC<LayoutProps> = ({
         role="main"
         aria-label={t('accessibility.mainContent')}
         style={{ flex: 1, display: 'flex', flexDirection: 'column' }}
-        className={`main-content ${drawerOpen && !viewport.isMobile ? 'drawer-open' : ''}`}
+        className={`main-content ${viewport.isMobile ? (drawerOpen ? 'drawer-open' : '') : (drawerCollapsed ? 'drawer-collapsed' : 'drawer-open')}`}
       >
         <ResponsiveGrid
           container
@@ -163,7 +162,7 @@ const Layout: React.FC<LayoutProps> = ({
           <ResponsiveGridItem xs={12}>
             {/* Breadcrumbs */}
             <Breadcrumbs currentTab={currentTab} onTabChange={onTabChange} />
-            
+
             <ContainerQuery type="content">
               <Box className="content-grid" sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                 {children}
@@ -174,9 +173,9 @@ const Layout: React.FC<LayoutProps> = ({
       </main>
 
       {/* Add semantic footer with safe area padding */}
-      <footer 
-        className={`safe-area-bottom ${drawerOpen && !viewport.isMobile ? 'drawer-open' : ''}`} 
-        role="contentinfo" 
+      <footer
+        className={`safe-area-bottom ${viewport.isMobile ? (drawerOpen ? 'drawer-open' : '') : (drawerCollapsed ? 'drawer-collapsed' : 'drawer-open')}`}
+        role="contentinfo"
         aria-label={t('accessibility.footerInfo')}
       >
         <ResponsiveGrid container fluid={false} gap="md">

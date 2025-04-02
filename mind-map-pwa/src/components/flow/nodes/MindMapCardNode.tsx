@@ -2,7 +2,7 @@
 import React, { memo } from 'react';
 import { Handle, Position, NodeProps } from 'reactflow';
 import { Box, useTheme } from '@mui/material';
-import MindMapCard from '../../MindMapCard';
+import MindMapNode from '../../MindMap/MindMapNode';
 import { useAccessibility } from '../../../contexts/AccessibilityContext';
 import { useI18n } from '../../../contexts/I18nContext';
 
@@ -49,8 +49,6 @@ const MindMapCardNode: React.FC<NodeProps<MindMapCardNodeData>> = ({
       {/* Node content */}
       <Box
         sx={{
-          border: `2px solid ${borderColor}`,
-          borderRadius: 2,
           padding: 0.5,
           minWidth: 150,
           maxWidth: 250,
@@ -59,9 +57,12 @@ const MindMapCardNode: React.FC<NodeProps<MindMapCardNodeData>> = ({
         aria-selected={selected}
         role="treeitem"
       >
-        <MindMapCard
+        <MindMapNode
+          id={String(Math.random())}
           title={data.title}
           description={data.description}
+          isSelected={selected}
+          isRoot={false}
         />
       </Box>
 

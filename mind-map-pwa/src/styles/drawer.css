@@ -2,17 +2,19 @@ bra/* src/styles/drawer.css */
 
 .drawer {
   position: fixed;
-  top: 0;
+  top: var(--header-height, 64px); /* Position below header */
   left: 0;
-  height: 100%;
+  height: calc(100vh - var(--header-height, 64px) - var(--footer-height, 60px)); /* Full height minus header and footer */
   background-color: var(--drawer-bg-color, #1e1e1e);
   color: var(--drawer-text-color, #ffffff);
-  z-index: 1200;
-  transition: transform 0.3s ease-in-out, width 0.3s ease-in-out;
+  z-index: 1100; /* Below header but above content */
+  transition: transform 0.3s ease-in-out, width 0.3s ease-in-out, opacity 0.3s ease-in-out;
   overflow-y: auto;
   box-shadow: var(--drawer-shadow, 2px 0 8px rgba(0, 0, 0, 0.15));
   display: flex;
   flex-direction: column;
+  scrollbar-width: thin;
+  scrollbar-color: var(--drawer-scrollbar-thumb, rgba(255, 255, 255, 0.3)) var(--drawer-scrollbar-track, rgba(0, 0, 0, 0.1));
 }
 
 .drawer-header {
@@ -29,7 +31,8 @@ bra/* src/styles/drawer.css */
   margin: 0;
 }
 
-.drawer-close-button {
+.drawer-close-button,
+.drawer-collapse-button {
   background: transparent;
   border: none;
   color: var(--drawer-text-color, #ffffff);
@@ -41,13 +44,21 @@ bra/* src/styles/drawer.css */
   border-radius: 50%;
 }
 
-.drawer-close-button:hover {
+.drawer-close-button:hover,
+.drawer-collapse-button:hover {
   background-color: var(--drawer-hover-color, rgba(255, 255, 255, 0.1));
 }
 
 .drawer-content {
   flex-grow: 1;
   padding: 16px;
+  overflow-y: auto;
+}
+
+.drawer-footer {
+  padding: 16px;
+  border-top: 1px solid var(--drawer-border-color, rgba(255, 255, 255, 0.1));
+  margin-top: auto;
 }
 
 .drawer-nav-list {
@@ -67,11 +78,27 @@ bra/* src/styles/drawer.css */
   text-decoration: none;
   color: var(--drawer-text-color, #ffffff);
   border-radius: 4px;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s, transform 0.2s;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 1rem;
+  font-family: inherit;
 }
 
 .drawer-nav-link:hover {
   background-color: var(--drawer-hover-color, rgba(255, 255, 255, 0.1));
+}
+
+.drawer-nav-link:focus {
+  outline: 2px solid var(--drawer-focus-color, rgba(255, 255, 255, 0.5));
+  outline-offset: -2px;
+}
+
+.drawer-nav-link:active {
+  transform: scale(0.98);
 }
 
 .drawer-nav-link.active {
@@ -126,11 +153,11 @@ bra/* src/styles/drawer.css */
     max-width: 300px;
     transform: translateX(-100%);
   }
-  
+
   .drawer.open {
     transform: translateX(0);
   }
-  
+
   .main-content {
     transition: margin-left 0.3s ease-in-out;
     margin-left: 0;
@@ -138,52 +165,117 @@ bra/* src/styles/drawer.css */
 }
 
 @media (min-width: 600px) and (max-width: 899px) {
-  /* Tablet: Push mode */
+  /* Tablet: Persistent sidebar */
   .drawer {
-    width: 320px;
-    transform: translateX(-100%);
+    width: 280px;
+    transform: translateX(0); /* Always visible */
   }
-  
-  .drawer.open {
-    transform: translateX(0);
+
+  .drawer.collapsed {
+    width: 64px; /* Collapsed state shows only icons */
   }
-  
+
   .main-content {
     transition: margin-left 0.3s ease-in-out;
-    margin-left: 0;
+    margin-left: 280px; /* Always make space for sidebar */
   }
-  
-  .main-content.drawer-open {
-    margin-left: 320px;
+
+  .main-content.drawer-collapsed {
+    margin-left: 64px;
   }
 }
 
 @media (min-width: 900px) {
-  /* Desktop: Push mode */
+  /* Desktop: Persistent sidebar */
   .drawer {
-    width: 380px;
-    transform: translateX(-100%);
+    width: 320px;
+    transform: translateX(0); /* Always visible */
   }
-  
-  .drawer.open {
-    transform: translateX(0);
+
+  .drawer.collapsed {
+    width: 80px; /* Collapsed state shows only icons */
   }
-  
+
   .main-content {
     transition: margin-left 0.3s ease-in-out;
-    margin-left: 0;
+    margin-left: 320px; /* Always make space for sidebar */
   }
-  
-  .main-content.drawer-open {
-    margin-left: 380px;
+
+  .main-content.drawer-collapsed {
+    margin-left: 80px;
   }
 }
 
 /* Safe area insets for notched devices */
 @supports (padding: max(0px)) {
   .drawer {
-    padding-top: max(16px, env(safe-area-inset-top));
     padding-left: max(16px, env(safe-area-inset-left));
     padding-bottom: max(16px, env(safe-area-inset-bottom));
   }
+}
+
+/* CSS Variables for layout measurements */
+:root {
+  --header-height: 64px;
+  --footer-height: 60px;
+}
+
+@media (max-width: 599px) {
+  :root {
+    --header-height: 56px;
+    --footer-height: 56px;
+  }
+}
+
+/* Collapsed sidebar styles */
+.drawer.collapsed .drawer-nav-link {
+  justify-content: center;
+  padding: 12px 8px;
+  transition: padding 0.3s ease-in-out, justify-content 0.3s ease-in-out;
+}
+
+.drawer.collapsed .drawer-title,
+.drawer.collapsed .drawer-nav-link span:not(.drawer-nav-icon) {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  transition: opacity 0.2s ease-out, width 0.3s ease-in-out;
+}
+
+.drawer.collapsed .drawer-nav-icon {
+  margin-right: 0;
+  transition: margin-right 0.3s ease-in-out;
+}
+
+.drawer.collapsed .drawer-header {
+  justify-content: center;
+  padding: 16px 8px;
+  transition: padding 0.3s ease-in-out, justify-content 0.3s ease-in-out;
+}
+
+.drawer.collapsed .drawer-footer {
+  padding: 16px 8px;
+  transition: padding 0.3s ease-in-out;
+}
+
+/* Scrollbar styling */
+.drawer::-webkit-scrollbar {
+  width: 6px;
+}
+
+.drawer::-webkit-scrollbar-track {
+  background: var(--drawer-scrollbar-track, rgba(0, 0, 0, 0.1));
+}
+
+.drawer::-webkit-scrollbar-thumb {
+  background-color: var(--drawer-scrollbar-thumb, rgba(255, 255, 255, 0.3));
+  border-radius: 3px;
+}
+
+/* Focus visible styles for accessibility */
+.drawer-nav-link:focus-visible {
+  outline: 2px solid var(--drawer-focus-color, rgba(255, 255, 255, 0.5));
+  outline-offset: -2px;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
 }
